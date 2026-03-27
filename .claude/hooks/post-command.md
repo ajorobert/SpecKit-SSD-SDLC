@@ -1,55 +1,50 @@
 # Post-Command Hook
-Executes after every sk.* command automatically.
+Executes after every sk.* command.
 
 ## Trigger
 event: after_tool_use
 matcher: sk.*
 
-## Steps (execute in order, no skipping)
+## Steps
 
-1. UPDATE STATE
-   Read .specify/state.yaml
-   Write these fields:
-   - last_command: <name of sk.* command that just ran>
+1. UPDATE SESSION
+   Read .claude/session.yaml
+   Write:
+   - last_command: <command that ran>
    - last_command_at: <ISO 8601 timestamp>
    - last_command_status: success | failed | interrupted
-   - last_modified_by: "<command-name> @ <timestamp>"
-   Re-read state.yaml and verify written values are present
+   Re-read and verify written values present
    If verification fails: report to user, do not release lock
 
-2. MEMORY UPDATES (conditional)
-   Execute only the updates relevant to the command that just ran:
+2. UPDATE TOUCHED LISTS
+   If last_command produced a unit-level artifact:
+   - Add active_unit_id to units_touched if not already present
+   If last_command produced a story-level artifact:
+   - Add active_story_id to stories_touched if not already present
 
-   If last_command = sk.plan OR sk.architecture:
-   - Check if new services were introduced → update service-registry.md
-   - Check if new domain entities introduced → update domain-model.md
+3. MEMORY UPDATES (conditional)
+   sk.plan OR sk.architecture → update service-registry.md, domain-model.md if changed
+   sk.datamodel               → update domain-model.md
+   sk.contracts               → update service-registry.md
+   sk.adr                     → update architecture-decisions.md index
 
-   If last_command = sk.datamodel:
-   - Update domain-model.md with new or modified entities
+4. STORY STATUS UPDATE (conditional)
+   sk.specify completion      → set story status: draft
+   sk.plan completion         → set story status: ready
+   sk.implement completion    → set story status: review
+   sk.verify PASS             → set story status: done
+   Update story frontmatter directly in story-{ID}.md
 
-   If last_command = sk.contracts:
-   - Update service-registry.md with new or modified contracts
+5. ADR TRIGGER
+   If sk.plan OR sk.architecture:
+   - Cross-service decision made? → suggest ADR
+   - Do not create without confirmation
 
-   If last_command = sk.adr:
-   - Update architecture-decisions.md index table
+6. PHR TRIGGER
+   If sk.architecture: create PHR automatically
+   If sk.implement AND novel tradeoffs resolved: create PHR automatically
 
-3. ADR TRIGGER (conditional)
-   If last_command = sk.plan OR sk.architecture:
-   - Evaluate: did this command produce a cross-service decision?
-   - Evaluate: were real alternatives considered?
-   - Evaluate: does this involve auth, payments, or security?
-   If any YES: surface ADR suggestion to user, wait for confirmation
-   Do not create ADR without explicit user confirmation
-
-4. PHR TRIGGER (conditional)
-   If last_command = sk.architecture:
-   - Automatically create PHR via sk.phr
-   If last_command = sk.implement:
-   - Evaluate: were novel tradeoffs resolved during implementation?
-   - If YES: automatically create PHR via sk.phr
-
-5. RELEASE LOCK
-   Delete .specify/state.lock
+7. RELEASE LOCK
+   Delete .claude/session.lock
    Confirm deletion
    If deletion fails: report to user
-   Do not leave lock file on clean exit under any circumstances

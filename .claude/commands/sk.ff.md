@@ -1,49 +1,43 @@
 # sk.ff — Fast Forward
-Runs the full spec-to-tasks pipeline in one shot.
+Runs full spec-to-tasks pipeline in one shot for standard features.
 Sequence: sk.specify → sk.clarify → sk.architecture → sk.plan → sk.tasks
-Pauses at every Confirm and Validate checkpoint automatically.
 
 ## Pre-flight
-1. Verify system-context.md and standards/tech-stack.md are populated
-   - Either empty → STOP, instruct user to run sk.constitution first
+1. Read session.yaml — verify role and session active
 2. Load skill: .claude/skills/system-context/SKILL.md
+3. Verify system-context.md and tech-stack.md populated
 
 ## Execution sequence
 
 ### Phase 1: Specify
 Execute sk.specify in full
-After completion: read state.yaml checkpoint_mode
+Read checkpoint_mode from story frontmatter after completion
 
 ### Phase 2: Clarify
 Execute sk.clarify in full
-If clarification changes scope: re-run checkpoint classification
-Update state.yaml checkpoint_mode if classification changes
+If scope changed: re-classify checkpoint_mode, update story frontmatter
 
-### Phase 3: Architecture
-Execute only if checkpoint_mode = validate
-- autopilot → SKIP sk.architecture, proceed to Phase 4
-- confirm → SKIP sk.architecture, proceed to Phase 4
-- validate → execute sk.architecture in full
-  PAUSE: present architecture summary to user
-  Wait for explicit approval before Phase 4
-  On approval: set state.yaml checkpoint_status: approved
+### Phase 3: Architecture (conditional)
+checkpoint_mode = validate only:
+  Execute sk.architecture in full
+  PAUSE: present architecture summary
+  Wait for explicit approval
+  On approval: set story frontmatter checkpoint_status: approved
+autopilot | confirm: SKIP sk.architecture
 
 ### Phase 4: Plan
 Execute sk.plan in full
-If checkpoint_mode = confirm:
-  PAUSE: present plan summary to user
-  Wait for explicit approval before Phase 5
-  On approval: set state.yaml checkpoint_status: approved
-If checkpoint_mode = autopilot | validate (already approved):
-  Proceed automatically
+checkpoint_mode = confirm:
+  PAUSE: present plan summary
+  Wait for explicit approval
+  On approval: set story frontmatter checkpoint_status: approved
+autopilot | validate (already approved): proceed
 
 ### Phase 5: Tasks
 Execute sk.tasks in full
 
-## Completion
-Report summary:
-- Intent, unit, story
-- Checkpoint mode applied
-- Artifacts created
-- Any ADR suggestions raised
-- Ready for: sk.implement
+## Completion report
+- Story ID, checkpoint mode applied
+- Artifacts created with paths
+- ADR suggestions raised
+- Next step: sk.implement {story-id}

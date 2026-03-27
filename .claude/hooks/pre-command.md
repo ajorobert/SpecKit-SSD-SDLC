@@ -1,29 +1,27 @@
 # Pre-Command Hook
-Executes before every sk.* command automatically.
+Executes before every sk.* command.
 
 ## Trigger
 event: before_tool_use
 matcher: sk.*
 
-## Steps (execute in order, no skipping)
+## Steps
 
 1. CHECK LOCK
-   - Read .specify/state.lock
-   - If file exists:
-     - Read and display contents to user
-     - Display: "A lock file exists. No sk.* command can run until resolved."
-     - Display: "If no other session is active, run sk.reset-lock"
-     - HALT — do not proceed
-   - If file does not exist: continue
+   - Read .claude/session.lock
+   - EXISTS: read contents, report to user
+     Display: "Run sk.reset-lock if no other session is active"
+     HALT
+   - NOT EXISTS: continue
 
 2. ACQUIRE LOCK
-   - Write .specify/state.lock:
-     command: <name of sk.* command being invoked>
+   - Write .claude/session.lock:
+     command: <sk.* command name>
      started_at: <ISO 8601 timestamp>
-   - Confirm file written before continuing
    - If write fails: HALT, report to user
 
-3. READ STATE
-   - Read .specify/state.yaml
-   - If file missing or invalid YAML: HALT, report to user
-   - Store current state in working memory for this session
+3. VALIDATE SESSION
+   - Read .claude/session.yaml
+   - If role is null: HALT
+     Display: "No active session. Run sk.session start --role <role>"
+   - Store session context in working memory

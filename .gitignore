@@ -1,2 +1,4 @@
 .claude/settings.local.json
 .specify/state.lock
+.claude/session.yaml
+.claude/session.lock

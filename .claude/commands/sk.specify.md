@@ -1,65 +1,49 @@
 # sk.specify
 Wraps: upstream.specify
+Role: po
 
 ## Pre-flight
-1. Acquire lock per command-rules.md
+1. Read session.yaml — verify role = po
+   WARN if different role (do not block, just warn)
 2. Load skill: .claude/skills/system-context/SKILL.md
-3. Verify system-context.md and standards/tech-stack.md are populated
-   - Either empty → STOP, inform user to run sk.constitution first
+3. Verify system-context.md populated
+   EMPTY → STOP, instruct user to run sk.constitution first
 
-## Steps
+## Intent resolution
+Check session.yaml active_intent_id:
+- NULL → new intent
+  1. Ask user for intent title and code (short uppercase e.g. CHK)
+  2. Create specs/intents/{NNN}-{intent-name}/ directory
+  3. Create intent.md from .your-layer/templates/intent-template.md
+  4. Set session.yaml active_intent_id: {INTENT-CODE}
+- NOT NULL → confirm or change
 
-### A. Intent resolution
-Check state.yaml active_intent:
-- NULL → this is a new intent
-  1. Ask user for intent title
-  2. Generate next intent number from .specify/intents/ directory
-  3. Create .specify/intents/{NNN}-{intent-name}/intent.md:
+## Unit resolution
+Ask user: existing unit or new unit?
+- NEW:
+  1. Ask for unit title and code (e.g. PAY)
+  2. Create specs/intents/{intent}/units/{unit-name}/ directory
+  3. Create unit-brief.md from .your-layer/templates/unit-brief-template.md
+     ID format: {INTENT-CODE}-{UNIT-CODE}
+  4. Set session.yaml active_unit_id: {INTENT-CODE}-{UNIT-CODE}
+- EXISTING: set session.yaml active_unit_id to selected unit
 
-     # Intent: {title}
-     Status: active
-     Created: {date}
-     ## Objective
-     ## Success Criteria
-     ## Out of Scope
+## Story creation
+1. Count existing stories in active unit to get next number
+2. Generate story ID: {INTENT-CODE}-{UNIT-CODE}-{NNN} (zero-padded)
+3. Execute upstream specify instructions
+4. Write output to:
+   specs/intents/{intent}/units/{unit}/stories/story-{ID}.md
+   using .your-layer/templates/story-template.md as structure
+5. Set story frontmatter status: draft
 
-  4. Set state.yaml active_intent: {NNN}-{intent-name}
-
-- NOT NULL → adding to existing intent, confirm with user
-
-### B. Unit resolution
-Check state.yaml active_unit:
-- NULL → ask user which unit this story belongs to
-  1. If unit is new: create .specify/intents/{intent}/units/{unit-name}/unit-brief.md:
-
-     # Unit: {name}
-     Bounded Context:
-     Owns:
-     Dependencies:
-     Status: active
-
-  2. Set state.yaml active_unit: {unit-name}
-
-- NOT NULL → confirm with user or allow change
-
-### C. Execute upstream specify
-Read upstream.specify from upstream-adapter.md
-Execute upstream specify instructions
-Output goes to .specify/intents/{intent}/units/{unit}/stories/story-{NNN}.md
-instead of upstream default location
-
-### D. Checkpoint classification
+## Checkpoint classification
 Load skill: .claude/skills/governance/SKILL.md
 Read checkpoint-rules.md
-Evaluate current story against classification criteria
-Set state.yaml checkpoint_mode: autopilot | confirm | validate
-Report classification to user with reasoning
+Classify story → set checkpoint_mode in story frontmatter
+Report classification with reasoning
 
 ## Post-execution
-1. Update state.yaml:
-   - active_story: story-{NNN}
-   - last_command: sk.specify
-   - last_command_at: <timestamp>
-   - last_command_status: success
-2. Report: intent, unit, story, checkpoint_mode
-3. Release lock
+Update session.yaml:
+- active_story_id: {story-ID}
+- Add story-ID to stories_touched

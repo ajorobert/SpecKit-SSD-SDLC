@@ -13,6 +13,6 @@ Rules
 - Never load memory files not listed in the command's skill definition
 
 State
-- Active session state: .specify/state.yaml
-- Lock file (runtime only): .specify/state.lock
+- Local session state: .claude/session.yaml (gitignored)
+- Lock file (runtime only): .claude/session.lock (gitignored)
 <!-- END SPECKIT-SSD-SDLC MANAGED -->
