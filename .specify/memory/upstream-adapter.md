@@ -8,3 +8,5 @@ upstream.tasks     → upstream/templates/commands/tasks.md
 upstream.implement → upstream/templates/commands/implement.md
 upstream.clarify   → upstream/templates/commands/clarify.md
 upstream.analyze   → upstream/templates/commands/analyze.md
+upstream.constitution → upstream/templates/commands/constitution.md
+upstream.checklist    → upstream/templates/commands/checklist.md
