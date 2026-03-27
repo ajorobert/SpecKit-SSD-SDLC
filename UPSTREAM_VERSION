@@ -2,3 +2,6 @@ upstream_source: https://github.com/github/spec-kit
 upstream_branch: main
 last_synced: 2026-03-23
 notes: Initial subtree add
+
+Open UPSTREAM_VERSION and add:
+note: .specify/ prefix absent in upstream — template commands live at upstream/templates/commands/ not upstream/.specify/templates/commands/
