@@ -11,3 +11,7 @@ last_modified_by: null      # "command-name @ timestamp"
 
 project_initialized: false
 upstream_version_at_init: null
+
+# Checkpoint
+checkpoint_mode: null     # autopilot | confirm | validate
+checkpoint_status: null   # pending | approved | blocked
