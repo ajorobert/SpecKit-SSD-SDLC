@@ -1,0 +1,13 @@
+schema_version: "1.0"
+
+active_intent: null
+active_unit: null
+active_story: null
+
+last_command: null
+last_command_at: null
+last_command_status: null   # success | failed | interrupted
+last_modified_by: null      # "command-name @ timestamp"
+
+project_initialized: false
+upstream_version_at_init: null
