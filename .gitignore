@@ -2,3 +2,4 @@
 .specify/state.lock
 .claude/session.yaml
 .claude/session.lock
+.your-layer/reconcile-reports/

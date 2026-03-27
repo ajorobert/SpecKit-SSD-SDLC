@@ -14,6 +14,19 @@ Roles: po | architect | backend-lead | frontend-lead | engineer
 4. Create git branch: git checkout -b {branch}
 5. Write session.yaml:
    - role, session_id, branch, started, active_intent_id (if --intent provided)
+
+## Agent spawning
+Map role to agent definition:
+po               → .claude/agents/po.md
+architect        → .claude/agents/architect.md
+lead             → .claude/agents/lead.md
+backend-engineer → .claude/agents/backend-engineer.md
+frontend-engineer→ .claude/agents/frontend-engineer.md
+
+Load the mapped agent definition into session context.
+Inform user which agent persona is now active.
+Display the agent's allowed commands as a reminder.
+
 6. Report: session started, branch created, role active
 
 ### sk.session end
