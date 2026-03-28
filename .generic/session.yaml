@@ -1,0 +1,16 @@
+# SpecKit-SSD-SDLC Local Session State
+# Gitignored — never commit this file
+# Managed by sk.session commands
+
+role: null           # po | architect | backend-lead | frontend-lead | engineer
+session_id: null     # e.g. arch-20250327
+branch: null         # e.g. arch/session-20250327
+started: null
+active_story_id: null   # current story focus e.g. CHK-PAY-001
+active_unit_id: null    # current unit focus e.g. CHK-PAY
+active_intent_id: null  # current intent focus e.g. CHK
+stories_touched: []     # all story IDs worked this session
+units_touched: []       # all unit IDs worked this session
+last_command: null
+last_command_at: null
+last_command_status: null
