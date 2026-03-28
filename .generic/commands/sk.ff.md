@@ -1,3 +1,8 @@
+<!-- GENERIC LAYER — self-contained command -->
+<!-- Before executing: read .generic/hooks/pre-command.md -->
+<!-- After executing: read .generic/hooks/post-command.md -->
+<!-- Context to load: see .generic/context-maps/command-context-map.md -->
+
 # sk.ff — Fast Forward
 Runs full spec-to-tasks pipeline in one shot for standard features.
 Sequence: sk.specify → sk.clarify → sk.architecture → sk.plan → sk.tasks

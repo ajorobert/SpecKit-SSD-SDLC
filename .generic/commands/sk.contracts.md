@@ -1,3 +1,8 @@
+<!-- GENERIC LAYER — self-contained command -->
+<!-- Before executing: read .generic/hooks/pre-command.md -->
+<!-- After executing: read .generic/hooks/post-command.md -->
+<!-- Context to load: see .generic/context-maps/command-context-map.md -->
+
 # sk.contracts
 Unit-level command. Defines API contracts for all stories in unit.
 
