@@ -13,6 +13,17 @@ Story-level commands (sk.plan, sk.tasks, sk.implement, sk.clarify):
 - Require active_story_id set in session.yaml
 - If null: instruct user to run sk.session focus --story {story-id}
 
+## Test Role Routing
+sk.test branches on session.yaml role:
+- role = backend-qa → generate provider contract tests + integration tests
+- role = frontend-qa → generate consumer contract tests + E2E tests + component tests
+- role = other → STOP: "sk.test requires backend-qa or frontend-qa role"
+
+## Security Role Gate
+sk.security-audit requires role = security in session.yaml
+Any other role → STOP: "sk.security-audit requires security role.
+Run sk.session switch --role security"
+
 ## Lock Protocol
 1. Check .claude/session.lock
    - EXISTS: read contents, report to user, STOP
