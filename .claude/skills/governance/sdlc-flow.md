@@ -13,6 +13,8 @@ sk.plan          — technical implementation plan
 sk.tasks         — actionable task breakdown
 sk.implement     — execute tasks
 sk.verify        — PASS/FAIL audit against quality gates
+sk.test          — generate and run test suite (backend-qa | frontend-qa)
+sk.security-audit — OWASP audit, secrets scan, dependency scan (security)
 
 Shortcut: sk.ff
 Runs phases 2→3→4→7→8 in sequence for standard features.
@@ -20,13 +22,15 @@ Pauses at each Confirm/Validate checkpoint.
 Skips sk.architecture if checkpoint_mode is autopilot.
 
 Phase Ownership
-sk.impact       → architect
-sk.specify      → product owner + architect
-sk.clarify      → product owner
-sk.architecture → architect
-sk.datamodel    → architect + backend lead
-sk.contracts    → architect + backend lead
-sk.plan         → backend lead / frontend lead (per unit)
-sk.tasks        → implementing engineer
-sk.implement    → implementing engineer
-sk.verify       → architect + lead engineer
+sk.impact          → architect
+sk.specify         → product owner + architect
+sk.clarify         → product owner
+sk.architecture    → architect
+sk.datamodel       → architect + backend lead
+sk.contracts       → architect + backend lead
+sk.plan            → backend lead / frontend lead (per unit)
+sk.tasks           → implementing engineer
+sk.implement       → implementing engineer
+sk.verify          → architect + lead engineer
+sk.test            → backend-qa + frontend-qa
+sk.security-audit  → security

@@ -30,3 +30,20 @@ Implementation Gate (before merge)
 - [ ] PHR created if novel tradeoffs were resolved
 - [ ] Standards compliance: coding-standards.md
 - [ ] No new domain entities introduced outside sk.datamodel
+
+Test Gate (before story moves to security-review)
+- [ ] Provider contract tests exist for every endpoint (backend-qa)
+- [ ] Consumer contract tests exist for every consumed endpoint (frontend-qa)
+- [ ] Every acceptance criterion has a mapped E2E test
+- [ ] Integration tests cover service + database interactions
+- [ ] Coverage thresholds met: coding-standards.md Test Coverage Thresholds
+- [ ] All tests pass — no skipped tests without documented reason
+
+Security Gate (before story moves to done)
+- [ ] security-audit.md exists for this story
+- [ ] All OWASP Top 10 items documented as PASS/FAIL/NA
+- [ ] No CRITICAL findings open
+- [ ] HIGH findings acknowledged with tracking reference
+- [ ] Secrets scan: CLEAN
+- [ ] Dependency scan completed — no unaddressed critical CVEs
+- [ ] Verdict: CLEAR or CONDITIONAL (BLOCKED prevents done)

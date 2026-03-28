@@ -1,0 +1,59 @@
+# sk.test
+Generates and runs test suite for active story.
+Role: backend-qa (backend tests) | frontend-qa (frontend tests)
+Level: story
+
+## Input Artifacts
+session.yaml (role determines test mode)
+specs/intents/{intent}/units/{unit}/contracts/api-spec.json
+specs/intents/{intent}/units/{unit}/contracts/test-plan.md
+story-{ID}.md (acceptance criteria)
+.specify/memory/standards/tech-stack.md (test framework)
+
+## Steps
+
+### If role = backend-qa
+1. Read contracts/test-plan.md provider section
+2. Read api-spec.json — inventory all endpoints and error codes
+3. [REFINE MODE] if provider tests exist, [CREATE MODE] if not
+4. Generate provider contract tests:
+   tests/contract/{unit}/provider/{endpoint}.provider.test.{ext}
+   Coverage: happy path, validation error, auth rejection,
+   not found, boundary values
+5. Generate integration tests:
+   tests/integration/{story-id}/{scenario}.integration.test.{ext}
+6. Run tests — report results
+7. Flag any endpoint in api-spec.json with no test coverage
+
+### If role = frontend-qa
+1. Read contracts/test-plan.md consumer section
+2. Read api-spec.json — identify fields frontend consumes
+3. Read story acceptance criteria — map to E2E scenarios
+4. [REFINE MODE] if consumer tests exist, [CREATE MODE] if not
+5. Generate consumer contract tests:
+   tests/contract/{unit}/consumer/{endpoint}.consumer.test.{ext}
+   Mock backend using api-spec.json responses
+6. Generate E2E tests mapped to acceptance criteria:
+   tests/e2e/{story-id}/{acceptance-criterion}.e2e.test.{ext}
+7. Generate component tests:
+   tests/components/{unit}/{component}.test.{ext}
+8. Run tests — report results
+9. Flag any acceptance criterion with no E2E test coverage
+
+### If role = neither
+STOP: "sk.test requires backend-qa or frontend-qa role.
+Run sk.session switch --role backend-qa or frontend-qa"
+
+## Output Artifacts
+tests/contract/{unit}/provider/ (backend-qa)
+tests/integration/{story-id}/ (backend-qa)
+tests/contract/{unit}/consumer/ (frontend-qa)
+tests/e2e/{story-id}/ (frontend-qa)
+tests/components/{unit}/ (frontend-qa)
+
+## Quality Bar
+- Every endpoint has provider test (backend-qa)
+- Every acceptance criterion has E2E test (frontend-qa)
+- Tests runnable without manual setup
+- Test names describe scenarios not implementation
+- Coverage report generated and displayed

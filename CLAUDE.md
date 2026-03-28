@@ -7,6 +7,7 @@ Spec-driven development framework for full-stack multi-service systems.
 Commands: .claude/commands/sk.*.md
 Agents: .claude/agents/
 Skills: .claude/skills/ (auto-loaded by context)
+Roles: po | architect | lead | backend | frontend | backend-qa | frontend-qa | security
 
 ## Rules
 1. Read .specify/memory/command-rules.md before any sk.* command
