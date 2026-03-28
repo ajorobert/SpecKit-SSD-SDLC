@@ -1,46 +1,27 @@
 # sk.plan
-Wraps: upstream.plan
-Role: backend-lead | frontend-lead
-Story-level command — requires active_story_id
+Creates technical implementation plan for a story.
+Role: lead | Level: story
 
-## Pre-flight
-1. Read session.yaml active_story_id
-   NULL → STOP: run sk.session focus --story {id} first
-2. Read story frontmatter from story-{ID}.md
-3. Verify story status = ready
-   NOT ready → warn user, ask to confirm proceed
-4. Load skills in order:
-   a. .claude/skills/domain-model/SKILL.md
-   b. .claude/skills/service-registry/SKILL.md
-   c. .claude/skills/architecture-decisions/SKILL.md
-   d. .claude/skills/standards/SKILL.md (tech-stack.md only)
-5. Read unit architecture.md if exists:
-   specs/intents/{intent}/units/{unit}/architecture.md
-   This is the architectural context for this plan
+## Input Artifacts
+specs/intents/{intent}/units/{unit}/architecture.md (required)
+specs/intents/{intent}/units/{unit}/data-model.md
+specs/intents/{intent}/units/{unit}/contracts/api-spec.json
+story-{ID}.md (active story)
+.specify/memory/standards/tech-stack.md
 
-## Cross-service check
-- Story touches existing contracts? → carry into plan
-- Story introduces new domain entities? → flag for post-execution update
-- Story conflicts with active ADR? → STOP, report conflict
+## Steps
+1. Verify architecture.md exists — if missing: STOP, run sk.architecture first
+2. [REFINE MODE] if plan.md exists, [CREATE MODE] if not
+3. Execute upstream.plan from upstream-adapter.md with loaded context
+4. Write plan referencing architecture.md explicitly
+5. If checkpoint_mode = confirm: pause after plan, wait for approval
+   On approval: set story frontmatter checkpoint_status: approved
 
-## Checkpoint gate
-Read story frontmatter checkpoint_mode:
-- validate → verify architecture.md exists for active unit
-  MISSING → STOP: run sk.architecture first
-- confirm | autopilot → proceed
-
-## Execute upstream plan
-Read upstream.plan from upstream-adapter.md
-Execute upstream plan instructions with loaded context
-Write plan to:
+## Output Artifacts
 specs/intents/{intent}/units/{unit}/stories/{story-id}/plan.md
 
-## Confirm checkpoint
-If checkpoint_mode = confirm:
-  STOP — present plan summary
-  Wait for explicit approval
-  On approval: set story frontmatter checkpoint_status: approved
-
-## Post-execution
-Update story frontmatter: status: ready (if was draft)
-Suggest ADR if cross-service decision made
+## Quality Bar
+- Explicit reference to architecture.md
+- Tech stack decisions justified against tech-stack.md
+- No contradictions with architecture.md
+- Confirm checkpoint approved before tasks proceed

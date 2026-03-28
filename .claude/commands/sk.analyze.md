@@ -1,17 +1,19 @@
 # sk.analyze
-Wraps: upstream.analyze
-Unit-level command — requires active_unit_id
+Cross-artifact consistency check for active unit.
+Role: lead, architect | Level: unit
 
-## Pre-flight
-1. Read session.yaml active_unit_id
-   NULL → STOP: run sk.session focus --unit {id} first
-2. Load skill: .claude/skills/architecture-decisions/SKILL.md
+## Input Artifacts
+All artifacts in active unit directory
+.specify/memory/architecture-decisions.md
 
-## Execute upstream analyze
-Read upstream.analyze from upstream-adapter.md
-Execute upstream analyze instructions in full
+## Steps
+1. Execute upstream.analyze from upstream-adapter.md in full
+2. Flag cross-service inconsistencies to user
+   suggest sk.architecture review if found
 
-## Post-execution
-If analysis surfaces cross-service inconsistencies:
-- Flag to user
-- Suggest sk.architecture review
+## Output Artifacts
+None — analysis only, no files written
+
+## Quality Bar
+- All stories in unit covered by architecture
+- No contract conflicts between services

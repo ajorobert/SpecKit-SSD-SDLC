@@ -1,24 +1,25 @@
 # sk.tasks
-Wraps: upstream.tasks
-Story-level command — requires active_story_id
+Generates actionable task breakdown for a story.
+Role: lead | Level: story
 
-## Pre-flight
-1. Read session.yaml active_story_id
-   NULL → STOP: run sk.session focus --story {id} first
-2. Read story frontmatter
-3. Verify plan.md exists:
-   specs/intents/{intent}/units/{unit}/stories/{story-id}/plan.md
-   MISSING → STOP: run sk.plan first
-4. Load skill: .claude/skills/architecture-decisions/SKILL.md
-5. Verify checkpoint gate:
-   checkpoint_mode = confirm OR validate → checkpoint_status must = approved
-   NOT approved → STOP: approval required before tasks
+## Input Artifacts
+specs/intents/{intent}/units/{unit}/stories/{story-id}/plan.md (required)
+story-{ID}.md frontmatter (checkpoint_status)
 
-## Execute upstream tasks
-Read upstream.tasks from upstream-adapter.md
-Execute upstream tasks instructions
-Write tasks to:
+## Steps
+1. Verify plan.md exists — if missing: STOP, run sk.plan first
+2. Verify checkpoint gate:
+   confirm or validate mode → checkpoint_status must = approved
+   not approved → STOP, instruct user to approve plan first
+3. [REFINE MODE] if tasks.md exists, [CREATE MODE] if not
+4. Execute upstream.tasks from upstream-adapter.md
+5. Write tasks to story directory
+
+## Output Artifacts
 specs/intents/{intent}/units/{unit}/stories/{story-id}/tasks.md
 
-## Post-execution
-Report task count and parallel markers found
+## Quality Bar
+- Test tasks before implementation tasks (TDD order)
+- Parallel tasks marked [P]
+- Each task has explicit file path
+- Dependencies between tasks explicit

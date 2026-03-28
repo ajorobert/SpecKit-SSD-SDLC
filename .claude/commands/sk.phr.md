@@ -1,20 +1,20 @@
 # sk.phr
-No skill load required.
+Records a Prompt History Record for significant decisions.
+Role: any | Level: story or unit
 
-## Pre-flight
-1. Read session.yaml for context
+## Input Artifacts
+session.yaml (active focus for context)
 
 ## Steps
-1. Collect:
-   - Related command
-   - Prompt or decision being recorded
-   - Context at time of decision
-   - Outcome and rationale
-   - Alternatives rejected
+1. Collect: related command, decision, context, outcome, alternatives
+2. Determine feature name from active_unit_id or active_story_id
+3. Run .your-layer/scripts/create-phr.sh "{feature-name}"
+4. Write PHR using phr-template.md
 
-2. Determine feature name from session active_unit_id or active_story_id
+## Output Artifacts
+history/prompts/{feature}/PHR-{NNN}-{date}.md
 
-3. Run .your-layer/scripts/create-phr.sh "<feature-name>"
-
-4. Write PHR using .your-layer/templates/phr-template.md
-   Include story ID and unit ID from session context
+## Quality Bar
+- Outcome and rationale clearly distinct
+- Alternatives rejected section populated
+- Lessons section contains actionable insight

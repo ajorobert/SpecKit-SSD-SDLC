@@ -1,43 +1,27 @@
 # sk.ff — Fast Forward
-Runs full spec-to-tasks pipeline in one shot for standard features.
-Sequence: sk.specify → sk.clarify → sk.architecture → sk.plan → sk.tasks
+Runs specify → clarify → architecture → plan → tasks in sequence.
+Role: lead | Level: story
 
-## Pre-flight
-1. Read session.yaml — verify role and session active
-2. Load skill: .claude/skills/system-context/SKILL.md
-3. Verify system-context.md and tech-stack.md populated
+## Input Artifacts
+.specify/memory/system-context.md
+session.yaml (active focus)
 
-## Execution sequence
+## Steps
+1. Verify system-context.md and tech-stack.md populated
+2. Execute sk.specify
+3. Read checkpoint_mode from story frontmatter
+4. Execute sk.clarify
+5. If checkpoint_mode = validate: execute sk.architecture
+   PAUSE for approval before continuing
+6. Execute sk.plan
+   If checkpoint_mode = confirm: PAUSE for approval
+7. Execute sk.tasks
 
-### Phase 1: Specify
-Execute sk.specify in full
-Read checkpoint_mode from story frontmatter after completion
+## Output Artifacts
+All artifacts from each sub-command
 
-### Phase 2: Clarify
-Execute sk.clarify in full
-If scope changed: re-classify checkpoint_mode, update story frontmatter
-
-### Phase 3: Architecture (conditional)
-checkpoint_mode = validate only:
-  Execute sk.architecture in full
-  PAUSE: present architecture summary
-  Wait for explicit approval
-  On approval: set story frontmatter checkpoint_status: approved
-autopilot | confirm: SKIP sk.architecture
-
-### Phase 4: Plan
-Execute sk.plan in full
-checkpoint_mode = confirm:
-  PAUSE: present plan summary
-  Wait for explicit approval
-  On approval: set story frontmatter checkpoint_status: approved
-autopilot | validate (already approved): proceed
-
-### Phase 5: Tasks
-Execute sk.tasks in full
-
-## Completion report
-- Story ID, checkpoint mode applied
-- Artifacts created with paths
-- ADR suggestions raised
-- Next step: sk.implement {story-id}
+## Quality Bar
+- Checkpoint pauses respected
+- All artifacts created in correct locations
+- Story frontmatter updated throughout
+- Completion report: story ID, artifacts created, next step

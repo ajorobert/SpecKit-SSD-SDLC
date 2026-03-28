@@ -1,23 +1,20 @@
 # sk.constitution
-Runs once at project initialization.
-Wraps: upstream.constitution
+Initializes project principles and standards.
+Role: any | Level: project
 
-## Pre-flight
-1. Check if specs/intents/ has any content
-   - HAS CONTENT → [REFINE MODE] inform user
-   - EMPTY → [CREATE MODE] proceed
-2. Load skill: .claude/skills/system-context/SKILL.md
+## Input Artifacts
+.specify/memory/system-context.md (check if populated)
 
 ## Steps
-1. Read upstream.constitution from upstream-adapter.md
-2. Execute upstream constitution instructions
-3. After constitution.md created, prompt user to fill in:
-   - .specify/memory/system-context.md
-   - .specify/memory/standards/tech-stack.md
-   These must be populated before any other sk.* command runs.
+1. [REFINE MODE] if constitution.md exists, [CREATE MODE] if not
+2. Execute upstream.constitution from upstream-adapter.md
+3. After completion prompt user to populate:
+   .specify/memory/system-context.md
+   .specify/memory/standards/tech-stack.md
 
-## Post-execution
-Update session.yaml:
-- last_command: sk.constitution
-- last_command_at: <timestamp>
-- last_command_status: success
+## Output Artifacts
+.specify/memory/constitution.md (upstream managed)
+
+## Quality Bar
+- System context populated before any other command runs
+- Tech stack defined and stable

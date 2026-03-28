@@ -1,18 +1,17 @@
-<!-- SPECKIT-SSD-SDLC MANAGED — do not edit this section manually -->
-SpecKit-SSD-SDLC
+<!-- SPECKIT-SSD-SDLC MANAGED -->
 
-Identity
-This is a spec-driven development framework for full-stack multi-service systems.
-All sk.* commands live in .claude/commands/
+# SpecKit-SSD-SDLC
 
-Rules
-- Before any sk.* command: read .specify/memory/command-rules.md
-- Before any upstream reference: read .specify/memory/upstream-adapter.md
-- For specialized context: load the relevant skill from .claude/skills/
-- Never edit files inside upstream/
-- Never load memory files not listed in the command's skill definition
+## Identity
+Spec-driven development framework for full-stack multi-service systems.
+Commands: .claude/commands/sk.*.md
+Agents: .claude/agents/
+Skills: .claude/skills/ (auto-loaded by context)
 
-State
-- Local session state: .claude/session.yaml (gitignored)
-- Lock file (runtime only): .claude/session.lock (gitignored)
+## Rules
+1. Read .specify/memory/command-rules.md before any sk.* command
+2. Read .specify/memory/upstream-adapter.md before any upstream reference
+3. Never edit files inside upstream/
+4. Session state: .claude/session.yaml
+
 <!-- END SPECKIT-SSD-SDLC MANAGED -->

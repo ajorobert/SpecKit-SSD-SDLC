@@ -1,33 +1,28 @@
 # sk.implement
-Wraps: upstream.implement
-Story-level command — requires active_story_id
+Executes implementation tasks for a story.
+Role: backend | frontend | Level: story
 
-## Pre-flight
-1. Read session.yaml active_story_id
-   NULL → STOP: run sk.session focus --story {id} first
-2. Read story frontmatter — verify status = ready
-3. Verify artifacts exist:
-   - plan.md → missing: run sk.plan first
-   - tasks.md → missing: run sk.tasks first
-4. Load skills:
-   a. .claude/skills/service-registry/SKILL.md
-   b. .claude/skills/architecture-decisions/SKILL.md
-   c. .claude/skills/standards/SKILL.md (coding-standards.md only)
-5. Read unit architecture.md for implementation context
+## Input Artifacts
+specs/intents/{intent}/units/{unit}/stories/{story-id}/plan.md (required)
+specs/intents/{intent}/units/{unit}/stories/{story-id}/tasks.md (required)
+specs/intents/{intent}/units/{unit}/architecture.md
+specs/intents/{intent}/units/{unit}/contracts/api-spec.json
+.specify/memory/standards/coding-standards.md
 
-## Context redirect
-Set FEATURE_DIR to story directory:
-specs/intents/{intent}/units/{unit}/stories/{story-id}/
+## Steps
+1. Verify plan.md and tasks.md exist
+2. Set FEATURE_DIR to story directory
+3. Execute upstream.implement from upstream-adapter.md in full
+   Do not duplicate upstream logic
+4. Flag any coding-standards.md violation immediately
+   Do not proceed with that task until resolved
 
-## Execute upstream implement
-Read upstream.implement from upstream-adapter.md
-Execute upstream implement instructions in full
-Do not duplicate upstream logic
+## Output Artifacts
+src/{service}/** (backend role)
+src/{frontend-surface}/** (frontend role)
 
-## Standards enforcement
-Flag any coding-standards.md violation immediately
-Do not proceed with that task until resolved
-
-## Post-execution
-Story status update handled by post-command hook
-PHR trigger evaluated by post-command hook
+## Quality Bar
+- All tasks marked [X] on completion
+- Tests written before implementation (TDD)
+- No coding standards violations
+- Implementation matches contracts/api-spec.json exactly

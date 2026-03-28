@@ -1,17 +1,18 @@
 # sk.clarify
-Wraps: upstream.clarify
-Story-level command — requires active_story_id
+Resolves ambiguities in the active story.
+Role: po, architect, lead | Level: story
 
-## Pre-flight
-1. Read session.yaml active_story_id
-   NULL → STOP: run sk.session focus --story {id} first
+## Input Artifacts
+story-{ID}.md (active story)
 
-## Execute upstream clarify
-Read upstream.clarify from upstream-adapter.md
-Execute upstream clarify instructions in full
+## Steps
+1. Execute upstream.clarify from upstream-adapter.md in full
+2. If clarification changes scope: flag to user
+   suggest updating story acceptance criteria
 
-## Post-execution
-If clarification changes scope:
-- Flag to user — sk.specify may need updating
-- Suggest re-running checkpoint classification
-- Update story frontmatter if scope changed
+## Output Artifacts
+story-{ID}.md (updated if scope changed)
+
+## Quality Bar
+- All ambiguities resolved before sk.plan proceeds
+- Scope changes reflected in story frontmatter
