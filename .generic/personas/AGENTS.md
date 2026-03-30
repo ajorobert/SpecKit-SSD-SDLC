@@ -7,7 +7,7 @@ Read your assigned persona file before starting any work.
 | Role | File | Natural Commands |
 |------|------|-----------------|
 | po | personas/po.md | sk.specify, sk.clarify |
-| architect | personas/architect.md | sk.architecture, sk.datamodel, sk.contracts, sk.impact, sk.adr, sk.verify |
+| architect | personas/architect.md | sk.architecture, sk.datamodel, sk.contracts, sk.impact, sk.adr, sk.verify, sk.knowledge-base |
 | lead | personas/lead.md | sk.plan, sk.tasks, sk.analyze, sk.ff |
 | backend | personas/backend.md | sk.implement |
 | frontend | personas/frontend.md | sk.implement |

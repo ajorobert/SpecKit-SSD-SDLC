@@ -84,3 +84,27 @@ Do not load unlisted files — load on demand if needed mid-execution.
 ## sk.analyze
 - .specify/memory/system-context.md
 - .specify/memory/architecture-decisions.md
+
+## sk.knowledge-base (system)
+- .specify/memory/system-context.md
+- history/adr/
+
+## sk.knowledge-base (domain)
+- history/adr/
+- specs/domains/{domain}/
+
+## sk.knowledge-base (unit)
+- specs/intents/{intent}/units/{unit}/architecture.md
+- history/adr/
+
+## sk.implement (knowledge base context)
+- specs/knowledge-base.md (all tiers, before code)
+- specs/domains/{relevant-domain}/knowledge-base.md (tier 2, if exists)
+- specs/intents/{intent}/units/{unit}/knowledge-base.md (tier 3, if exists)
+
+## sk.test (knowledge base context)
+- specs/knowledge-base.md (tier 1, before tests)
+- specs/intents/{intent}/units/{unit}/knowledge-base.md (tier 3, if exists)
+
+## sk.security-audit (knowledge base context)
+- specs/intents/{intent}/units/{unit}/knowledge-base.md (tier 3, before code)
