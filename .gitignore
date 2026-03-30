@@ -1,1 +1,7 @@
 .claude/settings.local.json
+.claude/session.yaml
+.claude/session.lock
+.your-layer/reconcile-reports/
+# Generic layer session state
+.generic/session.yaml
+.generic/session.lock

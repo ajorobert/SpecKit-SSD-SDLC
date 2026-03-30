@@ -1,3 +1,8 @@
+---
+name: upstream-adapter
+description: "Load when: any sk.* wrapper command that delegates to upstream spec-kit. Always load before referencing upstream commands."
+---
+
 Upstream Adapter Skill
 Source: .specify/memory/upstream-adapter.md
 Loaded by: all sk.* wrapper commands

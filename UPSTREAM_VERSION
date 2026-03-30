@@ -1,4 +1,7 @@
 upstream_source: https://github.com/github/spec-kit
 upstream_branch: main
-last_synced: 2026-03-23
-notes: Initial subtree add
+last_synced: 2026-03-27
+notes: >
+  Template commands live at upstream/templates/commands/
+  not upstream/.specify/templates/commands/
+  Run .your-layer/scripts/reconcile-upstream.sh after every upstream pull
