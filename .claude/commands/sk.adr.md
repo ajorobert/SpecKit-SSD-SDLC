@@ -17,6 +17,21 @@ session.yaml (active_intent_id, active_unit_id)
 ## Output Artifacts
 history/adr/ADR-{NNN}-{title}.md
 .specify/memory/architecture-decisions.md (index updated)
+knowledge-base.md (relevant tier updated if decision is significant)
+
+## Knowledge Base Update
+After writing ADR, evaluate:
+- System-level decision → append to specs/knowledge-base.md
+  Evolution History section
+- Domain-level decision → append to relevant
+  specs/domains/{domain}/knowledge-base.md
+  What Was Tried and Rejected OR Evolution History section
+- Unit-level decision → append to unit knowledge-base.md
+  Key Decisions and Their Reasons section
+
+Append only the non-derivable essence:
+decision made, why, what was rejected.
+Do not duplicate the full ADR content.
 
 ## Quality Bar
 - Alternatives table populated with at least 2 options

@@ -3,6 +3,13 @@ Executes implementation tasks for a story.
 Role: backend | frontend | Level: story
 
 ## Input Artifacts
+specs/knowledge-base.md (tier 1 — always read first)
+specs/domains/{relevant-domain}/knowledge-base.md (tier 2 — if exists)
+specs/intents/{intent}/units/{unit}/knowledge-base.md (tier 3 — if exists)
+
+Note: knowledge bases contain non-derivable context only.
+Read them before reading code. They explain why, not what.
+
 specs/intents/{intent}/units/{unit}/stories/{story-id}/plan.md (required)
 specs/intents/{intent}/units/{unit}/stories/{story-id}/tasks.md (required)
 specs/intents/{intent}/units/{unit}/architecture.md

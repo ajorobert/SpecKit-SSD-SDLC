@@ -22,6 +22,14 @@ specs/intents/{intent}/units/{unit}/stories/ (all stories)
 
 ## Output Artifacts
 specs/intents/{intent}/units/{unit}/architecture.md
+specs/intents/{intent}/units/{unit}/knowledge-base.md
+  (boundary section updated if architecture changes domain ownership)
+
+## Steps (continued)
+8. If architecture introduces or changes domain boundary:
+   Update unit knowledge-base.md boundary rationale
+   If boundary change is significant: suggest domain-level
+   knowledge base update via sk.knowledge-base --tier domain
 
 ## Quality Bar
 - All unit stories explicitly listed in stories-covered

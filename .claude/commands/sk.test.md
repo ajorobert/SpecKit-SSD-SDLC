@@ -4,6 +4,10 @@ Role: backend-qa (backend tests) | frontend-qa (frontend tests)
 Level: story
 
 ## Input Artifacts
+specs/knowledge-base.md (tier 1 — always read first)
+specs/intents/{intent}/units/{unit}/knowledge-base.md
+  (tier 3 — invariants inform test design)
+
 session.yaml (role determines test mode)
 specs/intents/{intent}/units/{unit}/contracts/api-spec.json
 specs/intents/{intent}/units/{unit}/contracts/test-plan.md
