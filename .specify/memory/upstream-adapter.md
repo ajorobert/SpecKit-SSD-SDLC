@@ -10,3 +10,8 @@ upstream.clarify   → upstream/templates/commands/clarify.md
 upstream.analyze   → upstream/templates/commands/analyze.md
 upstream.constitution → upstream/templates/commands/constitution.md
 upstream.checklist    → upstream/templates/commands/checklist.md
+
+## Explicitly Excluded Upstream Commands
+upstream.taskstoissues → upstream/templates/commands/taskstoissues.md
+Reason: GitHub-specific workflow, outside SpecKit-SSD-SDLC scope.
+Not wrapped. Exclude from reconcile warnings.

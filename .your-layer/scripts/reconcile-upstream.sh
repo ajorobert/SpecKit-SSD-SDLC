@@ -12,6 +12,9 @@ DATE=$(date +%Y-%m-%d)
 SEQUENCE=$(printf "%02d" $(ls "$REPORT_DIR"/reconcile-"$DATE"-*.md \
            2>/dev/null | wc -l | xargs -I{} expr {} + 1))
 REPORT="$REPORT_DIR/reconcile-${DATE}-${SEQUENCE}.md"
+EXCLUDED_UPSTREAM="taskstoissues.md"
+
+
 
 mkdir -p "$REPORT_DIR"
 
@@ -45,6 +48,10 @@ echo "" >> "$REPORT"
 
 for f in "$UPSTREAM_COMMANDS"/*.md; do
   BASENAME=$(basename "$f")
+  if [[ "$EXCLUDED_UPSTREAM" == *"$BASENAME"* ]]; then
+    echo "- ⏭️  Excluded (intentional): $BASENAME"
+    continue
+  fi
   if ! grep -q "$BASENAME" "$ADAPTER"; then
     echo "- ⚠️  NEW (not in adapter): $BASENAME" >> "$REPORT"
     WARNS=$((WARNS + 1))
