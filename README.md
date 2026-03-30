@@ -51,14 +51,14 @@ Works with any AI tool that reads markdown. Entry points: `AGENTS.md`,
 upstream/                      ← spec-kit source (read-only, git subtree)
 
 .claude/                       ← Claude Code native layer
-  commands/sk.*.md             ← 17 lean sk.* commands
-  agents/                      ← 5 role-based agent personas
+  commands/sk.*.md             ← 19 lean sk.* commands
+  agents/                      ← 8 role-based agent personas
   skills/                      ← 7 context skills (auto-loaded)
   hooks/post-command.md        ← story status updates after each command
   session.yaml                 ← local session state (gitignored)
 
 .generic/                      ← platform-agnostic layer
-  commands/sk.*.md             ← same 17 commands, self-contained
+  commands/sk.*.md             ← same 19 commands, self-contained
   personas/                    ← role definitions for generic tools
   context-maps/                ← explicit context-loading instructions
   hooks/                       ← pre/post command instructions (inline)
@@ -77,7 +77,7 @@ specs/                         ← living project specs
   intents/                     ← Intent → Unit → Story hierarchy
 
 .your-layer/                   ← framework internals
-  templates/                   ← adr, phr, architecture, contracts, story, unit, intent
+  templates/                   ← adr, phr, architecture, contracts, story, unit, intent, test-plan, security-audit
   scripts/                     ← create-adr.sh, create-phr.sh, reconcile-upstream.sh
 
 history/
@@ -105,8 +105,10 @@ Intent (e.g. CHK)
             └── tasks.md           ← story-level
 ```
 
-Stories carry structured frontmatter: `status`, `checkpoint_mode`
-(autopilot / confirm / validate), `checkpoint_status`, `owner`, `branch`.
+Stories carry structured frontmatter: `status` (draft → ready → in-progress →
+review → testing → security-review → done), `checkpoint_mode`
+(autopilot / confirm / validate), `checkpoint_status`, `owner`, `branch`,
+`test-status` (null / pass / fail), and `security-status` (null / CLEAR / CONDITIONAL / BLOCKED).
 
 ---
 
@@ -140,6 +142,8 @@ Each story is classified at specify-time into one of three modes:
 | `sk.ff` | story | lead | Fast-forward: specify→clarify→architecture→plan→tasks |
 | `sk.adr` | unit/intent | architect | Create Architecture Decision Record |
 | `sk.phr` | story/unit | any | Record Prompt History for significant decisions |
+| `sk.test` | story | backend-qa / frontend-qa | Generate and run test suite (provider contract + integration, or consumer contract + E2E + component) |
+| `sk.security-audit` | story | security | OWASP Top 10 audit, secrets scan, dependency scan — writes security-audit.md |
 | `sk.session` | — | any | Manage local session: start/end/focus/status/list/switch |
 | `sk.analyze` | unit | lead/architect | Cross-artifact consistency check |
 | `sk.reset-lock` | — | any | Clear stuck session lock |
@@ -162,7 +166,7 @@ sk.contracts
 sk.session end               ← commits, pushes branch, opens PR
 ```
 
-Roles: `po` · `architect` · `lead` · `backend` · `frontend`
+Roles: `po` · `architect` · `lead` · `backend` · `frontend` · `backend-qa` · `frontend-qa` · `security`
 
 Session state (`.claude/session.yaml`) is gitignored — each person's focus
 is local. Shared state lives in `specs/` story frontmatter and `.specify/memory/`.
@@ -171,7 +175,7 @@ is local. Shared state lives in `specs/` story frontmatter and `.specify/memory/
 
 ## Quality Gates
 
-`sk.verify` evaluates four gates in sequence:
+`sk.verify` evaluates six gates in sequence:
 
 | Gate | Runs when | Key checks |
 |------|-----------|-----------|
@@ -179,23 +183,29 @@ is local. Shared state lives in `specs/` story frontmatter and `.specify/memory/
 | **Architecture** | if architecture.md exists | stories covered, services registered, domain entities added, ADR for cross-service decisions |
 | **Plan** | if plan.md exists | contracts defined for new endpoints, checkpoint approved if required |
 | **Implementation** | if tasks complete | all tasks done, PHR created, no standards violations |
+| **Test** | before `security-review` | provider + consumer contract tests exist, every AC has E2E, coverage thresholds met, all tests pass |
+| **Security** | before `done` | security-audit.md exists, OWASP Top 10 documented, no open CRITICAL findings, secrets scan clean |
 
-A single FAIL blocks progression. PASS sets story status to `done`.
+A single FAIL blocks progression. Security verdict BLOCKED prevents the story from reaching `done`.
 
 ---
 
 ## Agent Personas
 
-Five agents, each scoped to specific commands and files:
+Eight agents, each scoped to specific commands and files:
 
 - **po** — defines intents, units, stories, acceptance criteria
 - **architect** — service design, data models, contracts, ADRs
 - **lead** — implementation plans, task breakdowns, consistency checks
 - **backend-engineer** — API and data layer implementation
 - **frontend-engineer** — UI and frontend logic implementation
+- **backend-qa** — provider contract tests, integration tests, coverage validation
+- **frontend-qa** — consumer contract tests, E2E tests, component tests, accessibility
+- **security** — OWASP Top 10 audit, secrets scan, dependency scan, security-audit.md
 
-Constraints are hard-coded per persona: e.g. backend-engineer never modifies
-`specs/` or `contracts/`; architect never writes to `src/`.
+Constraints are hard-coded per persona: QA agents never modify implementation code;
+security agent never modifies implementation code or specs; backend-engineer never
+modifies `specs/` or `contracts/`; architect never writes to `src/`.
 
 ---
 
@@ -229,6 +239,8 @@ sk.plan             ← technical plan
 sk.tasks            ← task breakdown
 sk.implement        ← build
 sk.verify           ← quality gate
+sk.test             ← generate and run tests (switch to backend-qa or frontend-qa role)
+sk.security-audit   ← OWASP audit, secrets scan, dependency scan (switch to security role)
 ```
 
 Or for standard features:
