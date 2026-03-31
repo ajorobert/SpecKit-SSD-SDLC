@@ -14,6 +14,8 @@ Artifact exists → [REFINE MODE] update, never overwrite.
 Artifact missing → [CREATE MODE] create from template.
 Declare mode at start of every execution.
 
-## Upstream References
-Always read .specify/memory/upstream-adapter.md before referencing
-any upstream command. Use file paths only, never slash command names.
+## Upstream Reference
+upstream/ is a pattern reference archive — not executed at runtime.
+spec-kit AI prompting patterns have been inlined into sk.* commands.
+Do not invoke upstream shell scripts. Do not reference upstream-adapter.md for execution.
+See upstream-adapter.md for the migration rationale and pattern source map.

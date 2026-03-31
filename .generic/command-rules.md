@@ -38,6 +38,12 @@ Run sk.session switch --role security"
 - Artifact missing → [CREATE MODE]
 - Declare mode at start of every execution
 
+## Upstream Reference
+upstream/ is a pattern reference archive — not executed at runtime.
+spec-kit AI prompting patterns have been inlined into sk.* commands.
+Do not invoke upstream shell scripts. Do not reference upstream-adapter.md for execution.
+See .specify/memory/upstream-adapter.md for migration rationale and pattern source map.
+
 ## Post-Execution Memory Updates
 sk.plan, sk.architecture → update service-registry.md, domain-model.md if changed
 sk.datamodel             → update domain-model.md

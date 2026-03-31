@@ -13,7 +13,10 @@ session.yaml (active_intent_id, active_unit_id)
 2. Resolve unit: read active_unit_id from session.yaml
    NULL → ask user for unit title and code (e.g. PAY)
    Create specs/intents/{intent}/units/{unit}/unit-brief.md if new
-3. Execute upstream.specify from upstream-adapter.md
+3. Capture user story:
+   - Ask: who is the user, what do they need, why (business value)
+   - Ask: what are the acceptance criteria (minimum 3, verifiable, user-focused)
+   - Ask: what is explicitly out of scope
 4. Write story to:
    specs/intents/{intent}/units/{unit}/stories/story-{ID}.md
    using story-template.md, ID format: {INTENT}-{UNIT}-{NNN}

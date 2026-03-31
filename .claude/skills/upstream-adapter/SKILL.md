@@ -1,11 +1,12 @@
 ---
 name: upstream-adapter
-description: "Load when: any sk.* wrapper command that delegates to upstream spec-kit. Always load before referencing upstream commands."
+description: "Load when: investigating spec-kit prompting patterns or checking migration rationale. upstream/ is a reference archive — not executed at runtime."
 ---
 
 Upstream Adapter Skill
 Source: .specify/memory/upstream-adapter.md
-Loaded by: all sk.* wrapper commands
-Read .specify/memory/upstream-adapter.md before referencing
-any upstream command. Always use file paths not slash command names.
-If any path returns not-found: STOP and report to user.
+
+upstream/ contains spec-kit source files used as pattern references only.
+All spec-kit AI prompting patterns have been inlined into sk.* commands.
+Do not invoke upstream shell scripts or execute upstream command templates.
+See .specify/memory/upstream-adapter.md for migration rationale and pattern source map.
