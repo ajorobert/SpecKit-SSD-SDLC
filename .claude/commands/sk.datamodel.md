@@ -7,6 +7,7 @@ ONE document per unit.
 specs/intents/{intent}/units/{unit}/architecture.md
 .specify/memory/domain-model.md
 .specify/memory/standards/data-standards.md
+.claude/skills/design-principles/SKILL.md
 
 ## Steps
 1. [REFINE MODE] if data-model.md exists, [CREATE MODE] if not
@@ -26,3 +27,5 @@ specs/intents/{intent}/units/{unit}/data-model.md
 - All required fields per data-standards.md present
 - Migration strategy defined for breaking changes
 - Revision note appended if REFINE MODE
+- Index strategy defined for every query pattern in Access Patterns section
+- Transaction boundaries and isolation level declared for each write path

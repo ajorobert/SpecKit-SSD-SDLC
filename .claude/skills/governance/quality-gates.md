@@ -17,6 +17,8 @@ Architecture Gate (before sk.tasks)
 - [ ] All new domain entities added to domain-model.md
 - [ ] ADR raised for any cross-service decision
 - [ ] Checkpoint mode set in state.yaml
+- [ ] Consistency requirement declared per write path (strong / eventual / causal)
+- [ ] Failure modes documented per external dependency (timeout, fallback, circuit breaker)
 
 Plan Gate (before sk.implement)
 - [ ] plan.md exists for active story
@@ -24,6 +26,7 @@ Plan Gate (before sk.implement)
 - [ ] Data model changes documented
 - [ ] No conflicts with existing contracts in service-registry.md
 - [ ] Confirm/Validate checkpoint approved if required
+- [ ] Idempotency-Key declared on all mutation endpoints
 
 Implementation Gate (before merge)
 - [ ] All tasks in tasks.md marked complete

@@ -12,6 +12,7 @@ Unit-level command. Defines API contracts for all stories in unit.
 2. Load skills:
    a. .claude/skills/service-registry/SKILL.md
    b. .claude/skills/standards/SKILL.md (api-standards.md only)
+   c. .claude/skills/design-principles/SKILL.md
 3. Read unit architecture.md — contracts must align with it
 4. Read unit data-model.md if exists — contracts expose data model
 5. Check if contracts/ directory exists for active unit:
@@ -86,6 +87,13 @@ If [CREATE MODE]:
   ## Events Consumed
 
   ## Breaking Change Policy
+
+## Quality Bar
+- All endpoints follow api-standards.md URL and response format
+- Test plan has both provider and consumer sections
+- Provider tests cover happy path + error cases + auth rejection
+- No undocumented breaking changes
+- Idempotency-Key declared on all mutation endpoints (POST/PUT/PATCH/DELETE)
 
 ## Post-execution
 Post-command hook updates service-registry.md automatically

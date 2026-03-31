@@ -16,6 +16,7 @@ Covers all stories within the unit.
    c. .claude/skills/service-registry/SKILL.md
    d. .claude/skills/architecture-decisions/SKILL.md
    e. .claude/skills/standards/SKILL.md (tech-stack.md only)
+   f. .claude/skills/design-principles/SKILL.md
 3. Check if architecture.md exists for active unit:
    specs/intents/{intent}/units/{unit}/architecture.md
    EXISTS → [REFINE MODE]
@@ -97,6 +98,17 @@ checkpoint_mode = validate:
   Instruct user: architecture requires approval before sk.plan can proceed
   User approves → update story frontmatter checkpoint_status: approved
 
+## Quality Bar
+- All unit stories listed in stories-covered
+- Bounded context clearly defined
+- No conflicts with service-registry.md
+- Security approach defined
+- Open questions listed not hidden
+- Consistency requirement declared per write path (strong / eventual / causal)
+- Failure mode documented per external dependency (timeout, fallback, circuit breaker)
+- DDIA-significant decisions recorded in unit knowledge-base (why, not what)
+
 ## Post-execution
 PHR created automatically by post-command hook
 Suggest ADR for any significant design decision made
+Suggest ADR if consistency model changes or new partitioning/replication strategy introduced

@@ -12,6 +12,7 @@ Unit-level command. ONE data model per unit.
 2. Load skills:
    a. .claude/skills/domain-model/SKILL.md
    b. .claude/skills/standards/SKILL.md (data-standards.md only)
+   c. .claude/skills/design-principles/SKILL.md
 3. Read unit architecture.md if exists — data model must align with it
 4. Check if data-model.md exists for active unit:
    EXISTS → [REFINE MODE]
@@ -77,6 +78,14 @@ If [CREATE MODE]:
   ## Indexes
 
   ## Migration Notes
+
+## Quality Bar
+- No entity conflicts with existing domain-model.md
+- All required fields per data-standards.md present
+- Migration strategy defined for breaking changes
+- Revision note appended if REFINE MODE
+- Index strategy defined for every query pattern in architecture Access Patterns section
+- Transaction boundaries and isolation level declared for each write path
 
 ## Post-execution
 Post-command hook updates domain-model.md automatically

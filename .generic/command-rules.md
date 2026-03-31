@@ -49,6 +49,8 @@ Suggest (never create without confirmation) when:
 - Decision spans more than one service
 - Real alternatives were considered
 - Involves auth, payments, or security
+- Consistency model changes (strong ↔ eventual, or introducing eventual consistency for the first time)
+- New partitioning or replication strategy adopted for a service or collection
 
 ## PHR Triggers
 Create automatically after:
