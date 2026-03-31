@@ -37,17 +37,20 @@ for Cursor, Windsurf, Gemini CLI, Codex, and any tool that reads markdown.
 
 ---
 
-## Three-Source Map
+## Four-Source Map
 
-This framework draws from three sources:
+This framework draws from four sources:
 
 | Source | What is taken | Where it lives |
 |--------|--------------|----------------|
-| **spec-kit** | Core workflow engine (specify, plan, tasks, implement, clarify, analyze) | `upstream/` subtree + `sk.*` wrappers |
+| **spec-kit** | AI prompting patterns (clarify loop, implement phases, constitution interview) | Inlined into sk.* commands — `upstream/` is a reference archive only |
 | **spec-kit-plus** | ADR system, PHR system, PASS/FAIL quality gates, command-rules pattern | `sk.adr`, `sk.phr`, `sk.verify`, `.specify/memory/command-rules.md` |
 | **specs.md** (concepts) | Intent→Unit→Story hierarchy, adaptive checkpoints, hierarchical standards, complexity classification | `specs/intents/`, `.claude/skills/governance/`, `.specify/memory/standards/` |
+| **gstack** | Execution pipeline (code review, browser QA, eng review, debugging, shipping) | `sk.review`, `sk.plan-eng-review`, `sk.qa`, `sk.investigate`, `sk.ship` wrappers |
 
-The spec-kit upstream is never modified. All framework logic lives in the layer above it.
+The spec-kit upstream is a reference archive — never executed at runtime. All AI prompting patterns
+have been inlined into sk.* commands adapted to our artifact structure.
+gstack must be installed separately: see [github.com/garrytan/gstack](https://github.com/garrytan/gstack).
 
 ---
 
@@ -83,12 +86,13 @@ Works with any AI tool that reads markdown. Entry points: `AGENTS.md`,
 - `upstream-adapter.md` — upstream file path references
 - `standards/` — tech stack, coding, API, data standards with module overrides
 
-### 21 Commands (`.claude/commands/` + `.generic/commands/`)
+### 27 Commands (`.claude/commands/` + `.generic/commands/`)
 
 | Type | Commands |
 |------|----------|
-| Wrappers | sk.constitution, sk.specify, sk.plan, sk.tasks, sk.implement, sk.clarify, sk.analyze, sk.ff |
-| Originals | sk.architecture, sk.datamodel, sk.contracts, sk.impact, sk.verify |
+| Spec & planning | sk.constitution, sk.specify, sk.clarify, sk.architecture, sk.datamodel, sk.contracts, sk.plan, sk.tasks, sk.implement, sk.analyze, sk.ff |
+| Validation | sk.impact, sk.verify |
+| gstack wrappers | sk.office-hours [optional], sk.plan-eng-review, sk.review, sk.investigate, sk.qa, sk.ship |
 | QA & Security | sk.test, sk.security-audit |
 | History | sk.adr, sk.phr |
 | Knowledge | sk.knowledge-base |
@@ -154,7 +158,7 @@ These two files must be populated before any `sk.*` command runs:
 .specify/memory/standards/tech-stack.md
 ```
 
-Run `sk.constitution` first — it executes the upstream constitution workflow
+Run `sk.constitution` first — it interviews you for project principles
 then prompts you to fill in these files.
 
 ### 2. Start a session
@@ -166,15 +170,20 @@ sk.session start --role po
 ### 3. Run the SDLC
 
 ```
+[sk.office-hours]   ← [optional] validate idea before spec work (po/architect)
 sk.specify          ← captures intent, unit, story; classifies checkpoint
 sk.clarify          ← resolve questions
 sk.architecture     ← (validate mode only, or when new services involved)
+[sk.plan-eng-review]← [optional] engineer review of architecture (architect)
 sk.plan             ← technical plan
 sk.tasks            ← task breakdown
 sk.implement        ← build
+sk.review           ← spec-aware code review: bounded context + contracts + ADRs
 sk.verify           ← quality gate
-sk.test             ← generate and run tests (switch to backend-qa or frontend-qa role)
-sk.security-audit   ← OWASP audit, secrets scan, dependency scan (switch to security role)
+sk.test             ← generate and run tests (backend-qa or frontend-qa role)
+sk.qa               ← browser acceptance testing (frontend-qa role only)
+sk.security-audit   ← OWASP + STRIDE audit, secrets scan (security role)
+sk.ship             ← quality-gated release (lead role; sk.verify must pass)
 ```
 
 Or for standard features:
@@ -182,6 +191,9 @@ Or for standard features:
 ```
 sk.ff               ← runs specify→clarify→architecture→plan→tasks in one shot
 ```
+
+> **Prerequisite for sk.review, sk.qa, sk.investigate, sk.plan-eng-review, sk.ship, sk.office-hours:**
+> gstack must be installed. See [github.com/garrytan/gstack](https://github.com/garrytan/gstack).
 
 ### What To Do Next
 
@@ -213,7 +225,7 @@ sk.ff               ← runs specify→clarify→architecture→plan→tasks in 
 
 | Command | Level | Role | Description |
 |---------|-------|------|-------------|
-| `sk.constitution` | project | any | Initialize project principles and fill memory files |
+| `sk.constitution` | project | any | Initialize or update project principles via interview; writes constitution.md |
 | `sk.specify` | intent→story | po | Capture intent, decompose to unit and story |
 | `sk.clarify` | story | po/architect/lead | Resolve ambiguities before planning |
 | `sk.impact` | intent | architect | Assess blast radius of proposed work |
@@ -222,20 +234,23 @@ sk.ff               ← runs specify→clarify→architecture→plan→tasks in 
 | `sk.contracts` | unit | architect | Define API contracts, generate provider tests |
 | `sk.plan` | story | lead | Technical implementation plan |
 | `sk.tasks` | story | lead | Actionable task breakdown (TDD order) |
-| `sk.implement` | story | backend/frontend | Execute tasks via upstream implement |
+| `sk.implement` | story | backend/frontend | Execute tasks phase-by-phase (TDD order, marks [X] per task) |
+| `sk.review` | story | backend/frontend | Spec-aware code review: bounded context + contracts + ADRs → gstack /review |
 | `sk.verify` | story | architect/lead | PASS/FAIL quality gate across all gates |
 | `sk.ff` | story | lead | Fast-forward: specify→clarify→architecture→plan→tasks |
 | `sk.adr` | unit/intent | architect | Create Architecture Decision Record |
 | `sk.phr` | story/unit | any | Record Prompt History for significant decisions |
 | `sk.knowledge-base` | system/domain/unit | architect | Generate or update knowledge base at specified tier |
 | `sk.test` | story | backend-qa / frontend-qa | Generate and run test suite (provider contract + integration, or consumer contract + E2E + component) |
-| `sk.security-audit` | story | security | OWASP Top 10 audit, secrets scan, dependency scan — writes security-audit.md |
+| `sk.qa` | story | frontend-qa | Browser acceptance testing mapped to AC → gstack /qa (frontend only) |
+| `sk.security-audit` | story | security | OWASP Top 10 + STRIDE audit, secrets scan, dependency scan — writes security-audit.md |
+| `sk.ship` | story | lead | Quality-gated release: sk.verify must pass → gstack /ship |
+| `sk.office-hours` | intent/unit | po/architect | [OPTIONAL] Validate product idea or feature approach → gstack /office-hours |
+| `sk.plan-eng-review` | unit | architect | [OPTIONAL] Validate engineering plan against service-registry + ADRs → gstack /plan-eng-review |
+| `sk.investigate` | story | backend/frontend | Spec-aware debugging: classifies findings as implementation bug vs spec deviation → gstack /investigate |
 | `sk.session` | — | any | Manage local session: start/end/focus/status/list/switch |
-| `sk.analyze` | unit | lead/architect | Cross-artifact consistency check |
+| `sk.analyze` | unit | lead/architect | Cross-artifact consistency check (stories, contracts, bounded context, ADRs) |
 | `sk.reset-lock` | — | any | Clear stuck session lock |
-
-Upstream commands (specify, plan, tasks, implement, clarify, analyze) are delegated
-via path references in `.specify/memory/upstream-adapter.md` — never by slash command name.
 
 ---
 
@@ -282,7 +297,7 @@ Each story is classified at specify-time into one of three modes:
 | **Plan** | if plan.md exists | contracts defined for new endpoints, checkpoint approved if required |
 | **Implementation** | if tasks complete | all tasks done, PHR created, no standards violations |
 | **Test** | before `security-review` | provider + consumer contract tests exist, every AC has E2E, coverage thresholds met, all tests pass |
-| **Security** | before `done` | security-audit.md exists, OWASP Top 10 documented, no open CRITICAL findings, secrets scan clean |
+| **Security** | before `done` | security-audit.md exists, OWASP Top 10 documented, STRIDE table present, no open CRITICAL findings (OWASP or STRIDE), secrets scan clean |
 
 A single FAIL blocks progression. Security verdict BLOCKED prevents the story from reaching `done`.
 
@@ -328,14 +343,14 @@ Never edit files inside `upstream/` directly.
 upstream/                      ← spec-kit source (read-only, git subtree)
 
 .claude/                       ← Claude Code native layer
-  commands/sk.*.md             ← 20 lean sk.* commands
+  commands/sk.*.md             ← 27 sk.* commands
   agents/                      ← 8 role-based agent personas
   skills/                      ← 7 context skills (auto-loaded)
   hooks/post-command.md        ← story status updates after each command
   session.yaml                 ← local session state (gitignored)
 
 .generic/                      ← platform-agnostic layer
-  commands/sk.*.md             ← same 20 commands, self-contained
+  commands/sk.*.md             ← same 27 commands, self-contained
   personas/                    ← role definitions for generic tools
   context-maps/                ← explicit context-loading instructions
   hooks/                       ← pre/post command instructions (inline)
