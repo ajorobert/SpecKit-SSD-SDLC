@@ -49,8 +49,20 @@ Suggest (never create without confirmation) when:
 - Decision spans more than one service
 - Real alternatives were considered
 - Involves auth, payments, or security
+- Consistency model changes (strong ↔ eventual, or introducing eventual consistency for the first time)
+- New partitioning or replication strategy adopted for a service or collection
 
 ## PHR Triggers
 Create automatically after:
 - sk.architecture
 - sk.implement when novel tradeoffs resolved
+
+## Knowledge Base Loading Order
+For sk.implement, sk.test, sk.security-audit:
+1. Read specs/knowledge-base.md (tier 1) if exists
+2. Read specs/domains/{domain}/knowledge-base.md (tier 2) if exists
+3. Read unit knowledge-base.md (tier 3) if exists
+4. Then read code and detail files
+Knowledge bases contain non-derivable context only.
+They complement code reading — do not treat them as
+a substitute for reading the actual implementation.

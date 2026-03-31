@@ -39,3 +39,14 @@ Security persona: .generic/personas/security.md
 
 Role routing enforced: sk.test and sk.security-audit check session.yaml role.
 Wrong role → STOP with instructions to switch.
+
+## Knowledge Base System
+Three-tier non-derivable context alongside code.
+
+Tier 1 — system:  specs/knowledge-base.md
+Tier 2 — domain:  specs/domains/{domain}/knowledge-base.md
+Tier 3 — unit:    specs/intents/{intent}/units/{unit}/knowledge-base.md
+
+Read before working on any module.
+Generated and maintained by sk.knowledge-base command.
+Contains only what cannot be derived from reading code.

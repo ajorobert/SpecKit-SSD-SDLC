@@ -21,6 +21,14 @@ Runs phases 2→3→4→7→8 in sequence for standard features.
 Pauses at each Confirm/Validate checkpoint.
 Skips sk.architecture if checkpoint_mode is autopilot.
 
+## Knowledge Base Usage Per Phase
+sk.impact          → read tier 1 + relevant tier 2
+sk.architecture    → read tier 1 + tier 2 + update tier 3
+sk.implement       → read tier 1 + tier 2 + tier 3 before code
+sk.test            → read tier 1 + tier 3 before generating tests
+sk.security-audit  → read tier 3 before auditing
+sk.knowledge-base  → run after first unit complete, update per ADR
+
 Phase Ownership
 sk.impact          → architect
 sk.specify         → product owner + architect

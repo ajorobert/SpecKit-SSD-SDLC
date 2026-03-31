@@ -8,6 +8,7 @@ specs/intents/{intent}/units/{unit}/data-model.md
 .specify/memory/service-registry.md
 .specify/memory/standards/api-standards.md
 .specify/memory/standards/tech-stack.md (for test framework)
+.claude/skills/design-principles/SKILL.md
 
 ## Steps
 1. [REFINE MODE] if contracts/ exists, [CREATE MODE] if not
@@ -31,3 +32,4 @@ tests/contract/{unit}/provider/{endpoint}.provider.test.{ext}
 - Test plan has both provider and consumer sections
 - Provider tests cover happy path + error cases + auth rejection
 - No undocumented breaking changes
+- Idempotency-Key declared on all mutation endpoints (POST/PUT/PATCH/DELETE)

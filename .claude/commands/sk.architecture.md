@@ -9,6 +9,7 @@ specs/intents/{intent}/units/{unit}/stories/ (all stories)
 .specify/memory/domain-model.md
 .specify/memory/service-registry.md
 .specify/memory/architecture-decisions.md
+.claude/skills/design-principles/SKILL.md
 
 ## Steps
 1. [REFINE MODE] if architecture.md exists, [CREATE MODE] if not
@@ -22,6 +23,14 @@ specs/intents/{intent}/units/{unit}/stories/ (all stories)
 
 ## Output Artifacts
 specs/intents/{intent}/units/{unit}/architecture.md
+specs/intents/{intent}/units/{unit}/knowledge-base.md
+  (boundary section updated if architecture changes domain ownership)
+
+## Steps (continued)
+8. If architecture introduces or changes domain boundary:
+   Update unit knowledge-base.md boundary rationale
+   If boundary change is significant: suggest domain-level
+   knowledge base update via sk.knowledge-base --tier domain
 
 ## Quality Bar
 - All unit stories explicitly listed in stories-covered
@@ -29,3 +38,6 @@ specs/intents/{intent}/units/{unit}/architecture.md
 - No conflicts with service-registry.md
 - Security approach defined
 - Open questions listed not hidden
+- Consistency requirement declared for every write path (strong / eventual / causal)
+- Failure mode documented for every external dependency (timeout, fallback, circuit breaker)
+- DDIA-significant decisions recorded in unit knowledge-base (why, not what)

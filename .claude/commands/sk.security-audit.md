@@ -3,6 +3,9 @@ Security audit of implementation for active story.
 Role: security | Level: story
 
 ## Input Artifacts
+specs/intents/{intent}/units/{unit}/knowledge-base.md
+  (external constraints + invariants inform audit scope)
+
 src/{service}/** (implementation files for active unit)
 specs/intents/{intent}/units/{unit}/contracts/api-spec.json
 .specify/memory/architecture-decisions.md

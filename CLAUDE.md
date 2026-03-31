@@ -15,4 +15,15 @@ Roles: po | architect | lead | backend | frontend | backend-qa | frontend-qa | s
 3. Never edit files inside upstream/
 4. Session state: .claude/session.yaml
 
+## Knowledge Bases (non-derivable context)
+Tier 1 — system:  specs/knowledge-base.md
+Tier 2 — domain:  specs/domains/{domain}/knowledge-base.md
+Tier 3 — unit:    specs/intents/{intent}/units/{unit}/knowledge-base.md
+
+Read tier 1 before any work.
+Read relevant tier 2 when working within a domain.
+Read tier 3 before implementing or testing a unit.
+These complement code reading — they contain only what
+code cannot tell you.
+
 <!-- END SPECKIT-SSD-SDLC MANAGED -->
