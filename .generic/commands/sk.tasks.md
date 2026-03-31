@@ -19,11 +19,18 @@ Story-level command — requires active_story_id
    checkpoint_mode = confirm OR validate → checkpoint_status must = approved
    NOT approved → STOP: approval required before tasks
 
-## Execute upstream tasks
-Read upstream.tasks from upstream-adapter.md
-Execute upstream tasks instructions
-Write tasks to:
+## Generate tasks
+Generate task breakdown and write to:
 specs/intents/{intent}/units/{unit}/stories/{story-id}/tasks.md
+
+Structure:
+- Phase 1: Setup (project structure, config, dependencies)
+- Phase 2: Foundational (blocking prerequisites — schema migrations, shared utilities)
+- Phase 3+: User story tasks in priority order
+  - Write test tasks before implementation tasks (TDD order)
+  - Mark parallelizable tasks with [P]
+  - Each task: `- [ ] [T{NNN}] [P?] Description — file/path/target`
+- Final phase: cross-cutting concerns (logging, error handling)
 
 ## Post-execution
 Report task count and parallel markers found

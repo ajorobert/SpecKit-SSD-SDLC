@@ -36,7 +36,10 @@ Ask user: existing unit or new unit?
 ## Story creation
 1. Count existing stories in active unit to get next number
 2. Generate story ID: {INTENT-CODE}-{UNIT-CODE}-{NNN} (zero-padded)
-3. Execute upstream specify instructions
+3. Capture story content:
+   - Ask: who is the user, what do they need, why (business value)
+   - Ask: acceptance criteria (minimum 3, measurable, user-focused, technology-agnostic)
+   - Ask: what is explicitly out of scope
 4. Write output to:
    specs/intents/{intent}/units/{unit}/stories/story-{ID}.md
    using .your-layer/templates/story-template.md as structure

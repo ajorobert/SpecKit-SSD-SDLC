@@ -34,11 +34,18 @@ Read story frontmatter checkpoint_mode:
   MISSING → STOP: run sk.architecture first
 - confirm | autopilot → proceed
 
-## Execute upstream plan
-Read upstream.plan from upstream-adapter.md
-Execute upstream plan instructions with loaded context
-Write plan to:
+## Write plan
+Write technical plan to:
 specs/intents/{intent}/units/{unit}/stories/{story-id}/plan.md
+
+Plan must cover:
+- Technical approach and key decisions (reference architecture.md explicitly)
+- Component breakdown (what to build, in what order)
+- Data layer changes (migrations, new entities referencing data-model.md)
+- API changes (new or modified endpoints referencing api-spec.json)
+- Test strategy (unit tests, integration tests, contract tests)
+- Dependencies on other services or units
+- Risks and open questions
 
 ## Confirm checkpoint
 If checkpoint_mode = confirm:
