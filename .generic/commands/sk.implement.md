@@ -28,6 +28,13 @@ Story-level command — requires active_story_id
 6. specs/intents/{intent}/units/{unit}/contracts/api-spec.json (if exists)
 7. specs/intents/{intent}/units/{unit}/architecture.md (if exists)
 8. .specify/memory/standards/coding-standards.md
+9. .specify/memory/standards/observability-standards.md
+
+## Pre-generation protocol
+Before writing any code in an existing module:
+1. Read the existing code in the target area. Match the established patterns.
+2. Search the codebase before introducing a new abstraction (interface, utility, base class) — if an equivalent exists, use it.
+This prevents session-to-session drift.
 
 ## Project setup verification
 Before executing tasks, verify ignore files exist for detected stack:

@@ -39,5 +39,21 @@ updated: {date}
 ## External Dependencies
 ## Security Approach
 ## Error Handling
+## Observability
+<!-- Describe the observability strategy for this unit.
+     Required:
+     - Which events are logged at INFO level (significant business events)
+     - Which external calls require duration metrics
+     - What GET /health verifies (which dependencies are checked)
+     Optional:
+     - Domain-level metrics emitted (counters, gauges, histograms)
+     - Key business operations instrumented as named spans
+     - Alert thresholds for error rate or latency
+     Example:
+     - Logging: INFO on order placed/cancelled; WARN on payment retry; ERROR on processor failure
+     - Metrics: orders_created_total; payment_processing_duration_seconds; payment_errors_total
+     - Health: GET /health checks payment-service reachability + database connection
+     See observability-standards.md for required structured logging fields. -->
+
 ## Stories Coverage
 ## Open Questions

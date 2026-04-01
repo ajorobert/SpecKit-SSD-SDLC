@@ -19,6 +19,13 @@ Story-level command — requires active_story_id
    checkpoint_mode = confirm OR validate → checkpoint_status must = approved
    NOT approved → STOP: approval required before tasks
 
+## New service detection
+If no existing src/{service}/ code — this is the first story for a new service.
+Add to Phase 1 (Setup):
+- [ ] [T00N] Configure structured JSON logging with trace_id propagation
+- [ ] [T00N] Implement GET /health endpoint (200 ok + 503 degraded responses)
+- [ ] [T00N] Instrument RED metrics middleware (rate, errors, duration per endpoint)
+
 ## Generate tasks
 Generate task breakdown and write to:
 specs/intents/{intent}/units/{unit}/stories/{story-id}/tasks.md
