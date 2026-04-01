@@ -15,6 +15,14 @@ Roles: po | architect | lead | backend | frontend | backend-qa | frontend-qa | s
 3. Never edit files inside upstream/
 4. Session state: .claude/session.yaml
 
+## Security Rules
+5. Never use `rm`, `rmdir`, `del`, or `unlink` — these commands are blocked by policy.
+6. To remove a file, use the archive script: `bash .claude/hooks/archive-file.sh "<relative-path>" "<reason for removal>"`
+   - This moves the file to `.archive/YYYY-MM-DD/` and logs it for human review.
+   - A human must review `.archive/ARCHIVE_LOG.md` before any permanent deletion.
+7. Never edit or write files outside the project root directory. All file paths must resolve within the project root.
+8. The `.archive/` folder is human-review territory — never delete files from it.
+
 ## Knowledge Bases (non-derivable context)
 Tier 1 — system:  specs/knowledge-base.md
 Tier 2 — domain:  specs/domains/{domain}/knowledge-base.md
