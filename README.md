@@ -14,8 +14,8 @@ It enforces a hierarchy of artifacts (Intent → Unit → Story), a team-based s
 model with role-specific agents, adaptive quality checkpoints, and a full SDLC
 workflow from specification through implementation and verification.
 
-It works with Claude Code natively, and includes a platform-agnostic layer
-for Cursor, Windsurf, Gemini CLI, Codex, and any tool that reads markdown.
+It works with Claude Code natively. Google Antigravity (Gemini) is supported
+via GEMINI.md, which routes into the same `.claude/` command and agent layer.
 
 ---
 
@@ -34,6 +34,7 @@ for Cursor, Windsurf, Gemini CLI, Codex, and any tool that reads markdown.
 | No non-derivable context | Three-tier knowledge base system |
 | Single tool dependency | Generic layer for any agent |
 | No upstream resilience | Subtree + reconcile script + adapter map |
+| No project bootstrap | setup.sh + sk.init for one-command initialization |
 
 ---
 
@@ -54,17 +55,16 @@ gstack must be installed separately: see [github.com/garrytan/gstack](https://gi
 
 ---
 
-## Two Execution Layers
+## Execution Layer
 
 ### Claude Code Native — `.claude/`
 Lean commands that use Claude Code primitives: skills auto-loaded by context,
 a post-command hook for story status updates, and agent persona definitions.
 Commands are concise (Input Artifacts / Steps / Output Artifacts / Quality Bar).
 
-### Generic — `.generic/`
-Self-contained commands that carry all context-loading instructions inline.
-Works with any AI tool that reads markdown. Entry points: `AGENTS.md`,
-`.cursorrules`, `.windsurfrules`, `GEMINI.md`.
+### Antigravity (Gemini) — `GEMINI.md`
+GEMINI.md routes Antigravity into the same `.claude/` commands, agents, and skills.
+No separate command layer — zero duplication. Entry point: `GEMINI.md`.
 
 ---
 
@@ -73,8 +73,8 @@ Works with any AI tool that reads markdown. Entry points: `AGENTS.md`,
 ### Foundation
 
 - `upstream/` — spec-kit as a protected git subtree. Never edited. Pulled via `git subtree pull` when upstream releases.
-- Unified Architecture: `.claude/` acts as the master execution layer for Agentic AI (Claude Code, Antigravity/Gemini), while `.generic/` provides fallback mappings for non-agentic tools (Cursor, Copilot).
-- Root entry points: `CLAUDE.md`, `AGENTS.md`, `.cursorrules`, `.windsurfrules`, `GEMINI.md`
+- Unified Architecture: `.claude/` is the master execution layer for both Claude Code and Antigravity (Gemini). GEMINI.md routes Gemini into the same layer.
+- Root entry points: `CLAUDE.md`, `GEMINI.md`
 
 ### Memory Layer (`.specify/memory/`)
 
@@ -83,11 +83,11 @@ Works with any AI tool that reads markdown. Entry points: `AGENTS.md`,
 - `service-registry.md` — all services and their contracts
 - `architecture-decisions.md` — ADR index
 - `command-rules.md` — agent behavior rules
-- `gemini-command-rules.md` — agent behavior rules strictly for Antigravity (Gemini) to prevent bloating Claude
+- `gemini-command-rules.md` — agent behavior rules for Antigravity (Gemini), kept separate to avoid bloating Claude context
 - `upstream-adapter.md` — upstream file path references
 - `standards/` — tech stack, coding, API, data standards with module overrides
 
-### 27 Commands (`.claude/commands/` + `.generic/commands/`)
+### 28 Commands (`.claude/commands/`)
 
 | Type | Commands |
 |------|----------|
@@ -98,8 +98,9 @@ Works with any AI tool that reads markdown. Entry points: `AGENTS.md`,
 | History | sk.adr, sk.phr |
 | Knowledge | sk.knowledge-base |
 | Session | sk.session, sk.reset-lock |
+| Init | sk.init |
 
-### 8 Agent Personas (`.claude/agents/` + `.generic/personas/`)
+### 8 Agent Personas (`.claude/agents/`)
 
 - po, architect, lead
 - backend, frontend
@@ -138,7 +139,7 @@ Works with any AI tool that reads markdown. Entry points: `AGENTS.md`,
 - Tier 3: unit-level knowledge bases
 - Complements code reading — contains only what code cannot tell you
 
-### 10 Templates (`.your-layer/templates/`)
+### Templates (`templates/artifacts/`)
 
 - intent, unit-brief, story
 - architecture, contracts-readme
@@ -148,19 +149,76 @@ Works with any AI tool that reads markdown. Entry points: `AGENTS.md`,
 
 ---
 
+## Using SpecKit in Your Project
+
+SpecKit is designed to be added as a **git subtree** to any project repository.
+A `setup.sh` script deploys the framework files, and `sk.init` initializes project memory.
+
+### Step 1 — Add as subtree
+
+```bash
+git subtree add --prefix=.speckit https://github.com/your-org/SpecKit-SSD-SDLC main --squash
+```
+
+### Step 2 — Run setup
+
+```bash
+bash .speckit/setup.sh
+```
+
+This script:
+- **Always:** Syncs `.claude/` to your project root (framework-owned)
+- **On first run:** Creates `CLAUDE.md`, `GEMINI.md`, `.specify/`, `specs/`, `history/`
+- **On update runs:** Prompts whether to replace `CLAUDE.md`/`GEMINI.md` with latest — your answer, no default
+
+Your project-specific config (`.specify/project-config.md`) is **never touched** by setup.sh.
+
+### Step 3 — Initialize project memory
+
+```bash
+/sk.init    # in Claude Code
+```
+
+`sk.init` interviews you about your project and generates:
+- `.specify/project-config.md` — project identity + custom rules (shared by CLAUDE.md and GEMINI.md)
+- `.specify/memory/system-context.md`, `service-registry.md`
+- `.specify/memory/standards/` — tech stack, coding standards, API standards, data standards
+
+Run `sk.init` again at any time to update specific memory files.
+
+### Receiving Framework Updates
+
+```bash
+git subtree pull --prefix=.speckit https://github.com/your-org/SpecKit-SSD-SDLC main --squash
+bash .speckit/setup.sh    # updates .claude/; prompts for CLAUDE.md/GEMINI.md
+```
+
+### What lives where after setup
+
+```
+your-monorepo/
+├── .speckit/                   ← framework subtree (don't edit)
+├── .claude/                    ← deployed by setup.sh, commit this
+├── .specify/
+│   ├── project-config.md       ← yours (generated by sk.init, edit freely)
+│   └── memory/                 ← yours (generated by sk.init)
+├── specs/                      ← yours (your intents, units, stories)
+├── history/                    ← yours (ADRs, PHRs)
+├── CLAUDE.md                   ← framework template (update via setup.sh prompt)
+└── GEMINI.md                   ← framework template (update via setup.sh prompt)
+```
+
+---
+
 ## How To Use It
 
-### 1. Fill in project memory
+### 1. Initialize your project
 
-These two files must be populated before any `sk.*` command runs:
-
+```bash
+git subtree add --prefix=.speckit <url> main --squash
+bash .speckit/setup.sh
+/sk.init    # interview → generates all memory files
 ```
-.specify/memory/system-context.md
-.specify/memory/standards/tech-stack.md
-```
-
-Run `sk.constitution` first — it interviews you for project principles
-then prompts you to fill in these files.
 
 ### 2. Start a session
 
@@ -200,21 +258,21 @@ sk.ff               ← runs specify→clarify→architecture→plan→tasks in 
 
 **Immediate — before using on a real project:**
 
-1. Run `sk.constitution` to establish project principles
-2. Fill in `.specify/memory/system-context.md` and `standards/tech-stack.md`
-3. Run `sk.knowledge-base --tier system` to capture system-level context
-4. Run `sk.session start --role po` and begin with `sk.specify`
+1. Run `bash .speckit/setup.sh` to deploy the framework
+2. Run `/sk.init` to interview and generate all memory files
+3. Run `sk.session start --role po` and begin with `sk.specify`
 
 **Before the first real story ships:**
 
 - Define core domains via `sk.knowledge-base --tier domain`
 - Establish auth ADR early — everything depends on it
-- Set coverage thresholds in `coding-standards.md`
+- Set coverage thresholds in `.specify/memory/standards/coding-standards.md`
 
 **Ongoing:**
 
-- Pull upstream updates periodically: `git subtree pull --prefix upstream https://github.com/github/spec-kit.git main --squash`
-- Run `reconcile-upstream.sh` after every upstream pull
+- Pull framework updates: `git subtree pull --prefix=.speckit <url> main --squash && bash .speckit/setup.sh`
+- Pull upstream updates: `git subtree pull --prefix upstream https://github.com/github/spec-kit.git main --squash`
+- Run `bash scripts/reconcile-upstream.sh` after every upstream pull
 - Update knowledge bases after every ADR
 - Run `sk.session list` as your team's daily standup view
 
@@ -252,6 +310,7 @@ sk.ff               ← runs specify→clarify→architecture→plan→tasks in 
 | `sk.session` | — | any | Manage local session: start/end/focus/status/list/switch |
 | `sk.analyze` | unit | lead/architect | Cross-artifact consistency check (stories, contracts, bounded context, ADRs) |
 | `sk.reset-lock` | — | any | Clear stuck session lock |
+| `sk.init` | — | any | Initialize or update project memory via interview; generates `.specify/project-config.md` and all `.specify/memory/` files |
 
 ---
 
@@ -327,12 +386,12 @@ modifies `specs/` or `contracts/`; architect never writes to `src/`.
 
 ```bash
 git subtree pull --prefix upstream https://github.com/github/spec-kit.git main --squash
-.your-layer/scripts/reconcile-upstream.sh
+bash scripts/reconcile-upstream.sh
 ```
 
-`reconcile-upstream.sh` checks all paths in `upstream-adapter.md` and reports
+`reconcile-upstream.sh` checks all paths in `.specify/memory/upstream-adapter.md` and reports
 broken references or new upstream files that may need wrapper commands.
-Reports are written to `.your-layer/reconcile-reports/` (gitignored).
+Reports are written to `history/reconcile-reports/` (gitignored).
 
 Never edit files inside `upstream/` directly.
 
@@ -343,28 +402,35 @@ Never edit files inside `upstream/` directly.
 ```
 upstream/                      ← spec-kit source (read-only, git subtree)
 
-.claude/                       ← Claude Code native layer
-  commands/sk.*.md             ← 27 sk.* commands
+.claude/                       ← Claude Code + Antigravity execution layer
+  commands/sk.*.md             ← 28 sk.* commands (including sk.init)
   agents/                      ← 8 role-based agent personas
-  skills/                      ← 7 context skills (auto-loaded)
-  hooks/post-command.md        ← story status updates after each command
+  skills/                      ← context skills (auto-loaded by Claude Code)
+  hooks/                       ← archive-file.sh, post-command.md, validate-path.sh
+  settings.json                ← security policies and hook config
   session.yaml                 ← local session state (gitignored)
 
-.generic/                      ← platform-agnostic layer
-  commands/sk.*.md             ← same 27 commands, self-contained
-  personas/                    ← role definitions for generic tools
-  context-maps/                ← explicit context-loading instructions
-  hooks/                       ← pre/post command instructions (inline)
+templates/                     ← deployment templates (used by setup.sh)
+  root/                        ← CLAUDE.md, GEMINI.md, .gitignore.fragment
+  project/                     ← .specify/, specs/, history/ scaffolding
+  artifacts/                   ← adr, phr, architecture, contracts, story, unit, intent,
+                               ←   test-plan, security-audit, knowledge base (3 tiers)
 
-.specify/                      ← project knowledge (fill in for your project)
+scripts/                       ← utility scripts
+  create-adr.sh                ← numbered ADR file creation
+  create-phr.sh                ← numbered PHR file creation
+  reconcile-upstream.sh        ← upstream change detection
+
+.specify/                      ← project knowledge (generated by sk.init)
+  project-config.md            ← project identity + custom rules (shared by CLAUDE.md + GEMINI.md)
   memory/
     system-context.md          ← what system you're building
     domain-model.md            ← canonical entities
     service-registry.md        ← service contracts
     architecture-decisions.md  ← ADR index
     upstream-adapter.md        ← upstream file path map
-    command-rules.md           ← agent behavior rules
-    gemini-command-rules.md    ← Antigravity-specific agent behavior rules
+    command-rules.md           ← agent behavior rules (Claude Code)
+    gemini-command-rules.md    ← agent behavior rules (Antigravity)
     standards/                 ← tech-stack, coding, API, data, per-module
 
 specs/                         ← living project specs
@@ -372,18 +438,13 @@ specs/                         ← living project specs
   domains/                     ← tier 2: core domain knowledge bases
   intents/                     ← Intent → Unit → Story hierarchy
 
-.your-layer/                   ← framework internals
-  templates/                   ← adr, phr, architecture, contracts, story, unit, intent,
-                               ←   test-plan, security-audit, knowledge base (3 tiers)
-  scripts/                     ← create-adr.sh, create-phr.sh, reconcile-upstream.sh
-
 history/
   adr/                         ← Architecture Decision Records
   prompts/                     ← Prompt History Records
 
-CLAUDE.md                      ← Claude Code entry point
-AGENTS.md                      ← Generic tools entry point
-.cursorrules / .windsurfrules / GEMINI.md  ← Tool-specific entry points
+setup.sh                       ← deployment script (run after git subtree add/pull)
+CLAUDE.md                      ← Claude Code entry point (framework-managed template)
+GEMINI.md                      ← Antigravity entry point (framework-managed template)
 ```
 
 ---
@@ -413,9 +474,8 @@ review → testing → security-review → done), `checkpoint_mode`
 ### Gitignored Runtime Files
 
 ```
-.claude/session.yaml      ← local session focus
-.claude/session.lock      ← runtime lock (cleared after each command)
-.generic/session.yaml     ← generic layer session focus
-.specify/state.lock       ← legacy (kept for safety)
-.your-layer/reconcile-reports/
+.claude/session.yaml           ← local session focus (per-developer)
+.claude/session.lock           ← runtime lock (cleared after each command)
+.specify/memory/state.lock     ← runtime lock
+history/reconcile-reports/     ← upstream reconcile output
 ```

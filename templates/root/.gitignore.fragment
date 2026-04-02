@@ -1,5 +1,4 @@
-.claude/settings.local.json
+# SpecKit runtime state (per-developer, not committed)
 .claude/session.yaml
 .claude/session.lock
 .specify/memory/state.lock
-history/reconcile-reports/

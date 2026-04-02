@@ -12,8 +12,8 @@ Roles: po | architect | lead | backend | frontend | backend-qa | frontend-qa | s
 
 ## Rules
 1. Read .specify/memory/command-rules.md before any sk.* command
-2. upstream/ is a pattern reference archive — not executed at runtime. See upstream-adapter.md for migration rationale.
-3. Never edit files inside upstream/
+2. .speckit/upstream/ is a pattern reference archive — not executed at runtime. See .specify/memory/upstream-adapter.md for migration rationale.
+3. Never edit files inside .speckit/upstream/
 4. Session state: .claude/session.yaml
 
 ## Security Rules
