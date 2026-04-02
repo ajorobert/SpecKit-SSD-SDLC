@@ -73,7 +73,7 @@ Works with any AI tool that reads markdown. Entry points: `AGENTS.md`,
 ### Foundation
 
 - `upstream/` — spec-kit as a protected git subtree. Never edited. Pulled via `git subtree pull` when upstream releases.
-- Two-layer architecture: `.claude/` for Claude Code native, `.generic/` for any agent (Cursor, Windsurf, Gemini CLI, Codex)
+- Unified Architecture: `.claude/` acts as the master execution layer for Agentic AI (Claude Code, Antigravity/Gemini), while `.generic/` provides fallback mappings for non-agentic tools (Cursor, Copilot).
 - Root entry points: `CLAUDE.md`, `AGENTS.md`, `.cursorrules`, `.windsurfrules`, `GEMINI.md`
 
 ### Memory Layer (`.specify/memory/`)
@@ -83,6 +83,7 @@ Works with any AI tool that reads markdown. Entry points: `AGENTS.md`,
 - `service-registry.md` — all services and their contracts
 - `architecture-decisions.md` — ADR index
 - `command-rules.md` — agent behavior rules
+- `gemini-command-rules.md` — agent behavior rules strictly for Antigravity (Gemini) to prevent bloating Claude
 - `upstream-adapter.md` — upstream file path references
 - `standards/` — tech stack, coding, API, data standards with module overrides
 
@@ -363,6 +364,7 @@ upstream/                      ← spec-kit source (read-only, git subtree)
     architecture-decisions.md  ← ADR index
     upstream-adapter.md        ← upstream file path map
     command-rules.md           ← agent behavior rules
+    gemini-command-rules.md    ← Antigravity-specific agent behavior rules
     standards/                 ← tech-stack, coding, API, data, per-module
 
 specs/                         ← living project specs
