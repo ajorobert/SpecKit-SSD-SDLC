@@ -72,3 +72,8 @@ For sk.implement, sk.test, sk.security-audit:
 Knowledge bases contain non-derivable context only.
 They complement code reading — do not treat them as
 a substitute for reading the actual implementation.
+
+## Safety Restrictions (Pre-Tool Equivalents)
+1. **No Direct Deletion:** Never directly delete files or use destructive shell commands (like `rm`, `del`, `Remove-Item`). If a file must be removed, use the archive workflow instead:
+   `bash .claude/hooks/archive-file.sh "<relative-path>" "<reason for removal>"`
+2. **Path Confinement:** All file modifications (edits/writes) MUST stay within the project root. Never attempt to read or modify external system directories (e.g., `/etc/`, `/usr/`, `C:\Windows`) or user home directories under any circumstances.
