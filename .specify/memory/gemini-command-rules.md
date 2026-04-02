@@ -24,15 +24,6 @@ sk.security-audit requires role = security in session.yaml
 Any other role → STOP: "sk.security-audit requires security role.
 Run sk.session switch --role security"
 
-## Lock Protocol
-1. Check .claude/session.lock
-   - EXISTS: read contents, report to user, STOP
-   - NOT EXISTS: create with {command, started_at}
-2. Execute command
-3. Update session.yaml
-4. Delete .claude/session.lock
-5. If interrupted: lock persists, user must run sk.reset-lock
-
 ## Idempotency
 - Artifact exists → [REFINE MODE] update, never overwrite
 - Artifact missing → [CREATE MODE]

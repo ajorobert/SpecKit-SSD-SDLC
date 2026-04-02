@@ -97,7 +97,7 @@ No separate command layer — zero duplication. Entry point: `GEMINI.md`.
 | QA & Security | sk.test, sk.security-audit |
 | History | sk.adr, sk.phr |
 | Knowledge | sk.knowledge-base |
-| Session | sk.session, sk.reset-lock |
+| Session | sk.session |
 | Init | sk.init |
 
 ### 8 Agent Personas (`.claude/agents/`)
@@ -309,7 +309,6 @@ sk.ff               ← runs specify→clarify→architecture→plan→tasks in 
 | `sk.investigate` | story | backend/frontend | Spec-aware debugging: classifies findings as implementation bug vs spec deviation → gstack /investigate |
 | `sk.session` | — | any | Manage local session: start/end/focus/status/list/switch |
 | `sk.analyze` | unit | lead/architect | Cross-artifact consistency check (stories, contracts, bounded context, ADRs) |
-| `sk.reset-lock` | — | any | Clear stuck session lock |
 | `sk.init` | — | any | Initialize or update project memory via interview; generates `.specify/project-config.md` and all `.specify/memory/` files |
 
 ---
@@ -475,6 +474,5 @@ review → testing → security-review → done), `checkpoint_mode`
 
 ```
 .claude/session.yaml           ← local session focus (per-developer)
-.claude/session.lock           ← runtime lock (cleared after each command)
 history/reconcile-reports/     ← upstream reconcile output
 ```

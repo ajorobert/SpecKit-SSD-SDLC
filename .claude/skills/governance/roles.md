@@ -28,4 +28,4 @@ Engineer
 - Commands: sk.implement, sk.phr
 
 Any Role
-- Commands: sk.verify, sk.ff, sk.reset-lock, sk.clarify
+- Commands: sk.verify, sk.ff, sk.clarify

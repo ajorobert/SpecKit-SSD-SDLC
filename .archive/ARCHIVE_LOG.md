@@ -38,3 +38,9 @@ approved and let a human run the cleanup.
 **Original path:** .your-layer
 **Archived to:** .archive/2026-04-02/.your-layer
 **Review:** [ ] approved for permanent delete
+
+## 2026-04-02 — .claude/commands/sk.reset-lock.md
+**Reason:** lock protocol removed — sk.reset-lock has no purpose without session.lock
+**Original path:** .claude/commands/sk.reset-lock.md
+**Archived to:** .archive/2026-04-02/sk.reset-lock.md
+**Review:** [ ] approved for permanent delete
