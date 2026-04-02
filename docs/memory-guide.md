@@ -11,11 +11,6 @@ upstream-adapter.md       — upstream file path references
 state.yaml                — live session state, managed by commands
 standards/                — set during project setup, stable after that
 
-state.lock format (runtime only, never committed)
-
-command: <sk.*-command-name>
-started_at: <ISO timestamp>
-
 Editing rules
 
 Memory files: structured data only

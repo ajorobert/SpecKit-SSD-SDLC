@@ -476,6 +476,5 @@ review → testing → security-review → done), `checkpoint_mode`
 ```
 .claude/session.yaml           ← local session focus (per-developer)
 .claude/session.lock           ← runtime lock (cleared after each command)
-.specify/memory/state.lock     ← runtime lock
 history/reconcile-reports/     ← upstream reconcile output
 ```
