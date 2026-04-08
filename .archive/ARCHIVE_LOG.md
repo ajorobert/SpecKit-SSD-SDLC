@@ -44,3 +44,21 @@ approved and let a human run the cleanup.
 **Original path:** .claude/commands/sk.reset-lock.md
 **Archived to:** .archive/2026-04-02/sk.reset-lock.md
 **Review:** [ ] approved for permanent delete
+
+## 2026-04-08 — .claude/commands/sk.constitution.md
+**Reason:** Absorbed into sk.init — constitution interview and constitution.md generation now part of sk.init Step 1 (Principles) and Step 2
+**Original path:** .claude/commands/sk.constitution.md
+**Archived to:** .archive/2026-04-08/sk.constitution.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-08 — .claude/commands/sk.plan-eng-review.md
+**Reason:** Inlined into sk.architecture as a mandatory Engineering Review step after architecture.md is written
+**Original path:** .claude/commands/sk.plan-eng-review.md
+**Archived to:** .archive/2026-04-08/sk.plan-eng-review.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-08 — .claude/commands/sk.office-hours.md
+**Reason:** Folded into sk.specify Step 3 as an optional pre-validation step when creating a new intent. No longer a standalone command.
+**Original path:** .claude/commands/sk.office-hours.md
+**Archived to:** .archive/2026-04-08/sk.office-hours.md
+**Review:** [ ] approved for permanent delete

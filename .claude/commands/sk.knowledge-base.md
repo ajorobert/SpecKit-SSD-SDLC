@@ -78,4 +78,21 @@ specs/intents/{intent}/units/{unit}/knowledge-base.md (tier unit)
 - Business invariants stated as rules not descriptions
 - Rejected approaches include reason for rejection
 - Safe change patterns are specific not generic
-- Total size under 800 tokens per knowledge base
+
+## Size Advisory
+Knowledge bases that grow too large defeat the context budget and cause sk.implement to
+load too much at once. Apply these limits strictly:
+
+| Tier | Soft limit | Hard limit | Action when exceeded |
+|------|-----------|------------|----------------------|
+| system (tier 1) | 200 lines | 300 lines | Extract domain-specific content to a tier 2 domain knowledge base |
+| domain (tier 2) | 150 lines | 250 lines | Extract unit-specific content to the relevant tier 3 unit knowledge base |
+| unit (tier 3) | 100 lines | 150 lines | Split into multiple sections; remove any content derivable from code |
+
+**Extraction rule:** If a section in tier 1 is only relevant to one domain, move it to tier 2.
+If a section in tier 2 is only relevant to one unit, move it to tier 3.
+Content that appears in two tiers is a duplication error — keep it at the most specific tier only.
+
+When REFINE MODE: check current line count. If over soft limit, prompt user before adding content:
+"This knowledge base is at {N} lines (soft limit: {limit}). Should we extract some content
+to a lower tier before adding more?"

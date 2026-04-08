@@ -3,6 +3,11 @@ Cross-artifact consistency check for the active unit.
 Role: lead, architect | Level: unit
 READ-ONLY — no files written, analysis report only.
 
+**When to run:** After sk.implement completes, before sk.test begins.
+Catches spec drift introduced during implementation — mismatches between what was built
+and what architecture.md, api-spec.json, and data-model.md describe.
+CRITICAL findings must be resolved before sk.test or sk.verify proceed.
+
 ## Pre-flight
 1. Read session.yaml active_unit_id
    NULL → STOP: run sk.session focus --unit {unit-id} first

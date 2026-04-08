@@ -38,12 +38,20 @@ Ask the following questions in a natural conversation (not a form). Gather enoug
 - How does authentication work? (e.g. JWT, OAuth2, session cookies, API keys)
 - Any external APIs, payment providers, notification services?
 
-**5. Team Conventions**
+**5. Principles and Constraints**
+- What constraints are absolutely fixed — technology mandates, compliance requirements,
+  deployment restrictions, or organizational policies that cannot be changed?
+- What is the team's primary engineering philosophy?
+  (e.g., simplicity-first, event-driven, API-first, CQRS, DDD, microservices)
+- Where and how will this system run?
+  (e.g., on-premise, cloud provider, containerized, serverless, hybrid)
+
+**6. Team Conventions**
 - Any mandatory coding rules, naming conventions, or standards to enforce?
 - Any specific patterns the team always uses? (e.g. Result<T,E> errors, repository pattern)
 - Anything the AI should always or never do in this codebase?
 
-**6. Overrides (optional)**
+**7. Overrides (optional)**
 - Any framework defaults to override?
   (e.g. skip ADR for internal tools, allow sk.implement without sk.plan for hotfixes)
 
@@ -89,6 +97,33 @@ Do not leave any placeholders — if something wasn't mentioned, make a reasonab
 - Required Fields: id, created_at, updated_at minimum
 - Keep the pre-existing Index Strategy, Partitioning, Transaction rules intact
 
+**`.specify/memory/constitution.md`**
+Using answers from step 5 (Principles and Constraints), write:
+```
+# Project Constitution
+Version: 1.0.0 | Ratification: {today} | Last Amended: {today}
+
+## System Identity
+{name} — {purpose from step 1}
+
+## Primary Actors
+{actors from step 1}
+
+## Non-Negotiable Constraints
+{numbered list from step 5 — each item declarative and testable, no vague language}
+
+## Tech Philosophy
+{paragraph from step 5 — replace "should" with MUST or MAY}
+
+## Deployment Context
+{paragraph from steps 3 and 5}
+
+## Governance
+Amendment procedure: re-run sk.init [8] to update constitution.
+Compliance review: sk.verify checks constitution constraints at each quality gate.
+```
+Principles must be declarative and testable. Replace vague adjectives with measurable criteria.
+
 ### Step 3 — Scaffold (if not exists)
 
 Create these only if they don't already exist:
@@ -103,6 +138,7 @@ Report what was created:
 ✓ .specify/project-config.md
 ✓ .specify/memory/system-context.md
 ✓ .specify/memory/service-registry.md
+✓ .specify/memory/constitution.md
 ✓ .specify/memory/standards/tech-stack.md
 ✓ .specify/memory/standards/coding-standards.md
 ✓ .specify/memory/standards/api-standards.md
@@ -133,7 +169,8 @@ What would you like to update?
   [5] api-standards      — URL structure, versioning, response envelope
   [6] data-standards     — naming, required fields, migration rules
   [7] service-registry   — service list and boundaries
-  [8] all memory files   — re-run full interview for everything
+  [8] constitution       — principles, constraints, tech philosophy, deployment context
+  [9] all memory files   — re-run full interview for everything
 
 Enter numbers (comma-separated) or press Enter to cancel:
 ```
@@ -155,6 +192,7 @@ For each selected item:
 - `.specify/project-config.md`
 - `.specify/memory/system-context.md`
 - `.specify/memory/service-registry.md`
+- `.specify/memory/constitution.md`
 - `.specify/memory/standards/tech-stack.md`
 - `.specify/memory/standards/coding-standards.md`
 - `.specify/memory/standards/api-standards.md`
@@ -168,3 +206,4 @@ For each selected item:
 - `coding-standards.md`: actionable rules enforceable by code review, not generic advice
 - `api-standards.md`: URL structure and response envelope are concrete, not aspirational
 - `project-config.md`: Custom Rules section has at least one entry, or explicitly states "None"
+- `constitution.md`: all principles declarative and testable — no vague adjectives, no [PLACEHOLDER] tokens

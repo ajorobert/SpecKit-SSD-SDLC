@@ -1,5 +1,8 @@
 {
   "permissions": {
+    "allow": [
+      "edit"
+    ],
     "deny": [
       "Bash(rm *)",
       "Bash(rm)",
@@ -11,7 +14,6 @@
       "Bash(* && rm *)"
     ]
   },
-  "disableBypassPermissionsMode": "disable",
   "hooks": {
     "PreToolUse": [
       {
@@ -33,5 +35,6 @@
         ]
       }
     ]
-  }
+  },
+  "disableBypassPermissionsMode": "disable"
 }

@@ -23,7 +23,8 @@ It natively supports both **Claude Code** and **Google Antigravity (Gemini)** vi
 
 ### 1. Initialize your project
 
-> **🔧 Prerequisite:** Commands like `/sk.review`, `/sk.qa`, `/sk.investigate`, `/sk.ship`, etc. rely on `gstack`. We strongly recommend installing it first: [garrytan/gstack](https://github.com/garrytan/gstack).
+> **🔧 Prerequisite:** Commands `/sk.review`, `/sk.investigate`, and `/sk.ship` wrap `gstack`. We strongly recommend installing it first: [garrytan/gstack](https://github.com/garrytan/gstack).  
+> `/sk.qa` does **not** require gstack — it runs platform-native tooling directly (Playwright/Cypress for web/admin, Maestro/Detox for mobile).
 
 SpecKit is designed to be added as a **git subtree** to any project repository.
 
@@ -75,41 +76,46 @@ You use `/sk.session focus` to lock your agent onto a specific level. SpecKit sa
 Commands marked `[optional]` are skippable. Commands marked `[conditional]` are required only in certain cases. Everything else is mandatory.
 
 ```
-── PRE-SPEC ─────────────────────────────────────────────────────────────────────
-[/sk.office-hours]       ← [optional] validate idea before committing to spec work (po/architect)
-
 ── SPECIFY ──────────────────────────────────────────────────────────────────────
-/sk.specify              ← capture intent, decompose to units & stories; sets checkpoint mode
-/sk.clarify              ← resolve ambiguities before any planning begins
+/sk.specify              ← capture intent → units → stories; sets checkpoint mode (po)
+                           --bug flag: bug report framing (expected/actual/repro) instead of user story
+                           New intent: optional pre-validation against existing intents + ADRs
+/sk.clarify              ← resolve ambiguities before any planning begins (po/architect/lead)
 [/sk.impact]             ← [optional] assess blast radius on existing services (architect)
 
 ── ARCHITECTURE ─────────────────────────────────────────────────────────────────
 /sk.architecture         ← [conditional: validate checkpoint or new services] service boundaries (architect)
+                           Includes mandatory engineering review: checks service-registry, domain-model, ADRs
 /sk.datamodel            ← [conditional: new domain entities] data model per unit (architect)
-/sk.contracts            ← [conditional: new or modified endpoints] API contracts + provider tests (architect)
+/sk.contracts            ← [conditional: new or modified endpoints] API contracts + per-consumer test plan (architect)
+                           Test plan has separate sections for web / mobile / admin consumers
 [/sk.adr]                ← [optional] record a significant architecture decision (architect)
-[/sk.plan-eng-review]    ← [optional] engineer review of architecture before planning (architect)
 
 ── PLAN ─────────────────────────────────────────────────────────────────────────
 /sk.plan                 ← technical implementation plan for active story (lead)
 /sk.tasks                ← actionable task breakdown in TDD order (lead)
 [/sk.knowledge-base]     ← [optional] generate or update knowledge base tiers (architect)
 
-── FAST TRACK (autopilot stories only) ──────────────────────────────────────────
-[/sk.ff]                 ← [optional] specify→clarify→architecture→plan→tasks in one shot (lead)
+── FAST TRACK ───────────────────────────────────────────────────────────────────
+[/sk.ff]                 ← specify→clarify→architecture→plan→tasks in one shot (lead)
+                           --bug flag: skips architecture step; runs sk.specify --bug instead
 
 ── IMPLEMENT ────────────────────────────────────────────────────────────────────
 /sk.implement            ← execute tasks phase-by-phase in TDD order (backend/frontend)
 [/sk.investigate]        ← [optional] spec-aware debugging when blocked (backend/frontend)
-[/sk.analyze]            ← [optional] cross-artifact consistency check (lead/architect)
+[/sk.analyze]            ← [recommended] cross-artifact consistency check after implement, before test (lead/architect)
 [/sk.phr]                ← [optional] record significant decisions or tradeoffs made (any)
 
 ── REVIEW & QUALITY ─────────────────────────────────────────────────────────────
 [/sk.review]             ← [recommended] spec-aware code review: boundaries + contracts + ADRs (backend/frontend)
-/sk.test                 ← generate & run contract + E2E tests (backend-qa/frontend-qa)
-[/sk.qa]                 ← [conditional: frontend work] browser acceptance testing (frontend-qa)
+/sk.test                 ← generate & run contract + integration tests (backend-qa/frontend-qa)
+[/sk.qa]                 ← [conditional: frontend work] acceptance testing by platform (frontend-qa)
+                           --platform web   → Playwright/Cypress (Next.js)
+                           --platform mobile → Maestro/Detox (React Native) — no browser tooling
+                           --platform admin  → Playwright/Cypress (React Admin)
 /sk.security-audit       ← OWASP Top 10 + STRIDE audit, secrets scan (security)
 /sk.verify               ← PASS/FAIL across all quality gates — must pass before ship (architect/lead)
+                           Run after sk.test passes. Use sk.analyze earlier in the cycle.
 
 ── SHIP ─────────────────────────────────────────────────────────────────────────
 /sk.ship                 ← quality-gated release; /sk.verify must pass (lead)
@@ -121,43 +127,42 @@ Commands marked `[optional]` are skippable. Commands marked `[conditional]` are 
 
 ### 🛠️ Setup & Session
 ```text
-/sk.init             ← Initialize/update project memory via interview (any)
-/sk.constitution     ← Initialize/update project principles via interview (any)
+/sk.init             ← Initialize/update project memory + constitution via interview (any)
 /sk.session          ← Manage local session: start/end/focus/status/list/switch (any)
 ```
 
 ### 📋 Specify & Plan
 ```text
-/sk.specify          ← Capture intent, decompose to unit and story (po)
+/sk.specify          ← Capture intent → unit → story; --bug for bug report framing (po)
 /sk.clarify          ← Resolve ambiguities before planning (po/architect/lead)
 /sk.impact           ← Assess blast radius of proposed work (architect)
-/sk.architecture     ← Define service boundaries, one doc per unit (architect)
+/sk.architecture     ← Define service boundaries, one doc per unit; includes engineering review (architect)
 /sk.datamodel        ← Define data model, one doc per unit (architect)
-/sk.contracts        ← Define API contracts, generate provider tests (architect)
+/sk.contracts        ← Define API contracts + per-consumer test plan (web/mobile/admin) (architect)
 /sk.plan             ← Technical implementation plan (lead)
 /sk.tasks            ← Actionable task breakdown [TDD order] (lead)
-/sk.ff               ← Fast-forward: specify→clarify→architecture→plan→tasks (use for autopilot stories) (lead)
+/sk.ff               ← Fast-forward: specify→clarify→architecture→plan→tasks; --bug skips architecture (lead)
 ```
 
 ### 💻 Implement & Review
 ```text
 /sk.implement        ← Execute tasks phase-by-phase [TDD order, marks X per task] (backend/frontend)
 /sk.review           ← Spec-aware code review: boundaries + contracts + ADRs (backend/frontend)
-/sk.analyze          ← Cross-artifact consistency check (lead/architect)
+/sk.analyze          ← Cross-artifact consistency check [run after implement, before test] (lead/architect)
 ```
 
 ### 🛡️ Quality & Security
 ```text
-/sk.verify           ← PASS/FAIL quality gate across all gates (architect/lead)
-/sk.test             ← Generate & run test suite [contract, E2E, etc.] (QA agents)
-/sk.qa               ← Browser acceptance testing mapped to AC (frontend-qa)
+/sk.verify           ← PASS/FAIL quality gate across all gates [run after test, before ship] (architect/lead)
+/sk.test             ← Generate & run contract + integration tests (QA agents)
+/sk.qa               ← Acceptance testing by platform: --platform web|mobile|admin (frontend-qa)
 /sk.security-audit   ← OWASP Top 10 + STRIDE audit, secrets scan (security)
 /sk.investigate      ← Spec-aware debugging (backend/frontend)
 ```
 
 ### 📚 History & Knowledge
 ```text
-/sk.knowledge-base   ← Generate or update knowledge base tier (architect)
+/sk.knowledge-base   ← Generate or update knowledge base tier [size-limited per tier] (architect)
 /sk.adr              ← Create Architecture Decision Record (architect)
 /sk.phr              ← Record Prompt History for significant decisions (any)
 ```
@@ -165,8 +170,6 @@ Commands marked `[optional]` are skippable. Commands marked `[conditional]` are 
 ### 🚀 Operations & Shipping
 ```text
 /sk.ship             ← Quality-gated release: /sk.verify must pass (lead)
-/sk.office-hours     ← [OPTIONAL] Validate product idea feature approach (po/architect)
-/sk.plan-eng-review  ← [OPTIONAL] Validate engineering plan against registry+ADRs (architect)
 ```
 
 ---
@@ -176,10 +179,10 @@ Commands marked `[optional]` are skippable. Commands marked `[conditional]` are 
 The framework generates several key artifacts across five categories to maintain AI context and process rigor.
 
 ### 1. Initialization & Standards (`.specify/`)
-Created primarily by `/sk.init` and `/sk.constitution`, these act as project-wide guidelines.
+Created by `/sk.init` via an interactive interview, these act as project-wide guidelines.
 - **`project-config.md`, `system-context.md`, `service-registry.md`**: Core identity and definitions.
 - **`standards/*.md`**: Constraints for coding, APIs, and data.
-- **`constitution.md`**: Core non-negotiable project principles.
+- **`constitution.md`**: Non-negotiable constraints, tech philosophy, and deployment context. Generated by `/sk.init`; update via the `[8] constitution` menu option.
 
 ### 2. Requirements & Definition (`specs/intents/`)
 Created by Product Owners using `/sk.specify` and `/sk.clarify` to define *what* gets built.
@@ -191,12 +194,12 @@ Created by Product Owners using `/sk.specify` and `/sk.clarify` to define *what*
 Generated by Architects and Tech Leads before coding begins.
 - **`architecture.md` (via `/sk.architecture`)**: The structure and pattern for a specific unit.
 - **`data-model.md` (via `/sk.datamodel`)**: Formalizes entity schemas and database structures.
-- **`contracts/api-spec.json` (via `/sk.contracts`)**: Defines API boundaries between backend and frontend.
+- **`contracts/api-spec.json` (via `/sk.contracts`)**: Defines API boundaries between backend and frontend. The accompanying `test-plan.md` has per-consumer sections (`### web`, `### mobile`, `### admin`) so contract changes surface which frontend is affected.
 - **`plan.md` & `tasks.md` (via `/sk.plan` and `/sk.tasks`)**: The technical approach and sequential checklist for implementation.
 
 ### 4. Knowledge & Historical Tracking (`history/`)
 Ensures the framework remembers *why* decisions were made, not just what was changed.
-- **`knowledge-base.md` (via `/sk.knowledge-base`)**: Caches non-derivable context at the System, Domain, or Unit level.
+- **`knowledge-base.md` (via `/sk.knowledge-base`)**: Caches non-derivable context at the System (≤300 lines), Domain (≤250 lines), or Unit (≤150 lines) tier. Content exceeding a tier's limit is extracted to the next tier down.
 - **`ADR-{NNN}.md` (via `/sk.adr`)**: Architecture Decision Records capturing context, options, and justification for significant tech choices.
 - **`PHR-{NNN}-{date}.md` (via `/sk.phr`)**: Prompt History Records to save highly effective AI prompts for future reuse.
 
