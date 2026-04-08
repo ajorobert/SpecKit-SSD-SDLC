@@ -18,9 +18,23 @@ branch: null
 # Story: {title}
 
 ## User Story
+<!-- REQUIRED FORMAT:
+As a [role],
+I want to [action],
+So that [value or reason].
+-->
 
 ## Acceptance Criteria
+<!-- REQUIRED FORMAT: Use checklist format with BDD (Given/When/Then) syntax where applicable.
+Example:
+- [ ] **Scenario**: User logs in
+  - Given the user is on the login page
+  - When they enter valid credentials
+  - Then they are redirected to the dashboard
+-->
 
 ## Out of Scope
+<!-- List explicit features, edge cases, or optimizations that are NOT part of this story to prevent scope creep. -->
 
 ## Notes
+<!-- Any implementation hints, references to ADRs, linking to upstream specs, or open questions. -->

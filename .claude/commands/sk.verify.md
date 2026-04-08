@@ -2,6 +2,10 @@
 PASS/FAIL quality gate for active story.
 Role: architect, lead | Level: story
 
+**When to run:** After sk.test passes (test-status = pass in story frontmatter), before sk.ship.
+This is the final gate — not a mid-implementation check. Run sk.analyze if you need a
+consistency check earlier in the cycle (after implement, before test).
+
 ## Input Artifacts
 story-{ID}.md (active story + frontmatter)
 All unit artifacts (architecture.md, data-model.md, contracts/)

@@ -21,6 +21,20 @@ specs/intents/{intent}/units/{unit}/stories/ (all stories)
 6. If validate checkpoint: pause for user approval before continuing
 7. Suggest ADR for any cross-service decision made
 
+## Engineering Review (mandatory — runs after step 5)
+Validate the written architecture against:
+- `.specify/memory/service-registry.md` — no new service boundary violations
+- `.specify/memory/domain-model.md` — no entity ownership conflicts with existing units
+- `.specify/memory/architecture-decisions.md` — no contradiction of existing ADR decisions
+
+Flag findings as:
+- BLOCKING: boundary violation, entity ownership conflict, or direct ADR contradiction
+  → fix architecture before proceeding
+- ADVISORY: new cross-service decision introduced
+  → suggest creating an ADR via sk.adr before implementation begins
+
+If all checks pass: report "Engineering review passed — no boundary violations or ADR conflicts."
+
 ## Output Artifacts
 specs/intents/{intent}/units/{unit}/architecture.md
 specs/intents/{intent}/units/{unit}/knowledge-base.md
