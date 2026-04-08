@@ -27,7 +27,12 @@ echo ""
 # PHASE 1: Always sync framework files
 # ─────────────────────────────────────────────
 echo "→ Syncing .claude/ ..."
-rsync -a --delete "$SCRIPT_DIR/.claude/" "$PROJECT_ROOT/.claude/"
+if command -v rsync &>/dev/null; then
+    rsync -a --delete "$SCRIPT_DIR/.claude/" "$PROJECT_ROOT/.claude/"
+else
+    mkdir -p "$PROJECT_ROOT/.claude"
+    cp -r "$SCRIPT_DIR/.claude/." "$PROJECT_ROOT/.claude/"
+fi
 echo "  ✓ .claude/ updated"
 echo ""
 

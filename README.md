@@ -29,7 +29,7 @@ It natively supports both **Claude Code** and **Google Antigravity (Gemini)** vi
 SpecKit is designed to be added as a **git subtree** to any project repository.
 
 ```bash
-git subtree add --prefix=.speckit https://github.com/your-org/SpecKit-SSD-SDLC main --squash
+git subtree add --prefix=.speckit https://github.com/ajorobert/SpecKit-SSD-SDLC master --squash
 bash .speckit/setup.sh
 /sk.init    # interactive interview → generates framework memory files
 ```
