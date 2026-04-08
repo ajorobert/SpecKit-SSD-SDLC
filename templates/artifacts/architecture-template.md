@@ -37,8 +37,30 @@ updated: {date}
      REQUIRED: every external dependency must have an entry. -->
 
 ## External Dependencies
+<!-- List every upstream service, database, or third-party API this unit depends on.
+     REQUIRED: every entry here must have a corresponding Failure Mode entry below.
+     Format:
+     - {dependency-name}: {protocol} — {SLA / expected latency} — {data exchanged}
+     Example:
+     - payment-service: REST (internal) — p99 < 500ms — charge requests and confirmation receipts
+     - postgres (orders-db): TCP — p99 < 10ms — order reads and writes
+     - SendGrid: HTTPS (external) — best-effort — transactional email dispatch -->
+
 ## Security Approach
+<!-- Auth model, data sensitivity, and encryption strategy for this unit.
+     Example:
+     - Auth: JWT bearer tokens validated on every request via auth-service; no local session state
+     - Data sensitivity: order totals and line items are PII-adjacent; encrypted at rest (AES-256)
+     - Transport: TLS 1.2+ enforced; no plaintext internal communication
+     - Input validation: all mutation endpoints validate schema before processing -->
+
 ## Error Handling
+<!-- Error propagation strategy: what errors are surfaced to callers vs. swallowed internally.
+     Example:
+     - Validation errors: 422 with field-level detail (never swallowed)
+     - Upstream timeouts: 503 returned to caller; upstream retried once with idempotency key
+     - Internal panics: logged at ERROR with trace; 500 returned with generic message (no stack leak)
+     - Business rule violations: 409 with machine-readable error code (e.g. INSUFFICIENT_STOCK) -->
 ## Observability
 <!-- Describe the observability strategy for this unit.
      Required:
@@ -56,4 +78,10 @@ updated: {date}
      See observability-standards.md for required structured logging fields. -->
 
 ## Stories Coverage
+<!-- List every story delivered by this unit. Update as stories are added.
+     Format: - [{story-id}] {title}: {one-line summary of what this story delivers in this unit}
+     Example:
+     - [INV-001-ORD-001] Create Order: POST /orders endpoint, validation, inventory reservation
+     - [INV-001-ORD-002] Cancel Order: status transition to CANCELLED, inventory release -->
+
 ## Open Questions
