@@ -13,6 +13,16 @@ Role: any
 5. Write session.yaml: role, branch, session_id
 6. Report: session started, branch, available commands for role
 
+### sk.session restore
+Use when session.yaml is missing but the working branch already exists.
+1. Read current git branch name
+2. Parse role and date from branch name — format: {role}/session-{YYYYMMDD}
+   Cannot parse → ask user to provide role and session_id manually
+3. Derive session_id: {role}-{YYYYMMDD}
+4. Write session.yaml with recovered values (active_intent_id, active_unit_id, active_story_id, stories_touched, units_touched all null/[])
+5. Remind user to run sk.session focus to restore active story context
+6. Report: session restored on branch {branch}
+
 ### sk.session switch --role <role>
 1. Read current session.yaml — verify session active
 2. Update role field

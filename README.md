@@ -49,6 +49,9 @@ Begin your work by adopting a persona (`po`, `architect`, `lead`, `backend`, `fr
 > **🏁 Ending your session:** 
 > When your work is done, run `/sk.session end` to autonomously save state, commit, push your branch, and open your Pull Request.
 
+> **🔁 Recovering a lost session:**
+> If `session.yaml` is accidentally deleted while on an active branch, run `/sk.session restore` — it reconstructs the session from the current branch name without creating a new branch. Then run `/sk.session focus --story {id}` to re-lock your active story context.
+
 ### 3. Understand the Hierarchy & Session Focus
 
 SpecKit organizes work into a strict top-down structure:
@@ -132,7 +135,7 @@ Commands marked `[optional]` are skippable. Commands marked `[conditional]` are 
 ### 🛠️ Setup & Session
 ```text
 /sk.init             ← Initialize/update project memory + constitution via interview (any)
-/sk.session          ← Manage local session: start/end/focus/status/list/switch (any)
+/sk.session          ← Manage local session: start/end/focus/status/list/switch/restore (any)
 ```
 
 ### 📋 Specify & Plan
