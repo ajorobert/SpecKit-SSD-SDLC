@@ -23,8 +23,12 @@ It natively supports both **Claude Code** and **Google Antigravity (Gemini)** vi
 
 ### 1. Initialize your project
 
-> **🔧 Prerequisite:** Commands `/sk.review`, `/sk.investigate`, and `/sk.ship` wrap `gstack`. We strongly recommend installing it first: [garrytan/gstack](https://github.com/garrytan/gstack).  
-> `/sk.qa` does **not** require gstack — it runs platform-native tooling directly (Playwright/Cypress for web/admin, Maestro/Detox for mobile).
+> **🔧 Optional dependency:** [garrytan/gstack](https://github.com/garrytan/gstack) enhances three commands when installed:
+> - `sk.review` and `sk.investigate` — run natively without gstack; gstack adds supplementary signal if present
+> - `sk.ship` — falls back to `gh pr create` without gstack (requires [GitHub CLI](https://cli.github.com/))
+> - `sk.qa` — does **not** use gstack; runs platform-native tooling directly (Playwright/Cypress for web/admin, Maestro/Detox for mobile)
+>
+> gstack's primary value is for **frontend** work: visual mockup generation (`/design-shotgun`), HTML conversion, and real browser QA.
 
 SpecKit is designed to be added as a **git subtree** to any project repository.
 

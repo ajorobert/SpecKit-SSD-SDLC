@@ -1,7 +1,7 @@
 # sk.review
 Spec-aware code review: validates against bounded context, contracts, and ADRs.
 Role: backend, frontend | Level: story
-Wraps: gstack /review
+gstack: optional enhancement — if installed, invoke after Claude's own review for additional signal
 
 ## Pre-flight
 1. Read session.yaml active_story_id
@@ -49,7 +49,8 @@ Observability (for stories adding new service endpoints):
 - GET /health endpoint present and returning correct shape"
 
 ## Invoke
-gstack /review
+Claude performs the review natively using the context surface above.
+If gstack is installed (`command -v gstack`): also invoke `gstack /review` for additional signal and merge findings.
 
 ## Output Artifact
 If any findings exist, write a review report to:
@@ -68,8 +69,8 @@ Status: REJECTED | APPROVED
 - {finding}: {description}
 ```
 
-On REJECTED: write/overwrite the file with current findings.
-On APPROVED:
+On REJECTED: write/overwrite the file with current findings. Set story status → review-rejected in frontmatter.
+On APPROVED: Set story status → testing in frontmatter (ready for sk.test).
 1. If any blocking findings were raised during this review cycle (i.e. the story was previously REJECTED):
    Append a `## Implementation Pitfalls` entry to the unit knowledge base:
      specs/intents/{intent}/units/{unit}/knowledge-base.md

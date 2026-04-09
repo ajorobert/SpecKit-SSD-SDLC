@@ -44,6 +44,12 @@ If ignore file exists: verify it contains essential patterns, append only missin
 - review-{story-id}.md EXISTS → **Refine mode**: only resolve blocking findings from the review report. Do not re-execute tasks already marked [X]. Do not regenerate passing code.
 - review-{story-id}.md ABSENT → **Normal mode**: execute tasks phase-by-phase as below.
 
+## Status transitions
+Update story-{ID}.md frontmatter at these points:
+- Start of execution (normal mode): set status → in-progress
+- Refine mode entry: set status → in-progress (was: review)
+- All tasks marked [X]: set status → review (ready for sk.review / sk.test)
+
 ## Task execution (phase-by-phase)
 Parse tasks.md and execute phases in order. Do not start a phase until the prior phase is complete.
 Skip any task already marked [X] — do not re-execute.

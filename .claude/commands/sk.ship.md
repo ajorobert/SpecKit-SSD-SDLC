@@ -1,7 +1,7 @@
 # sk.ship
-Quality-gated release via gstack.
+Quality-gated release.
 Role: lead | Level: story
-Wraps: gstack /ship
+gstack: optional — if installed, use `gstack /ship`; otherwise use `gh pr create`
 
 ## Pre-flight
 1. Read session.yaml active_story_id
@@ -31,7 +31,11 @@ Affected services: {services}
 Quality gates: sk.verify PASS, test-status = pass, security-status = clear"
 
 ## Invoke
-gstack /ship
+If gstack is installed (`command -v gstack`):
+  gstack /ship
+Else:
+  git push -u origin {branch}
+  gh pr create --title "[{role}] {story-id}: {story title}" --body "## Summary\n{acceptance criteria summary}\n\n## Quality Gates\n- sk.verify: PASS\n- test-status: pass\n- security-status: clear" --base dev
 
 ## Post-execution
 On successful ship:

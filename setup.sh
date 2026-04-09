@@ -28,10 +28,16 @@ echo ""
 # ─────────────────────────────────────────────
 echo "→ Syncing .claude/ ..."
 if command -v rsync &>/dev/null; then
-    rsync -a --delete "$SCRIPT_DIR/.claude/" "$PROJECT_ROOT/.claude/"
+    rsync -a --delete --exclude=session.yaml "$SCRIPT_DIR/.claude/" "$PROJECT_ROOT/.claude/"
 else
     mkdir -p "$PROJECT_ROOT/.claude"
-    cp -r "$SCRIPT_DIR/.claude/." "$PROJECT_ROOT/.claude/"
+    # Copy all files except session.yaml to avoid overwriting active session state
+    find "$SCRIPT_DIR/.claude" -name "session.yaml" -prune -o -type f -print | while read -r src; do
+        rel="${src#$SCRIPT_DIR/.claude/}"
+        dest="$PROJECT_ROOT/.claude/$rel"
+        mkdir -p "$(dirname "$dest")"
+        cp "$src" "$dest"
+    done
 fi
 echo "  ✓ .claude/ updated"
 
