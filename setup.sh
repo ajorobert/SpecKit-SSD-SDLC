@@ -34,6 +34,25 @@ else
     cp -r "$SCRIPT_DIR/.claude/." "$PROJECT_ROOT/.claude/"
 fi
 echo "  ✓ .claude/ updated"
+
+# session.yaml is gitignored — create it if absent
+if [ ! -f "$PROJECT_ROOT/.claude/session.yaml" ]; then
+    cat > "$PROJECT_ROOT/.claude/session.yaml" << 'EOF'
+# SpecKit-SSD-SDLC Session State
+# Gitignored — never commit
+# Managed by sk.session commands
+
+role: null              # po|architect|lead|backend|frontend|backend-qa|frontend-qa|security
+session_id: null        # e.g. po-20260409
+branch: null            # e.g. po/session-20260409
+active_intent_id: null  # e.g. CHK
+active_unit_id: null    # e.g. CHK-PAY
+active_story_id: null   # e.g. CHK-PAY-001
+stories_touched: []     # list of story IDs worked on this session
+units_touched: []       # list of unit IDs worked on this session
+EOF
+    echo "  ✓ .claude/session.yaml created"
+fi
 echo ""
 
 # ─────────────────────────────────────────────

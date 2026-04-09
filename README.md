@@ -352,6 +352,27 @@ Intent (e.g. CHK)
 </details>
 
 <details>
+<summary><strong>sk.init Memory Artifacts & Command Consumers</strong></summary>
+
+`/sk.init` runs an interactive interview and generates the following files under `.specify/memory/`. Each file has a `Loaded by:` header that controls which commands read it — no command loads all files at once.
+
+| File | What it contains | Loaded by |
+|------|-----------------|-----------|
+| `project-config.md` | Project name, description, stack, custom rules, overrides | Always (via CLAUDE.md / GEMINI.md) |
+| `constitution.md` | Non-negotiable constraints, tech philosophy, deployment context | `sk.verify` |
+| `system-context.md` | System overview, type, services, frontend surfaces, external dependencies | `sk.specify`, `sk.impact`, `sk.ff` |
+| `service-registry.md` | Service names, responsibilities, tech stack, API type | `sk.plan`, `sk.architecture`, `sk.contracts`, `sk.impact` |
+| `standards/tech-stack.md` | Backend, databases, frontend, infrastructure, DDD/DDIA constraints | `sk.plan` |
+| `standards/api-standards.md` | URL structure, versioning, response envelope, error format, auth, pagination | `sk.contracts` |
+| `standards/coding-standards.md` | Formatter/linter, naming, error handling pattern, implementation rules | `sk.implement`, `sk.review` |
+| `standards/data-standards.md` | Naming conventions, required fields, migrations, soft delete, multi-tenancy, indexes | `sk.datamodel` |
+
+**Why is tech stack repeated across multiple files?**  
+Each file is scoped to the commands that need it. `sk.implement` doesn't need system context; `sk.specify` doesn't need coding standards. Splitting keeps each command's context lean and focused. The cost — updating a few files on a stack change — is intentional friction, since stack changes require an ADR anyway.
+
+</details>
+
+<details>
 <summary><strong>Upstream Maintenance</strong></summary>
 
 To receive framework updates:
