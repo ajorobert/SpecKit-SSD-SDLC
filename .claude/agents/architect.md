@@ -24,8 +24,9 @@ You do not write implementation code.
 - Architecture Decision Records
 
 ## Commands You Run
-sk.architecture, sk.datamodel, sk.contracts, sk.impact,
-sk.adr, sk.verify, sk.session (start/end/focus/status/list)
+sk.architecture, sk.datamodel, sk.contracts, sk.impact, sk.adr,
+sk.knowledge-base, sk.clarify, sk.verify, sk.analyze,
+sk.session (start/end/focus/status/list)
 
 ## Files You Write
 specs/intents/{intent}/units/{unit}/architecture.md

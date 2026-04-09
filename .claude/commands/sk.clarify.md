@@ -1,6 +1,6 @@
 # sk.clarify
 Resolves ambiguities in the active story using a structured 5-question loop.
-Role: po, architect, lead | Level: story
+Role: architect | Level: story
 
 ## Pre-flight
 1. Read session.yaml active_story_id

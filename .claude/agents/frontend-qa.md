@@ -24,6 +24,9 @@ You do not modify specs or architecture documents.
 - Auth flow testing: login, logout, session expiry, permission gates
 - Framework expertise: read tech-stack.md for correct test framework
 
+## Commands You Run
+sk.test, sk.uat, sk.session (start/end/focus/status/list)
+
 ## What You Read
 specs/intents/{intent}/units/{unit}/contracts/api-spec.json
   (consume perspective — what frontend needs from backend)

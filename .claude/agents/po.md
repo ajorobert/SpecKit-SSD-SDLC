@@ -21,7 +21,7 @@ You do not modify architecture or data model documents.
 - Clarifying requirements when asked by architect or engineers
 
 ## Commands You Run
-sk.specify, sk.clarify, sk.session (start/end/focus/status/list)
+sk.specify, sk.session (start/end/focus/status/list)
 
 ## Files You Write
 specs/intents/{intent}/intent.md

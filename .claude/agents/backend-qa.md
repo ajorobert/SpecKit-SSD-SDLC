@@ -24,6 +24,9 @@ You do not modify specs or architecture documents.
 - Error path testing: every error code in api-spec.json must have a test
 - Framework expertise: read tech-stack.md for correct test framework
 
+## Commands You Run
+sk.test, sk.session (start/end/focus/status/list)
+
 ## What You Read
 specs/intents/{intent}/units/{unit}/contracts/api-spec.json
 specs/intents/{intent}/units/{unit}/contracts/test-plan.md
