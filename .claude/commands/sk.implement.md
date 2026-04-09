@@ -11,6 +11,8 @@ Role: backend | frontend | Level: story
    MISSING → STOP: run sk.plan first
 4. Verify tasks.md exists: STORY_DIR/tasks.md
    MISSING → STOP: run sk.tasks first
+5. Check for review report: STORY_DIR/review-{story-id}.md
+   EXISTS → read it; all blocking findings MUST be resolved before proceeding
 
 ## Context loading (in order)
 1. specs/knowledge-base.md (tier 1 — always read first)
@@ -38,8 +40,13 @@ Before executing tasks, verify ignore files exist for detected stack:
 Create missing ignore files with standard patterns for the detected technology.
 If ignore file exists: verify it contains essential patterns, append only missing critical ones.
 
+## Execution mode detection
+- review-{story-id}.md EXISTS → **Refine mode**: only resolve blocking findings from the review report. Do not re-execute tasks already marked [X]. Do not regenerate passing code.
+- review-{story-id}.md ABSENT → **Normal mode**: execute tasks phase-by-phase as below.
+
 ## Task execution (phase-by-phase)
 Parse tasks.md and execute phases in order. Do not start a phase until the prior phase is complete.
+Skip any task already marked [X] — do not re-execute.
 
 Standard phase order from tasks.md:
 - Phase 1: Setup — project structure, config, dependencies

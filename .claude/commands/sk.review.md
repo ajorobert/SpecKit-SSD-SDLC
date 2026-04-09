@@ -51,6 +51,38 @@ Observability (for stories adding new service endpoints):
 ## Invoke
 gstack /review
 
+## Output Artifact
+If any findings exist, write a review report to:
+  specs/intents/{intent}/units/{unit}/stories/review-{story-id}.md
+
+Format:
+```
+# Review: {story-id}
+Date: {YYYY-MM-DD}
+Status: REJECTED | APPROVED
+
+## Blocking Findings
+- {finding}: {description} → {required action}
+
+## Non-Blocking Findings
+- {finding}: {description}
+```
+
+On REJECTED: write/overwrite the file with current findings.
+On APPROVED:
+1. If any blocking findings were raised during this review cycle (i.e. the story was previously REJECTED):
+   Append a `## Implementation Pitfalls` entry to the unit knowledge base:
+     specs/intents/{intent}/units/{unit}/knowledge-base.md
+   Format:
+   ```
+   ## Implementation Pitfalls
+   <!-- Lessons from review cycles — sk.implement reads this to avoid repeating issues -->
+   - [{story-id}] {short description of what was wrong} → {what the correct pattern is}
+   ```
+   If the section already exists, append to it rather than replacing it.
+2. Archive the review report:
+   bash .claude/hooks/archive-file.sh "specs/intents/{intent}/units/{unit}/stories/review-{story-id}.md" "review passed"
+
 ## Post-execution
 Flag any finding that:
 - Violates bounded context boundaries (accessing another unit's internals directly)
