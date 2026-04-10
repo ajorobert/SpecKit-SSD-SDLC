@@ -48,7 +48,10 @@ The following are ON by default. Only ask if the user gives a conflicting signal
 
 Ask only:
 - Do any of these conflict with your constraints or existing stack? (If no answer: all defaults apply.)
-- CQRS or event-sourcing in addition to the above? (Default: no.)
+- **CQRS pattern** — XxxCommand/XxxQuery + dedicated handler per use case. Default ON.
+  Exception: pure infrastructure stories (no application use case — e.g. DBX plumbing) — pattern does not apply there.
+  Ask only: do you want command bus / dispatcher infrastructure (e.g. MediatR, custom mediator)?
+  (Default: no. Handlers are called directly from controllers/endpoints.)
 - Microservices or modular monolith? (Default: derive from step 2 service count.)
 
 **6. Error Handling**
