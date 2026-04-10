@@ -81,8 +81,8 @@ On APPROVED: Set story status → testing in frontmatter (ready for sk.test).
    - [{story-id}] {short description of what was wrong} → {what the correct pattern is}
    ```
    If the section already exists, append to it rather than replacing it.
-2. Archive the review report:
-   bash .claude/hooks/archive-file.sh "specs/intents/{intent}/units/{unit}/stories/{story-id}/review-{story-id}.md" "review passed"
+2. Keep the review report at its path — do NOT archive it on approval.
+   Non-blocking findings remain available for the developer to act on via sk.implement.
 
 ## Post-execution
 Flag any finding that:
