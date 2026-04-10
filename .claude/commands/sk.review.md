@@ -54,7 +54,7 @@ If gstack is installed (`command -v gstack`): also invoke `gstack /review` for a
 
 ## Output Artifact
 If any findings exist, write a review report to:
-  specs/intents/{intent}/units/{unit}/stories/review-{story-id}.md
+  specs/intents/{intent}/units/{unit}/stories/{story-id}/review-{story-id}.md
 
 Format:
 ```
@@ -82,7 +82,7 @@ On APPROVED: Set story status → testing in frontmatter (ready for sk.test).
    ```
    If the section already exists, append to it rather than replacing it.
 2. Archive the review report:
-   bash .claude/hooks/archive-file.sh "specs/intents/{intent}/units/{unit}/stories/review-{story-id}.md" "review passed"
+   bash .claude/hooks/archive-file.sh "specs/intents/{intent}/units/{unit}/stories/{story-id}/review-{story-id}.md" "review passed"
 
 ## Post-execution
 Flag any finding that:

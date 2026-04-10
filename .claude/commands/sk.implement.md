@@ -22,9 +22,10 @@ Role: backend | frontend | Level: story
 4. STORY_DIR/plan.md — tech approach, component breakdown, data/API changes
 5. STORY_DIR/tasks.md — full task list with phases and parallel markers
 6. specs/intents/{intent}/units/{unit}/contracts/api-spec.json (if exists)
-7. specs/intents/{intent}/units/{unit}/architecture.md (if exists)
-8. .specify/memory/standards/coding-standards.md
-9. .specify/memory/standards/observability-standards.md
+7. specs/intents/{intent}/units/{unit}/contracts/README.md (if exists — contains known gaps and contract decisions)
+8. specs/intents/{intent}/units/{unit}/architecture.md (if exists)
+9. .specify/memory/standards/coding-standards.md
+10. .specify/memory/standards/observability-standards.md
 
 ## Pre-generation protocol
 Before writing any code in an existing module:
