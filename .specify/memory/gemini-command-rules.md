@@ -1,6 +1,14 @@
 # Command Rules
 Apply on every sk.* command.
 
+## System-Level Context Loading
+@imports in CLAUDE.md are not processed in this environment.
+Explicitly read the following files at the start of every sk.* command,
+before any other work, if they exist:
+1. `specs/knowledge-base.md` — Tier 1 system knowledge base
+2. `.specify/memory/command-rules.md` — command rules and role behavior
+3. `.specify/project-config.md` — project identity and overrides (if exists)
+
 ## Session Resolution
 Every command resolves context from .claude/session.yaml
 If session.yaml role is null: STOP, instruct user to run sk.session start
@@ -56,10 +64,10 @@ Create automatically after:
 
 ## Knowledge Base Loading Order
 For sk.implement, sk.test, sk.security-audit:
-1. Read specs/knowledge-base.md (tier 1) if exists
-2. Read specs/domains/{domain}/knowledge-base.md (tier 2) if exists
-3. Read unit knowledge-base.md (tier 3) if exists
-4. Then read code and detail files
+<!-- specs/knowledge-base.md (tier 1) is already loaded above in System-Level Context Loading -->
+1. Read specs/domains/{domain}/knowledge-base.md (tier 2) if exists
+2. Read unit knowledge-base.md (tier 3) if exists
+3. Then read code and detail files
 Knowledge bases contain non-derivable context only.
 They complement code reading — do not treat them as
 a substitute for reading the actual implementation.

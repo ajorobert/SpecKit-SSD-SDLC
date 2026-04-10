@@ -4,7 +4,7 @@ Role: backend-qa (backend tests) | frontend-qa (frontend tests)
 Level: story
 
 ## Input Artifacts
-specs/knowledge-base.md (tier 1 — always read first)
+<!-- specs/knowledge-base.md (tier 1) is loaded via system prompt — no explicit read needed -->
 specs/intents/{intent}/units/{unit}/knowledge-base.md
   (tier 3 — invariants inform test design)
 

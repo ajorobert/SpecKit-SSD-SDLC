@@ -15,17 +15,17 @@ Role: backend | frontend | Level: story
    EXISTS → read it; all blocking findings MUST be resolved before proceeding
 
 ## Context loading (in order)
-1. specs/knowledge-base.md (tier 1 — always read first)
-2. specs/domains/{relevant-domain}/knowledge-base.md (tier 2 — if exists)
-3. specs/intents/{intent}/units/{unit}/knowledge-base.md (tier 3 — if exists)
+<!-- specs/knowledge-base.md (tier 1) is loaded via system prompt — no explicit read needed -->
+1. specs/domains/{relevant-domain}/knowledge-base.md (tier 2 — if exists)
+2. specs/intents/{intent}/units/{unit}/knowledge-base.md (tier 3 — if exists)
    Note: knowledge bases contain non-derivable context only (the "why", not the "what")
-4. STORY_DIR/plan.md — tech approach, component breakdown, data/API changes
-5. STORY_DIR/tasks.md — full task list with phases and parallel markers
-6. specs/intents/{intent}/units/{unit}/contracts/api-spec.json (if exists)
-7. specs/intents/{intent}/units/{unit}/contracts/README.md (if exists — contains known gaps and contract decisions)
-8. specs/intents/{intent}/units/{unit}/architecture.md (if exists)
-9. .specify/memory/standards/coding-standards.md
-10. .specify/memory/standards/observability-standards.md
+3. STORY_DIR/plan.md — tech approach, component breakdown, data/API changes
+4. STORY_DIR/tasks.md — full task list with phases and parallel markers
+5. specs/intents/{intent}/units/{unit}/contracts/api-spec.json (if exists)
+6. specs/intents/{intent}/units/{unit}/contracts/README.md (if exists — contains known gaps and contract decisions)
+7. specs/intents/{intent}/units/{unit}/architecture.md (if exists)
+8. .specify/memory/standards/coding-standards.md
+9. .specify/memory/standards/observability-standards.md
 
 ## Pre-generation protocol
 Before writing any code in an existing module:
