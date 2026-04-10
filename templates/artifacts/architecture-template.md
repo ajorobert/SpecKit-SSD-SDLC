@@ -27,7 +27,10 @@ updated: {date}
      Example:
      - POST /orders → strong (inventory reservation must be linearizable)
      - PATCH /orders/{id}/status → eventual (status fanout to notifications ok)
-     REQUIRED: every write path must have an entry. -->
+     REQUIRED: every write path must have an entry.
+     Also declare per write path:
+     - commandId deduplication: required | natural (document why it is naturally idempotent)
+     - Outbox pattern: required | not-required (required only if handler publishes events AND modifies state) -->
 
 ## Failure Modes
 <!-- DDIA Ch 8: per external dependency — what fails, timeout, fallback.
@@ -71,11 +74,14 @@ updated: {date}
      - Domain-level metrics emitted (counters, gauges, histograms)
      - Key business operations instrumented as named spans
      - Alert thresholds for error rate or latency
+     Idempotency observability (required if command handlers exist):
+     - Metric: commands_duplicate_total{handler, reason}
+     - Log: WARN on duplicate commandId with fields: handler, commandId, original_executed_at
      Example:
-     - Logging: INFO on order placed/cancelled; WARN on payment retry; ERROR on processor failure
-     - Metrics: orders_created_total; payment_processing_duration_seconds; payment_errors_total
+     - Logging: INFO on order placed/cancelled; WARN on payment retry; WARN on duplicate command rejected; ERROR on processor failure
+     - Metrics: orders_created_total; payment_processing_duration_seconds; payment_errors_total; commands_duplicate_total
      - Health: GET /health checks payment-service reachability + database connection
-     See observability-standards.md for required structured logging fields. -->
+     See observability-standards.md for required structured logging fields and idempotency metric labels. -->
 
 ## Stories Coverage
 <!-- List every story delivered by this unit. Update as stories are added.

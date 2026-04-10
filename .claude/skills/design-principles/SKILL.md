@@ -46,8 +46,13 @@ Items marked **[Advisory]** are non-blocking recommendations to surface and cons
 - **[Advisory]** For collections expected to grow unbounded: use cursor-based pagination, not offset-based
 - **[Advisory]** If read and write patterns diverge significantly: consider CQRS — separate read model optimized for queries, write model enforcing invariants
 
-### Events
-- **[Advisory]** If events are published or consumed: declare delivery guarantee (at-least-once / exactly-once / at-most-once), ordering guarantee (none / per-partition / global), and consumer model (consumer group / broadcast)
+### Events and Command Handlers
+
+- **[REQUIRED]** For every event published: declare delivery guarantee (at-least-once | exactly-once | at-most-once), ordering guarantee (none | per-partition | global), and consumer model (consumer-group | broadcast).
+- **[REQUIRED]** If delivery guarantee is at-least-once: consumer handler MUST be idempotent. Document the deduplication strategy (commandId-store, event-id-store, db-unique-constraint, or natural idempotency).
+- **[REQUIRED]** If a command handler publishes events AND modifies state: use the transactional outbox pattern — write state + outbox row in one transaction; relay publishes from outbox. Eliminates dual-write failure (DDIA Ch 11).
+- **[Advisory]** For async command dispatch: include commandId (UUID v4) in the command envelope. Handlers check commandId against a dedup store (TTL ≥ 24h or broker retention window) before executing.
+- **[Advisory]** "Exactly-once" is a broker-level claim — treat consumers as at-least-once in practice; handler idempotency is still required.
 
 ### Knowledge Base
 DDIA-significant decisions — why a consistency model was chosen, why a partition key was selected, why a transaction boundary was drawn — belong in the unit knowledge base, not just in architecture.md.

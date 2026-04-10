@@ -52,6 +52,10 @@ Ask only:
   Exception: pure infrastructure stories (no application use case — e.g. DBX plumbing) — pattern does not apply there.
   Ask only: do you want command bus / dispatcher infrastructure (e.g. MediatR, custom mediator)?
   (Default: no. Handlers are called directly from controllers/endpoints.)
+- **Command Handler Idempotency** — when CQRS is ON, every command handler must be safe to replay with the same input without re-executing side effects. Default ON. Record in constitution.
+  Ask only: Is command dispatch async (message queue, event bus, background worker)?
+  - Yes → messaging_context = true. Handler idempotency REQUIRED; outbox pattern REQUIRED for any event published inside a command handler.
+  - No (direct call) → messaging_context = false. commandId-based deduplication is the default pattern.
 - Microservices or modular monolith? (Default: derive from step 2 service count.)
 
 **6. Error Handling**
@@ -147,6 +151,11 @@ DEFAULT (active unless explicitly overridden in step 5):
  - DDD: each bounded context owns its aggregate; cross-context access via contracts only
  - No business logic in controllers; no direct DB queries outside repositories
  - One aggregate modified per command; cross-aggregate changes via domain events
+{If messaging_context = true:}
+ - Command Handler Idempotency: REQUIRED — every command carries commandId (UUID v4); handler checks commandId against dedup store before executing; duplicate → return cached result; log WARN + increment commands_duplicate_total
+ - Transactional Outbox: REQUIRED — events published inside command handlers must be written to outbox table in same transaction as state change; relay process publishes from outbox; no dual-write
+{If messaging_context = false:}
+ - Command Handler Idempotency: REQUIRED — every command carries commandId (UUID v4); same commandId must produce same result without re-executing side effects
 {If user overrode any default in step 5: replace or append the override here}
 
 ## Error Handling Contract

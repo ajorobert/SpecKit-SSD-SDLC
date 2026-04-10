@@ -36,7 +36,19 @@ Loaded by: sk.implement, sk.review
 # [REQUIRED] Functions must perform a single logical operation. Max 30 lines as secondary limit.
 # [REQUIRED] Max 3 parameters per function. Use a parameter object beyond that.
 
-# Idempotency: commands must be idempotent or explicitly marked — see api-standards.md.
+# --- Command Handler Idempotency (blocking) ---
+# [REQUIRED] Every command object must carry a commandId field (UUID v4, client-generated).
+# [REQUIRED] Command handlers must check commandId against a dedup store before executing.
+#   On duplicate: return the cached result. Do not re-execute side effects.
+#   Dedup store TTL: minimum 24h, or match message broker retention window.
+# [REQUIRED] If messaging_context = true: no direct event publish inside a command handler
+#   without outbox pattern (state write + outbox row in same transaction; relay publishes).
+# [REQUIRED] Duplicate detection: log at WARN with commandId.
+#   Metric per observability-standards.md (commands_duplicate_total).
+# [Advisory] Natural idempotency (pure computation, no state change) does not require
+#   dedup store — document as "naturally idempotent" in handler code comment.
+# Note: HTTP Idempotency-Key (api-standards.md) is API-layer. commandId is handler-layer.
+#   Both are required. They serve different audiences (HTTP clients vs internal command bus).
 
 ## Error Handling Pattern
 # Declare the project's error handling pattern here — AI will follow it consistently.

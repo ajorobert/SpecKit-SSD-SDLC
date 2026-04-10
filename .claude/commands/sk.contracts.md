@@ -54,3 +54,6 @@ tests/contract/{unit}/provider/{endpoint}.provider.test.{ext}
 - Provider tests cover happy path + error cases + auth rejection
 - No undocumented breaking changes
 - Idempotency-Key declared on all mutation endpoints (POST/PUT/PATCH/DELETE)
+- Dedup Strategy declared for every consumed event with Idempotent Handler = yes
+- Outbox column filled for every published event where handler also writes state
+- commandId field present in command schema for any command dispatched async

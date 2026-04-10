@@ -2,6 +2,10 @@
   "permissions": {
     "allow": [
       "Edit",
+      "write",
+      "search",
+      "find",
+      "grep",
       "Bash(npm run *)",
       "Bash(git commit *)",
       "Bash(git * main)",
