@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "edit"
+      "Edit",
+      "Bash(npm run *)",
+      "Bash(git commit *)",
+      "Bash(git * main)",
+      "Bash(* --version)",
+      "Bash(* --help *)"
     ],
     "deny": [
       "Bash(rm *)",
