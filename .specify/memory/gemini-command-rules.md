@@ -23,9 +23,9 @@ Story-level commands (sk.plan, sk.tasks, sk.implement, sk.clarify):
 
 ## Test Role Routing
 sk.test branches on session.yaml role:
-- role = backend-qa → generate provider contract tests + integration tests
-- role = frontend-qa → generate consumer contract tests + E2E tests + component tests
-- role = other → STOP: "sk.test requires backend-qa or frontend-qa role"
+- role = backend → generate provider contract tests + integration tests
+- role = frontend → generate consumer contract tests + E2E tests + component tests
+- role = other → STOP: "sk.test requires backend or frontend role"
 
 ## Security Role Gate
 sk.security-audit requires role = security in session.yaml
@@ -64,7 +64,6 @@ Create automatically after:
 
 ## Knowledge Base Loading Order
 For sk.implement, sk.test, sk.security-audit:
-<!-- specs/knowledge-base.md (tier 1) is already loaded above in System-Level Context Loading -->
 1. Read specs/domains/{domain}/knowledge-base.md (tier 2) if exists
 2. Read unit knowledge-base.md (tier 3) if exists
 3. Then read code and detail files

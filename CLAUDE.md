@@ -8,7 +8,7 @@ Read .specify/project-config.md for project identity, custom rules, and override
 Commands: .claude/commands/sk.*.md
 Agents: .claude/agents/
 Skills: .claude/skills/ (auto-loaded by context)
-Roles: po | architect | lead | backend | frontend | backend-qa | frontend-qa | security
+Roles: po | architect | lead | backend | frontend | security
 
 ## System Prompt Inclusions
 <!-- These files are inlined at session start via @imports.

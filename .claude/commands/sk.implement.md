@@ -15,7 +15,6 @@ Role: backend | frontend | Level: story
    EXISTS → read it; all blocking findings MUST be resolved before proceeding
 
 ## Context loading (in order)
-<!-- specs/knowledge-base.md (tier 1) is loaded via system prompt — no explicit read needed -->
 1. specs/domains/{relevant-domain}/knowledge-base.md (tier 2 — if exists)
 2. specs/intents/{intent}/units/{unit}/knowledge-base.md (tier 3 — if exists)
    Note: knowledge bases contain non-derivable context only (the "why", not the "what")
