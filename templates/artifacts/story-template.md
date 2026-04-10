@@ -3,7 +3,7 @@ id: {INTENT-CODE}-{UNIT-CODE}-{NNN}
 intent: {INTENT-CODE}
 unit: {INTENT-CODE}-{UNIT-CODE}
 title: {title}
-status: draft | ready | in-progress | testing | security-review | review | done
+status: draft | ready | in-progress | review | review-rejected | testing | security-review | done
 owner: null
 checkpoint_mode: null   # autopilot | confirm | validate
 checkpoint_status: null # null | approved

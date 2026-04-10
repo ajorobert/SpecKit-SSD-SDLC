@@ -1,7 +1,7 @@
 # sk.review
 Spec-aware code review: validates against bounded context, contracts, and ADRs.
 Role: backend, frontend | Level: story
-Wraps: gstack /review
+gstack: optional enhancement — if installed, invoke after Claude's own review for additional signal
 
 ## Pre-flight
 1. Read session.yaml active_story_id
@@ -49,7 +49,40 @@ Observability (for stories adding new service endpoints):
 - GET /health endpoint present and returning correct shape"
 
 ## Invoke
-gstack /review
+Claude performs the review natively using the context surface above.
+If gstack is installed (`command -v gstack`): also invoke `gstack /review` for additional signal and merge findings.
+
+## Output Artifact
+If any findings exist, write a review report to:
+  specs/intents/{intent}/units/{unit}/stories/{story-id}/review-{story-id}.md
+
+Format:
+```
+# Review: {story-id}
+Date: {YYYY-MM-DD}
+Status: REJECTED | APPROVED
+
+## Blocking Findings
+- {finding}: {description} → {required action}
+
+## Non-Blocking Findings
+- {finding}: {description}
+```
+
+On REJECTED: write/overwrite the file with current findings. Set story status → review-rejected in frontmatter.
+On APPROVED: Set story status → testing in frontmatter (ready for sk.test).
+1. If any blocking findings were raised during this review cycle (i.e. the story was previously REJECTED):
+   Append a `## Implementation Pitfalls` entry to the unit knowledge base:
+     specs/intents/{intent}/units/{unit}/knowledge-base.md
+   Format:
+   ```
+   ## Implementation Pitfalls
+   <!-- Lessons from review cycles — sk.implement reads this to avoid repeating issues -->
+   - [{story-id}] {short description of what was wrong} → {what the correct pattern is}
+   ```
+   If the section already exists, append to it rather than replacing it.
+2. Keep the review report at its path — do NOT archive it on approval.
+   Non-blocking findings remain available for the developer to act on via sk.implement.
 
 ## Post-execution
 Flag any finding that:

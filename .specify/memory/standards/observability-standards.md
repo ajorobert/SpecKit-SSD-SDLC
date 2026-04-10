@@ -45,6 +45,30 @@ Levels:
 [Advisory] One domain-level metric per unit (e.g. orders_created_total).
 [Advisory] Metric names: snake_case, unit suffix (_total, _seconds, _bytes).
 
+## Command Handler Idempotency Observability
+
+Applies when: CQRS is ON and command handlers perform state mutations.
+
+[REQUIRED] commands_duplicate_total{handler, reason}
+  Increment on every duplicate commandId detection before handler executes.
+  Labels:
+    handler — name of the command handler (e.g. "CreateOrderHandler")
+    reason  — "commandId_seen" | "natural_idempotent"
+
+[REQUIRED] Structured log entry on every duplicate detection:
+  level: warn
+  message: "duplicate command rejected"
+  fields: handler, commandId, original_executed_at (timestamp of first execution)
+  Must include trace_id and span_id per standard logging requirements.
+
+[Advisory] commands_processed_total{handler, status}
+  status: success | failure | duplicate
+  Provides full processing funnel visibility per handler.
+
+[Advisory] outbox_relay_lag_seconds (if outbox pattern in use)
+  Histogram: time between outbox row written and event published to broker.
+  Alert threshold: p99 > 5s warrants investigation.
+
 ## Health Check
 
 [REQUIRED] GET /health

@@ -1,10 +1,9 @@
 # sk.test
 Generates and runs test suite for active story.
-Role: backend-qa (backend tests) | frontend-qa (frontend tests)
+Role: backend (backend tests) | frontend (frontend tests)
 Level: story
 
 ## Input Artifacts
-specs/knowledge-base.md (tier 1 — always read first)
 specs/intents/{intent}/units/{unit}/knowledge-base.md
   (tier 3 — invariants inform test design)
 
@@ -16,7 +15,7 @@ story-{ID}.md (acceptance criteria)
 
 ## Steps
 
-### If role = backend-qa
+### If role = backend
 1. Read contracts/test-plan.md provider section
 2. Read api-spec.json — inventory all endpoints and error codes
 3. [REFINE MODE] if provider tests exist, [CREATE MODE] if not
@@ -29,7 +28,7 @@ story-{ID}.md (acceptance criteria)
 6. Run tests — report results
 7. Flag any endpoint in api-spec.json with no test coverage
 
-### If role = frontend-qa
+### If role = frontend
 1. Read contracts/test-plan.md consumer section
 2. Read api-spec.json — identify fields frontend consumes
 3. Read story acceptance criteria — map to E2E scenarios
@@ -45,19 +44,19 @@ story-{ID}.md (acceptance criteria)
 9. Flag any acceptance criterion with no E2E test coverage
 
 ### If role = neither
-STOP: "sk.test requires backend-qa or frontend-qa role.
-Run sk.session switch --role backend-qa or frontend-qa"
+STOP: "sk.test requires backend or frontend role.
+Run sk.session switch --role backend or frontend"
 
 ## Output Artifacts
-tests/contract/{unit}/provider/ (backend-qa)
-tests/integration/{story-id}/ (backend-qa)
-tests/contract/{unit}/consumer/ (frontend-qa)
-tests/e2e/{story-id}/ (frontend-qa)
-tests/components/{unit}/ (frontend-qa)
+tests/contract/{unit}/provider/ (backend)
+tests/integration/{story-id}/ (backend)
+tests/contract/{unit}/consumer/ (frontend)
+tests/e2e/{story-id}/ (frontend)
+tests/components/{unit}/ (frontend)
 
 ## Quality Bar
-- Every endpoint has provider test (backend-qa)
-- Every acceptance criterion has E2E test (frontend-qa)
+- Every endpoint has provider test (backend)
+- Every acceptance criterion has E2E test (frontend)
 - Tests runnable without manual setup
 - Test names describe scenarios not implementation
 - Coverage report generated and displayed

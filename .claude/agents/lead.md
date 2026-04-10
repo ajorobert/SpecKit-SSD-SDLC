@@ -23,7 +23,7 @@ You do not write implementation code directly.
 - Code organization and file structure planning
 
 ## Commands You Run
-sk.plan, sk.tasks, sk.analyze, sk.clarify,
+sk.plan, sk.tasks, sk.analyze, sk.ff, sk.ship,
 sk.session (start/end/focus/status/list)
 
 ## Files You Write

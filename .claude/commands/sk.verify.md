@@ -1,6 +1,6 @@
 # sk.verify
 PASS/FAIL quality gate for active story.
-Role: architect, lead | Level: story
+Role: architect | Level: story
 
 **When to run:** After sk.test passes (test-status = pass in story frontmatter), before sk.ship.
 This is the final gate — not a mid-implementation check. Run sk.analyze if you need a

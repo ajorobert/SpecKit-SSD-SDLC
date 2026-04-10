@@ -12,10 +12,7 @@ specs/intents/{intent}/units/{unit}/contracts/api-spec.json
 story-{ID}.md (audit scope)
 
 ## Steps
-1. Verify role = security
-   NOT security → STOP: "sk.security-audit requires security role.
-   Run sk.session switch --role security"
-2. Determine audit scope from active story and unit
+1. Determine audit scope from active story and unit
 3. Evaluate each OWASP Top 10 category against implementation
 4. Check auth boundaries against architecture-decisions.md auth ADR
 5. Scan for secrets and hardcoded credentials

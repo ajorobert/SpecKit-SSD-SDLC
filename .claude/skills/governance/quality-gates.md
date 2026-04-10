@@ -33,12 +33,19 @@ Implementation Gate (before merge)
 - [ ] PHR created if novel tradeoffs were resolved
 - [ ] Standards compliance: coding-standards.md
 - [ ] No new domain entities introduced outside sk.datamodel
+- [ ] If CQRS is ON: all command objects have commandId field (UUID v4)
+- [ ] If CQRS is ON: all command handlers check commandId against dedup store before executing
+- [ ] If messaging_context = true: no dual-write (event publish without outbox pattern)
+- [ ] commands_duplicate_total metric instrumented on all command handlers with dedup logic
 
 Test Gate (before story moves to security-review)
 - [ ] Provider contract tests exist for every endpoint (backend-qa)
 - [ ] Consumer contract tests exist for every consumed endpoint (frontend-qa)
 - [ ] Every acceptance criterion has a mapped E2E test
 - [ ] Integration tests cover service + database interactions
+- [ ] Idempotency replay test: each command handler submits same commandId twice → identical result, no additional side effects
+- [ ] Duplicate detection test: commands_duplicate_total incremented on second submission
+- [ ] If outbox in use: outbox relay test — state + outbox row committed atomically; relay publishes one event to broker
 - [ ] Coverage thresholds met: coding-standards.md Test Coverage Thresholds
 - [ ] All tests pass — no skipped tests without documented reason
 

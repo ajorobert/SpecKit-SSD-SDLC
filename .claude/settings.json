@@ -1,7 +1,17 @@
 {
   "permissions": {
+    "defaultMode": "acceptEdits",
     "allow": [
-      "edit"
+      "Edit",
+      "write",
+      "search",
+      "find",
+      "grep",
+      "Bash(npm run *)",
+      "Bash(git commit *)",
+      "Bash(git * main)",
+      "Bash(* --version)",
+      "Bash(* --help *)"
     ],
     "deny": [
       "Bash(rm *)",
@@ -15,6 +25,17 @@
     ]
   },
   "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/check-system-prompt-files.sh\""
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Bash",

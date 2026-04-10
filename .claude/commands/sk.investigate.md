@@ -1,7 +1,7 @@
 # sk.investigate
 Spec-aware root-cause debugging — knows what correct behavior looks like.
 Role: backend, frontend | Level: story
-Wraps: gstack /investigate
+gstack: optional enhancement — if installed, invoke for additional debugging signal
 
 ## Pre-flight
 1. Read session.yaml active_story_id
@@ -35,7 +35,8 @@ Contract shape (relevant endpoints):
 Intended implementation approach: {key points from plan.md}"
 
 ## Invoke
-gstack /investigate
+Claude performs the investigation natively using the context surface above.
+If gstack is installed (`command -v gstack`): also invoke `gstack /investigate` for additional signal and merge findings.
 
 ## Post-execution
 

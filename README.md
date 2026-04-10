@@ -23,8 +23,12 @@ It natively supports both **Claude Code** and **Google Antigravity (Gemini)** vi
 
 ### 1. Initialize your project
 
-> **🔧 Prerequisite:** Commands `/sk.review`, `/sk.investigate`, and `/sk.ship` wrap `gstack`. We strongly recommend installing it first: [garrytan/gstack](https://github.com/garrytan/gstack).  
-> `/sk.qa` does **not** require gstack — it runs platform-native tooling directly (Playwright/Cypress for web/admin, Maestro/Detox for mobile).
+> **🔧 Optional dependency:** [garrytan/gstack](https://github.com/garrytan/gstack) enhances three commands when installed:
+> - `sk.review` and `sk.investigate` — run natively without gstack; gstack adds supplementary signal if present
+> - `sk.ship` — falls back to `gh pr create` without gstack (requires [GitHub CLI](https://cli.github.com/))
+> - `sk.qa` — does **not** use gstack; runs platform-native tooling directly (Playwright/Cypress for web/admin, Maestro/Detox for mobile)
+>
+> gstack's primary value is for **frontend** work: visual mockup generation (`/design-shotgun`), HTML conversion, and real browser QA.
 
 SpecKit is designed to be added as a **git subtree** to any project repository.
 
@@ -44,6 +48,9 @@ Begin your work by adopting a persona (`po`, `architect`, `lead`, `backend`, `fr
 
 > **🏁 Ending your session:** 
 > When your work is done, run `/sk.session end` to autonomously save state, commit, push your branch, and open your Pull Request.
+
+> **🔁 Recovering a lost session:**
+> If `session.yaml` is accidentally deleted while on an active branch, run `/sk.session restore` — it reconstructs the session from the current branch name without creating a new branch. Then run `/sk.session focus --story {id}` to re-lock your active story context.
 
 ### 3. Understand the Hierarchy & Session Focus
 
@@ -128,7 +135,7 @@ Commands marked `[optional]` are skippable. Commands marked `[conditional]` are 
 ### 🛠️ Setup & Session
 ```text
 /sk.init             ← Initialize/update project memory + constitution via interview (any)
-/sk.session          ← Manage local session: start/end/focus/status/list/switch (any)
+/sk.session          ← Manage local session: start/end/focus/status/list/switch/restore (any)
 ```
 
 ### 📋 Specify & Plan

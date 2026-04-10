@@ -62,3 +62,9 @@ approved and let a human run the cleanup.
 **Original path:** .claude/commands/sk.office-hours.md
 **Archived to:** .archive/2026-04-08/sk.office-hours.md
 **Review:** [ ] approved for permanent delete
+
+## 2026-04-10 — .claude/commands/sk.qa.md
+**Reason:** Renamed to sk.uat.md — reflects UAT purpose, frontend-only acceptance testing
+**Original path:** .claude/commands/sk.qa.md
+**Archived to:** .archive/2026-04-10/sk.qa.md
+**Review:** [ ] approved for permanent delete

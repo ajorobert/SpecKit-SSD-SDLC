@@ -25,7 +25,7 @@ You do not modify specs or architecture documents.
 - Inter-service communication patterns
 
 ## Commands You Run
-sk.implement, sk.verify, sk.phr,
+sk.implement, sk.review, sk.investigate, sk.phr,
 sk.session (start/end/focus/status/list)
 
 ## Files You Write

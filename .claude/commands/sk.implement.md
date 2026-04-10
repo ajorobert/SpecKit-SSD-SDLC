@@ -11,15 +11,17 @@ Role: backend | frontend | Level: story
    MISSING → STOP: run sk.plan first
 4. Verify tasks.md exists: STORY_DIR/tasks.md
    MISSING → STOP: run sk.tasks first
+5. Check for review report: STORY_DIR/review-{story-id}.md
+   EXISTS → read it; all blocking findings MUST be resolved before proceeding
 
 ## Context loading (in order)
-1. specs/knowledge-base.md (tier 1 — always read first)
-2. specs/domains/{relevant-domain}/knowledge-base.md (tier 2 — if exists)
-3. specs/intents/{intent}/units/{unit}/knowledge-base.md (tier 3 — if exists)
+1. specs/domains/{relevant-domain}/knowledge-base.md (tier 2 — if exists)
+2. specs/intents/{intent}/units/{unit}/knowledge-base.md (tier 3 — if exists)
    Note: knowledge bases contain non-derivable context only (the "why", not the "what")
-4. STORY_DIR/plan.md — tech approach, component breakdown, data/API changes
-5. STORY_DIR/tasks.md — full task list with phases and parallel markers
-6. specs/intents/{intent}/units/{unit}/contracts/api-spec.json (if exists)
+3. STORY_DIR/plan.md — tech approach, component breakdown, data/API changes
+4. STORY_DIR/tasks.md — full task list with phases and parallel markers
+5. specs/intents/{intent}/units/{unit}/contracts/api-spec.json (if exists)
+6. specs/intents/{intent}/units/{unit}/contracts/README.md (if exists — contains known gaps and contract decisions)
 7. specs/intents/{intent}/units/{unit}/architecture.md (if exists)
 8. .specify/memory/standards/coding-standards.md
 9. .specify/memory/standards/observability-standards.md
@@ -38,8 +40,19 @@ Before executing tasks, verify ignore files exist for detected stack:
 Create missing ignore files with standard patterns for the detected technology.
 If ignore file exists: verify it contains essential patterns, append only missing critical ones.
 
+## Execution mode detection
+- review-{story-id}.md EXISTS → **Refine mode**: only resolve blocking findings from the review report. Do not re-execute tasks already marked [X]. Do not regenerate passing code.
+- review-{story-id}.md ABSENT → **Normal mode**: execute tasks phase-by-phase as below.
+
+## Status transitions
+Update story-{ID}.md frontmatter at these points:
+- Start of execution (normal mode): set status → in-progress
+- Refine mode entry: set status → in-progress (was: review)
+- All tasks marked [X]: set status → review (ready for sk.review / sk.test)
+
 ## Task execution (phase-by-phase)
 Parse tasks.md and execute phases in order. Do not start a phase until the prior phase is complete.
+Skip any task already marked [X] — do not re-execute.
 
 Standard phase order from tasks.md:
 - Phase 1: Setup — project structure, config, dependencies

@@ -27,6 +27,9 @@ You do not modify specs.
 - Frontend security: XSS vectors, CSRF, clickjacking, CSP headers
 - Infrastructure hints: CORS misconfiguration, security headers
 
+## Commands You Run
+sk.security-audit, sk.session (start/end/focus/status/list)
+
 ## What You Read
 src/{service}/** (implementation files)
 specs/intents/{intent}/units/{unit}/contracts/api-spec.json

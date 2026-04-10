@@ -1,6 +1,6 @@
 # sk.analyze
 Cross-artifact consistency check for the active unit.
-Role: lead, architect | Level: unit
+Role: lead | Level: unit
 READ-ONLY — no files written, analysis report only.
 
 **When to run:** After sk.implement completes, before sk.test begins.

@@ -8,10 +8,17 @@ Read .specify/project-config.md for project identity, custom rules, and override
 Commands: .claude/commands/sk.*.md
 Agents: .claude/agents/
 Skills: .claude/skills/ (auto-loaded by context)
-Roles: po | architect | lead | backend | frontend | backend-qa | frontend-qa | security
+Roles: po | architect | lead | backend | frontend | security
+
+## System Prompt Inclusions
+<!-- These files are inlined at session start via @imports.
+     Modifying any of them mid-session leaves the system prompt stale.
+     A PostToolUse hook will warn you when this happens — restart Claude Code to reload. -->
+@specs/knowledge-base.md
+@.specify/memory/command-rules.md
 
 ## Rules
-1. Read .specify/memory/command-rules.md before any sk.* command
+1. command-rules.md is loaded above via @import — no need to re-read it per command.
 2. upstream/ is a pattern reference archive — not executed at runtime. See upstream-adapter.md for migration rationale.
 3. Never edit files inside upstream/
 4. Session state: .claude/session.yaml
