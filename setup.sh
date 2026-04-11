@@ -97,6 +97,9 @@ fi
 if [ ! -d "$PROJECT_ROOT/.specify" ]; then
     cp -r "$TEMPLATES_PROJECT/.specify/" "$PROJECT_ROOT/.specify/"
     echo "→ Created .specify/ scaffold"
+    SPECIFY_CREATED=true
+else
+    SPECIFY_CREATED=false
 fi
 
 # specs/
@@ -146,6 +149,34 @@ if [ "$GEMINI_CREATED" = false ]; then
         echo "  ✓ GEMINI.md kept as-is"
     fi
     echo ""
+fi
+
+if [ "$SPECIFY_CREATED" = false ]; then
+    if [ -f "$PROJECT_ROOT/.specify/memory/command-rules.md" ]; then
+        echo "command-rules.md already exists."
+        printf "Update command-rules.md with latest framework governance? [y/n]: "
+        read -r response
+        if [ "$response" = "y" ] || [ "$response" = "Y" ]; then
+            cp "$TEMPLATES_PROJECT/.specify/memory/command-rules.md" "$PROJECT_ROOT/.specify/memory/command-rules.md"
+            echo "  ✓ command-rules.md updated"
+        else
+            echo "  ✓ command-rules.md kept as-is"
+        fi
+        echo ""
+    fi
+
+    if [ -f "$PROJECT_ROOT/.specify/memory/gemini-command-rules.md" ]; then
+        echo "gemini-command-rules.md already exists."
+        printf "Update gemini-command-rules.md with latest framework governance? [y/n]: "
+        read -r response
+        if [ "$response" = "y" ] || [ "$response" = "Y" ]; then
+            cp "$TEMPLATES_PROJECT/.specify/memory/gemini-command-rules.md" "$PROJECT_ROOT/.specify/memory/gemini-command-rules.md"
+            echo "  ✓ gemini-command-rules.md updated"
+        else
+            echo "  ✓ gemini-command-rules.md kept as-is"
+        fi
+        echo ""
+    fi
 fi
 
 # ─────────────────────────────────────────────
