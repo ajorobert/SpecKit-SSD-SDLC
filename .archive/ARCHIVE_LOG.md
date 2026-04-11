@@ -68,3 +68,147 @@ approved and let a human run the cleanup.
 **Original path:** .claude/commands/sk.qa.md
 **Archived to:** .archive/2026-04-10/sk.qa.md
 **Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.specify.md
+**Reason:** migrated to .claude/skills/sk.specify/ — commands replaced by skills-based architecture
+**Original path:** .claude/commands/sk.specify.md
+**Archived to:** .archive/2026-04-11/sk.specify.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.clarify.md
+**Reason:** migrated to .claude/skills/sk.clarify/
+**Original path:** .claude/commands/sk.clarify.md
+**Archived to:** .archive/2026-04-11/sk.clarify.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.architecture.md
+**Reason:** migrated to .claude/skills/sk.architecture/
+**Original path:** .claude/commands/sk.architecture.md
+**Archived to:** .archive/2026-04-11/sk.architecture.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.datamodel.md
+**Reason:** migrated to .claude/skills/sk.datamodel/
+**Original path:** .claude/commands/sk.datamodel.md
+**Archived to:** .archive/2026-04-11/sk.datamodel.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.contracts.md
+**Reason:** migrated to .claude/skills/sk.contracts/
+**Original path:** .claude/commands/sk.contracts.md
+**Archived to:** .archive/2026-04-11/sk.contracts.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.plan.md
+**Reason:** migrated to .claude/skills/sk.plan/
+**Original path:** .claude/commands/sk.plan.md
+**Archived to:** .archive/2026-04-11/sk.plan.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.tasks.md
+**Reason:** migrated to .claude/skills/sk.tasks/
+**Original path:** .claude/commands/sk.tasks.md
+**Archived to:** .archive/2026-04-11/sk.tasks.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.implement.md
+**Reason:** migrated to .claude/skills/sk.implement/
+**Original path:** .claude/commands/sk.implement.md
+**Archived to:** .archive/2026-04-11/sk.implement.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.review.md
+**Reason:** migrated to .claude/skills/sk.review/
+**Original path:** .claude/commands/sk.review.md
+**Archived to:** .archive/2026-04-11/sk.review.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.test.md
+**Reason:** migrated to .claude/skills/sk.test/
+**Original path:** .claude/commands/sk.test.md
+**Archived to:** .archive/2026-04-11/sk.test.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.investigate.md
+**Reason:** migrated to .claude/skills/sk.investigate/
+**Original path:** .claude/commands/sk.investigate.md
+**Archived to:** .archive/2026-04-11/sk.investigate.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.verify.md
+**Reason:** migrated to .claude/skills/sk.verify/
+**Original path:** .claude/commands/sk.verify.md
+**Archived to:** .archive/2026-04-11/sk.verify.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.ship.md
+**Reason:** migrated to .claude/skills/sk.ship/
+**Original path:** .claude/commands/sk.ship.md
+**Archived to:** .archive/2026-04-11/sk.ship.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.ff.md
+**Reason:** migrated to .claude/skills/sk.ff/ — now an orchestrator skill
+**Original path:** .claude/commands/sk.ff.md
+**Archived to:** .archive/2026-04-11/sk.ff.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.impact.md
+**Reason:** migrated to .claude/skills/sk.impact/
+**Original path:** .claude/commands/sk.impact.md
+**Archived to:** .archive/2026-04-11/sk.impact.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.adr.md
+**Reason:** migrated to .claude/skills/sk.adr/
+**Original path:** .claude/commands/sk.adr.md
+**Archived to:** .archive/2026-04-11/sk.adr.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.knowledge-base.md
+**Reason:** migrated to .claude/skills/sk.knowledge-base/
+**Original path:** .claude/commands/sk.knowledge-base.md
+**Archived to:** .archive/2026-04-11/sk.knowledge-base.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.analyze.md
+**Reason:** migrated to .claude/skills/sk.analyze/
+**Original path:** .claude/commands/sk.analyze.md
+**Archived to:** .archive/2026-04-11/sk.analyze.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.session.md
+**Reason:** migrated to .claude/skills/sk.session/
+**Original path:** .claude/commands/sk.session.md
+**Archived to:** .archive/2026-04-11/sk.session.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.init.md
+**Reason:** migrated to .claude/skills/sk.init/
+**Original path:** .claude/commands/sk.init.md
+**Archived to:** .archive/2026-04-11/sk.init.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.phr.md
+**Reason:** migrated to .claude/skills/sk.phr/
+**Original path:** .claude/commands/sk.phr.md
+**Archived to:** .archive/2026-04-11/sk.phr.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.security-audit.md
+**Reason:** migrated to .claude/skills/sk.security-audit/
+**Original path:** .claude/commands/sk.security-audit.md
+**Archived to:** .archive/2026-04-11/sk.security-audit.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/sk.uat.md
+**Reason:** migrated to .claude/skills/sk.uat/
+**Original path:** .claude/commands/sk.uat.md
+**Archived to:** .archive/2026-04-11/sk.uat.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-11 — .claude/commands/README.md
+**Reason:** commands directory archived — all sk.* commands migrated to skills
+**Original path:** .claude/commands/README.md
+**Archived to:** .archive/2026-04-11/README.md
+**Review:** [ ] approved for permanent delete

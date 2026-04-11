@@ -1,7 +1,7 @@
-# Command Rules
+# Skill Rules
 
 ## Session
-Every sk.* command reads .claude/session.yaml for active focus.
+Every sk.* skill reads .claude/session.yaml for active focus.
 No session active (role null): only sk.session start is permitted.
 
 ## Role Behavior
@@ -16,6 +16,6 @@ Declare mode at start of every execution.
 
 ## Upstream Reference
 .speckit/upstream/ is a pattern reference archive — not executed at runtime.
-spec-kit AI prompting patterns have been inlined into sk.* commands.
+spec-kit AI prompting patterns have been inlined into sk.* skills.
 Do not invoke upstream shell scripts. Do not reference upstream-adapter.md for execution.
 See .specify/memory/upstream-adapter.md for the migration rationale and pattern source map.

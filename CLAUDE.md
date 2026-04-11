@@ -5,20 +5,19 @@
 ## Identity
 Spec-driven development framework for full-stack multi-service systems.
 Read .specify/project-config.md for project identity, custom rules, and overrides.
-Commands: .claude/commands/sk.*.md
+Skills: .claude/skills/sk.*/SKILL.md
 Agents: .claude/agents/
-Skills: .claude/skills/ (auto-loaded by context)
+Context skills: .claude/skills/{governance,design-principles,domain-model,service-registry,standards,system-context,architecture-decisions,upstream-adapter}/
 Roles: po | architect | lead | backend | frontend | security
 
 ## System Prompt Inclusions
-<!-- These files are inlined at session start via @imports.
-     Modifying any of them mid-session leaves the system prompt stale.
+<!-- specs/knowledge-base.md is inlined at session start via @import.
+     Modifying it mid-session leaves the system prompt stale.
      A PostToolUse hook will warn you when this happens — restart Claude Code to reload. -->
 @specs/knowledge-base.md
-@.specify/memory/command-rules.md
 
 ## Rules
-1. command-rules.md is loaded above via @import — no need to re-read it per command.
+1. Skills are located in .claude/skills/sk.*/. Each skill declares its own inject_files and subagent_type. command-rules.md is no longer globally imported — relevant rules are embedded per skill.
 2. upstream/ is a pattern reference archive — not executed at runtime. See upstream-adapter.md for migration rationale.
 3. Never edit files inside upstream/
 4. Session state: .claude/session.yaml

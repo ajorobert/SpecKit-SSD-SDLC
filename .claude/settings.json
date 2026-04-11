@@ -1,17 +1,15 @@
 {
   "permissions": {
-    "defaultMode": "acceptEdits",
     "allow": [
       "Edit",
-      "write",
-      "search",
-      "find",
-      "grep",
       "Bash(npm run *)",
       "Bash(git commit *)",
       "Bash(git * main)",
       "Bash(* --version)",
-      "Bash(* --help *)"
+      "Bash(* --help *)",
+      "Edit(/.claude/skills/sk.uat/**)",
+      "Edit(/.claude/skills/sk.ff/**)",
+      "Edit(/.claude/**)"
     ],
     "deny": [
       "Bash(rm *)",
@@ -22,7 +20,8 @@
       "Bash(Remove-Item *)",
       "Bash(* | rm *)",
       "Bash(* && rm *)"
-    ]
+    ],
+    "defaultMode": "acceptEdits"
   },
   "hooks": {
     "PostToolUse": [

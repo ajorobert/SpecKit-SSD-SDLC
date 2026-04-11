@@ -1,0 +1,111 @@
+# sk.ff — Fast Forward (Orchestrator)
+Runs the SDLC pipeline from story capture through task breakdown in one invocation.
+Role: lead (orchestrator) | Level: story
+
+This skill orchestrates other skills in sequence. Each sub-skill runs with its own
+isolated context — state is passed via the file system (session.yaml + spec artifacts).
+
+## Mode Detection
+- `sk.ff` → [FEATURE MODE] full pipeline: specify → clarify → architecture → plan → tasks
+- `sk.ff --bug` → [BUG MODE] fix pipeline: specify --bug → clarify → plan → tasks
+  Architecture step is skipped in bug mode — the unit architecture already exists.
+  If the bug fix requires a data model or contract change, stop and run sk.architecture manually.
+
+## Pre-flight
+1. Read session.yaml — verify system-context.md and tech-stack.md populated
+   system-context.md missing: STOP — run sk.init first
+   tech-stack.md missing: STOP — run sk.init first
+
+## Orchestration: [FEATURE MODE]
+
+### Phase 1 — Story Capture
+Invoke skill: sk.specify
+- Context injected: session.yaml, system-context.md, architecture-decisions.md, domain-model.md
+- Waits for: story-{ID}.md written with checkpoint_mode set in frontmatter
+- Reads back: active_story_id from session.yaml (updated by sk.specify)
+- Reads back: checkpoint_mode from story-{ID}.md frontmatter
+
+### Phase 2 — Clarification
+Invoke skill: sk.clarify
+- Context injected: session.yaml
+- Waits for: story-{ID}.md updated with Clarifications section
+- No checkpoint gate here — clarify always runs
+
+### Phase 3 — Architecture [FEATURE MODE only]
+Condition: checkpoint_mode = validate → invoke sk.architecture
+           checkpoint_mode = standard or confirm → skip to Phase 4
+
+If invoked:
+- Invoke skill: sk.architecture
+- Context injected: session.yaml, domain-model.md, service-registry.md, architecture-decisions.md, design-principles/SKILL.md
+- Waits for: architecture.md written
+- PAUSE for user approval before continuing to Phase 4
+  Display: "Architecture written. Review architecture.md then type 'approved' to continue."
+  On approval: set story frontmatter checkpoint_status: approved
+
+### Phase 4 — Implementation Plan
+Invoke skill: sk.plan
+- Context injected: session.yaml, tech-stack.md
+- If checkpoint_mode = confirm: PAUSE after plan written
+  Display: "Plan written. Review plan.md then type 'approved' to continue."
+  On approval: set story frontmatter checkpoint_status: approved
+- Waits for: plan.md written
+
+### Phase 5 — Task Breakdown
+Invoke skill: sk.tasks
+- Context injected: session.yaml
+- Waits for: tasks.md written
+
+## Orchestration: [BUG MODE]
+
+### Phase 1 — Bug Report Capture
+Invoke skill: sk.specify --bug
+- Same as feature mode Phase 1, bug framing
+
+### Phase 2 — Clarification
+Invoke skill: sk.clarify
+- Focus clarify on: reproduction conditions, edge cases, regression risk
+
+### Phase 3 — Implementation Plan (no architecture step)
+Invoke skill: sk.plan
+- If checkpoint_mode = confirm: PAUSE for approval
+- Waits for: plan.md written
+- Verify story_type: bug in story frontmatter before proceeding
+
+### Phase 4 — Task Breakdown
+Invoke skill: sk.tasks
+
+## Checkpoint Pause Protocol
+When a checkpoint pause is required:
+1. Display the pause message clearly
+2. Write current state (session.yaml updated with active focus)
+3. Wait for user input: 'approved' or 'cancel'
+4. 'cancel': STOP pipeline, report artifacts created so far
+5. 'approved': continue to next phase
+
+## Completion Report
+After all phases complete, display:
+```
+Fast Forward complete.
+Story: {story-id} — {story title}
+Mode: {FEATURE | BUG}
+
+Artifacts created:
+  ✓ story-{ID}.md         (sk.specify)
+  ✓ story-{ID}.md         (sk.clarify — clarifications added)
+  ✓ architecture.md       (sk.architecture — if validate checkpoint)
+  ✓ plan.md               (sk.plan)
+  ✓ tasks.md              (sk.tasks)
+
+Next step: /sk.implement
+```
+
+## Output Artifacts
+All artifacts from each invoked sub-skill.
+
+## Quality Bar
+- Checkpoint pauses respected — never skip an approval gate
+- All artifacts created in correct locations
+- Story frontmatter updated throughout (status, checkpoint_status)
+- Bug mode: story_type: bug confirmed in frontmatter before plan proceeds
+- Each sub-skill invocation is self-contained — no state leaks between phases

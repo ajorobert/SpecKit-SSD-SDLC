@@ -1,4 +1,4 @@
-# Post-Command Hook
+# Post-Skill Hook
 
 ## Trigger
 event: after_tool_use
@@ -8,7 +8,7 @@ matcher: sk.*
 1. Read active story ID from .claude/session.yaml active_story_id
    If null: skip steps 2 and 3
 
-2. Update story status in frontmatter based on command completed:
+2. Update story status in frontmatter based on skill completed:
    sk.specify completion    → status: draft
    sk.plan completion       → status: ready
    sk.implement completion  → status: testing
