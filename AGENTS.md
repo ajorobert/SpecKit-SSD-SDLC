@@ -5,17 +5,16 @@ Spec-driven development framework for full-stack multi-service systems.
 ## For AI Agents — Start Here
 
 Read these files in order before doing anything:
-1. .generic/command-rules.md        — rules that govern all commands
+1. .specify/memory/command-rules.md        — rules that govern all skills
 2. .specify/memory/system-context.md — what system we are building
-3. .specify/memory/upstream-adapter.md — upstream command references
 
 ## Your Role
 Read .generic/personas/{role}.md for your current role context.
 If no role assigned, ask the user which role to adopt.
 
-## Available Commands
-All sk.* commands live in .generic/commands/
-Reference them as: .generic/commands/sk.{command}.md
+## Available Skills
+All sk.* skills live in .claude/skills/
+Reference them as: .claude/skills/sk.{skill}/SKILL.md and prompt.md
 
 ## Session State
 Read and update .generic/session.yaml for active focus.
@@ -26,9 +25,9 @@ specs/intents/            — all project specs and stories
 history/                  — ADR and PHR records
 
 ## Context Loading
-Before executing any command, read:
-.generic/context-maps/command-context-map.md
-Load only the context files listed for that command.
+Before executing any skill, read:
+.claude/skills/sk.{skill}/SKILL.md
+Load only the inject_files listed in its frontmatter.
 
 ## QA and Security Commands
 sk.test            — generate and run tests (role: backend-qa | frontend-qa)
@@ -48,5 +47,5 @@ Tier 2 — domain:  specs/domains/{domain}/knowledge-base.md
 Tier 3 — unit:    specs/intents/{intent}/units/{unit}/knowledge-base.md
 
 Read before working on any module.
-Generated and maintained by sk.knowledge-base command.
+Generated and maintained by sk.knowledge-base skill.
 Contains only what cannot be derived from reading code.

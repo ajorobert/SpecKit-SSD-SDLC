@@ -1,15 +1,15 @@
-# Command Rules
-Apply on every sk.* command.
+# Skill Rules
+Apply on every sk.* skill.
 
 ## Session Resolution
-Every command resolves context from .claude/session.yaml
+Every skill resolves context from .claude/session.yaml
 If session.yaml role is null: STOP, instruct user to run sk.session start
 
-Unit-level commands (sk.architecture, sk.datamodel, sk.contracts):
+Unit-level skills (sk.architecture, sk.datamodel, sk.contracts):
 - Require active_unit_id set in session.yaml
 - If null: instruct user to run sk.session focus --unit {unit-id}
 
-Story-level commands (sk.plan, sk.tasks, sk.implement, sk.clarify):
+Story-level skills (sk.plan, sk.tasks, sk.implement, sk.clarify):
 - Require active_story_id set in session.yaml
 - If null: instruct user to run sk.session focus --story {story-id}
 
@@ -28,12 +28,6 @@ Run sk.session switch --role security"
 - Artifact exists → [REFINE MODE] update, never overwrite
 - Artifact missing → [CREATE MODE]
 - Declare mode at start of every execution
-
-## Upstream Reference
-.speckit/upstream/ is a pattern reference archive — not executed at runtime.
-spec-kit AI prompting patterns have been inlined into sk.* commands.
-Do not invoke upstream shell scripts. Do not reference upstream-adapter.md for execution.
-See .specify/memory/upstream-adapter.md for migration rationale and pattern source map.
 
 ## Post-Execution Memory Updates
 sk.plan, sk.architecture → update service-registry.md, domain-model.md if changed

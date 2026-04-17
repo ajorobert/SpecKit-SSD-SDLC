@@ -1,23 +1,23 @@
-# Command Rules
-Apply on every sk.* command.
+# Skill Rules
+Apply on every sk.* skill.
 
 ## System-Level Context Loading
 @imports in CLAUDE.md are not processed in this environment.
-Explicitly read the following files at the start of every sk.* command,
+Explicitly read the following files at the start of every sk.* skill,
 before any other work, if they exist:
 1. `specs/knowledge-base.md` — Tier 1 system knowledge base
-2. `.specify/memory/command-rules.md` — command rules and role behavior
+2. `.specify/memory/command-rules.md` — skill rules and role behavior
 3. `.specify/project-config.md` — project identity and overrides (if exists)
 
 ## Session Resolution
-Every command resolves context from .claude/session.yaml
+Every skill resolves context from .claude/session.yaml
 If session.yaml role is null: STOP, instruct user to run sk.session start
 
-Unit-level commands (sk.architecture, sk.datamodel, sk.contracts):
+Unit-level skills (sk.architecture, sk.datamodel, sk.contracts):
 - Require active_unit_id set in session.yaml
 - If null: instruct user to run sk.session focus --unit {unit-id}
 
-Story-level commands (sk.plan, sk.tasks, sk.implement, sk.clarify):
+Story-level skills (sk.plan, sk.tasks, sk.implement, sk.clarify):
 - Require active_story_id set in session.yaml
 - If null: instruct user to run sk.session focus --story {story-id}
 
@@ -36,12 +36,6 @@ Run sk.session switch --role security"
 - Artifact exists → [REFINE MODE] update, never overwrite
 - Artifact missing → [CREATE MODE]
 - Declare mode at start of every execution
-
-## Upstream Reference
-upstream/ is a pattern reference archive — not executed at runtime.
-spec-kit AI prompting patterns have been inlined into sk.* commands.
-Do not invoke upstream shell scripts. Do not reference upstream-adapter.md for execution.
-See .specify/memory/upstream-adapter.md for migration rationale and pattern source map.
 
 ## Post-Execution Memory Updates
 sk.plan, sk.architecture → update service-registry.md, domain-model.md if changed
