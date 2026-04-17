@@ -69,8 +69,8 @@ Status: REJECTED | APPROVED
 - {finding}: {description}
 ```
 
-On REJECTED: write/overwrite the file with current findings. Set story status → review-rejected in frontmatter.
-On APPROVED: Set story status → testing in frontmatter (ready for sk.test).
+On REJECTED: write/overwrite the file with current findings.
+On APPROVED: keep the review report at its path.
 1. If any blocking findings were raised during this review cycle (i.e. the story was previously REJECTED):
    Append a `## Implementation Pitfalls` entry to the unit knowledge base:
      specs/intents/{intent}/units/{unit}/knowledge-base.md
@@ -100,3 +100,8 @@ Domain logic findings and observability gaps reported with severity from gstack 
 - No ADR constraint violations
 - No module boundary violations
 - All other findings reported with gstack /review output
+
+## Completion Signal
+Last line of output must be exactly one of:
+`SK_RESULT: PASS` — Status is APPROVED, no blocking findings
+`SK_RESULT: FAIL` — Status is REJECTED, blocking findings present

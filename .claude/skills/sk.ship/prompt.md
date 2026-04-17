@@ -37,7 +37,6 @@ Else:
 
 ## Post-execution
 On successful ship:
-- Update story-{ID}.md: status = done
 - Report PR URL or deployment reference from gstack output
 
 ## Quality Bar (hard blocks — no exceptions)

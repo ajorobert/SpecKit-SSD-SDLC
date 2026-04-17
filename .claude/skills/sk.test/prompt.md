@@ -60,3 +60,8 @@ tests/components/{unit}/ (frontend)
 - Tests runnable without manual setup
 - Test names describe scenarios not implementation
 - Coverage report generated and displayed
+
+## Completion Signal
+Last line of output must be exactly one of:
+`SK_RESULT: PASS` — all tests passed
+`SK_RESULT: FAIL` — one or more tests failed

@@ -21,7 +21,7 @@ All story artifacts (plan.md, tasks.md)
 4. Plan Gate: evaluate if plan.md exists
 5. Implementation Gate: evaluate if tasks.md complete
 6. Output structured report with PASS/FAIL per gate
-7. Overall PASS → story status set to done via post-command hook
+7. Overall PASS → story status set to done via post-skill hook
    Overall FAIL → story status unchanged, list failures
 
 ## Output Artifacts
@@ -32,3 +32,8 @@ story-{ID}.md status updated if overall PASS
 - Every gate item explicitly PASS, FAIL, or SKIP with reason
 - FAIL items include specific finding not generic message
 - Recommendations actionable not vague
+
+## Completion Signal
+Last line of output must be exactly one of:
+`SK_RESULT: PASS` — overall verdict is PASS
+`SK_RESULT: FAIL` — one or more gates failed
