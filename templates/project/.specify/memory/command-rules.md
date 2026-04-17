@@ -14,8 +14,3 @@ Artifact exists → [REFINE MODE] update, never overwrite.
 Artifact missing → [CREATE MODE] create from template.
 Declare mode at start of every execution.
 
-## Upstream Reference
-.speckit/upstream/ is a pattern reference archive — not executed at runtime.
-spec-kit AI prompting patterns have been inlined into sk.* skills.
-Do not invoke upstream shell scripts. Do not reference upstream-adapter.md for execution.
-See .specify/memory/upstream-adapter.md for the migration rationale and pattern source map.

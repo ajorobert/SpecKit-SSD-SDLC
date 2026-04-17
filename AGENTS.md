@@ -7,7 +7,6 @@ Spec-driven development framework for full-stack multi-service systems.
 Read these files in order before doing anything:
 1. .specify/memory/command-rules.md        — rules that govern all skills
 2. .specify/memory/system-context.md — what system we are building
-3. .specify/memory/upstream-adapter.md — upstream pattern references
 
 ## Your Role
 Read .generic/personas/{role}.md for your current role context.

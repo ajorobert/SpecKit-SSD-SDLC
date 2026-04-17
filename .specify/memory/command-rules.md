@@ -48,8 +48,3 @@ Dynamic paths (story-{ID}.md, architecture.md) are resolved by the agent after r
 
 sk.ff is an orchestrator skill — it invokes sk.specify → sk.clarify → [sk.architecture] → sk.plan → sk.tasks in sequence via the Skill tool.
 
-## Upstream Reference
-upstream/ is a pattern reference archive — not executed at runtime.
-spec-kit AI prompting patterns have been inlined into sk.* skills.
-Do not invoke upstream shell scripts. Do not reference upstream-adapter.md for execution.
-See upstream-adapter.md for the migration rationale and pattern source map.

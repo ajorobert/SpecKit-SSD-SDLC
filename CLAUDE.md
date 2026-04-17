@@ -7,7 +7,7 @@ Spec-driven development framework for full-stack multi-service systems.
 Read .specify/project-config.md for project identity, custom rules, and overrides.
 Skills: .claude/skills/sk.*/SKILL.md
 Agents: .claude/agents/
-Context skills: .claude/skills/{governance,design-principles,domain-model,service-registry,standards,system-context,architecture-decisions,upstream-adapter}/
+Context skills: .claude/skills/{governance,design-principles,domain-model,service-registry,standards,system-context,architecture-decisions}/
 Roles: po | architect | lead | backend | frontend | security
 
 ## System Prompt Inclusions
@@ -18,9 +18,7 @@ Roles: po | architect | lead | backend | frontend | security
 
 ## Rules
 1. Skills are located in .claude/skills/sk.*/. Each skill declares its own inject_files and subagent_type. command-rules.md is no longer globally imported — relevant rules are embedded per skill.
-2. upstream/ is a pattern reference archive — not executed at runtime. See upstream-adapter.md for migration rationale.
-3. Never edit files inside upstream/
-4. Session state: .claude/session.yaml
+2. Session state: .claude/session.yaml
 
 ## Security Rules
 5. Never use `rm`, `rmdir`, `del`, or `unlink` — these commands are blocked by policy.

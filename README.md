@@ -1,7 +1,6 @@
 # 🚀 SpecKit-SSD-SDLC
 
-> A spec-driven development framework for full-stack multi-service systems.  
-> Built as a structured layer on top of [github/spec-kit](https://github.com/github/spec-kit).
+> A spec-driven development framework for full-stack multi-service systems.
 
 ---
 
@@ -237,26 +236,10 @@ For developers actively working inside the framework or wanting a deep dive into
 | No security layer | `/sk.security-audit` with security agent |
 | No non-derivable context | Three-tier knowledge base system |
 | Single tool dependency | Generic execution layer mapping for Claude and Gemini |
-| No upstream resilience | Subtree + reconcile script + adapter map |
 | No project bootstrap | `setup.sh` + `/sk.init` for one-command initialization |
 
 </details>
 
-<details>
-<summary><strong>Four-Source Map</strong></summary>
-
-This framework draws from four original sources:
-
-| Source | What is taken | Where it lives |
-|--------|--------------|----------------|
-| **spec-kit** | AI prompting patterns (clarify loop, implement phases, constitution interview) | Inlined into `/sk.*` commands — `upstream/` is a reference archive only. |
-| **spec-kit-plus** | ADR system, PHR system, PASS/FAIL quality gates, command-rules pattern | `/sk.adr`, `/sk.phr`, `/sk.verify`, `.specify/memory/command-rules.md` |
-| **specs.md** (concepts) | Intent→Unit→Story hierarchy, adaptive checkpoints, hierarchical standards | `specs/intents/`, `.claude/skills/governance/` |
-| **gstack** | Execution pipeline (code review, browser QA, eng review, shipping) | Wrapper commands: `/sk.review`, etc. |
-
-The spec-kit upstream is a reference archive — **never executed at runtime**. All AI prompting patterns have been inlined and adapted structurally.
-
-</details>
 
 <details>
 <summary><strong>Execution Layer Structure</strong></summary>
@@ -271,7 +254,7 @@ The spec-kit upstream is a reference archive — **never executed at runtime**. 
 <details>
 <summary><strong>Core Components & Memory Layer</strong></summary>
 
-- **Foundation**: `upstream/` (protected git subtree), unified execution layer in `.claude/`.
+- **Foundation**: Unified execution layer in `.claude/`.
 - **Memory Layer (`.specify/memory/`)**:
   - `system-context.md`, `domain-model.md`, `service-registry.md`
   - `architecture-decisions.md` (ADR Index)
@@ -380,7 +363,7 @@ Each file is scoped to the commands that need it. `sk.implement` doesn't need sy
 </details>
 
 <details>
-<summary><strong>Upstream Maintenance</strong></summary>
+<summary><strong>Framework Updates</strong></summary>
 
 To receive framework updates:
 
@@ -388,14 +371,5 @@ To receive framework updates:
 git subtree pull --prefix=.speckit https://github.com/your-org/SpecKit-SSD-SDLC main --squash
 bash .speckit/setup.sh    # updates .claude/; prompts for CLAUDE/GEMINI replace
 ```
-
-To reconcile against base `spec-kit` updates:
-
-```bash
-git subtree pull --prefix upstream https://github.com/github/spec-kit.git main --squash
-bash scripts/reconcile-upstream.sh
-```
-
-Never edit files inside `upstream/` directly. 
 
 </details>
