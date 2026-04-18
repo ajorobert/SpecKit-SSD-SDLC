@@ -69,7 +69,7 @@ Structured review checklist for C# .NET 10 backend code. Evaluates design patter
 * Hardcoded secrets or connection strings.
 * Missing input validation on public-facing endpoints.
 * `IQueryable` exposed from repository interfaces.
-* CQRS violations: a single repository interface exposing both write methods and projection/list/search methods; a command handler returning a read DTO; a query handler invoking write methods or `IUnitOfWork.CommitAsync`; a search query bypassing Elasticsearch and going directly to PostgreSQL.
+* CQRS violations: a single repository interface exposing both write methods and projection/list/search methods; a command handler returning a read DTO; a query handler invoking write methods or `IUnitOfWork.CommitAsync`; a search query bypassing Elasticsearch and going directly to PostgreSQL; an Infrastructure read-repository implementation that targets more than one data store family (e.g. one class doing both Dapper and Elasticsearch calls) — split into `I{Entity}ReadRepository` (PostgreSQL) and `I{Entity}SearchRepository` (Elasticsearch) per `csharp-clean-arch`.
 
 ### Advisory Issues (flag and recommend)
 * Methods exceeding 30 lines — extract to private methods or separate class.

@@ -201,6 +201,8 @@ services.AddScoped<IListingReadRepository, DapperListingReadRepository>();
 services.Decorate<IListingReadRepository, CachedListingReadRepository>(); // Scrutor
 ```
 
+**Scope of this decorator pattern:** the Redis cache decorator wraps `I{Entity}ReadRepository` (entity-shaped reads backed by Dapper/PostgreSQL) only. It is **never** wrapped around `I{Entity}SearchRepository` (Elasticsearch-backed search reads — see `elasticsearch-patterns` and `csharp-clean-arch` Read side). Search results are query-hashed, not entity-keyed; if a search index needs result caching, do it inside the search repo impl with a short TTL on the query-hash key, not via this decorator.
+
 ### Cache invalidation — driven by domain events, never by command handlers
 
 The command handler does not call Redis directly. It mutates the aggregate; the resulting domain event triggers an in-process notification handler that invalidates the affected keys. This keeps the write side ignorant of the cache and prevents dual-write bugs.

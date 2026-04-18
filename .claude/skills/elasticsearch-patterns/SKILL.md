@@ -18,6 +18,7 @@ Elasticsearch is the **only** read store for search-shaped queries in this syste
 * Any query that is geo-shaped (radius, polygon, bounding box), full-text, faceted, autocomplete, or paginated-by-relevance → must route through an `IQueryHandler<...>` that uses an `I{Entity}SearchRepository` backed by `Elasticsearch.Clients.Elasticsearch`.
 * Search query handlers must **never** fall back to PostgreSQL for the search itself. If Elasticsearch is unavailable, the handler returns `Result.Failure(new ServiceUnavailableError(...))` — it does not silently degrade to a slower PostgreSQL `LIKE` or PostGIS scan.
 * Single-entity-by-ID lookups, transactional reads, and reporting queries do **not** use Elasticsearch — those go to Redis cache or Dapper over PostgreSQL per `csharp-clean-arch`.
+* See `csharp-clean-arch` (Read side) for the companion `I{Entity}ReadRepository` used for non-search reads — query handlers may inject either or both, but each Infrastructure impl class targets a single data store family (no class spans both ES and PostgreSQL).
 
 **Write side:**
 * Nothing writes to Elasticsearch from a CQRS command handler. Indexing happens exclusively in MassTransit consumers that subscribe to integration events published by the owning service via the transactional outbox (see `messaging-patterns`).

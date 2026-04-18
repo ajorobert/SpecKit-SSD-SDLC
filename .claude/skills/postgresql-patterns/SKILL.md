@@ -18,7 +18,7 @@ Within a single service, PostgreSQL is accessed differently for the write side v
 |---|---|---|---|
 | **Write** | EF Core (`DbContext`) | `ICommandHandler<...>` only | Loads aggregates by ID, mutates through domain methods, commits via `IUnitOfWork`. Tracking enabled. |
 | **Read** | Dapper (raw SQL → DTO) | `IQueryHandler<...>` only | Returns DTOs / read models directly. No tracking. May read from a PostgreSQL replica. |
-| **Read (search-shaped)** | — | — | Goes to **Elasticsearch**, never PostgreSQL. See `elasticsearch-patterns`. |
+| **Read (search-shaped)** | — | — | Goes to **Elasticsearch** via `I{Entity}SearchRepository` (see `csharp-clean-arch` Read side and `elasticsearch-patterns`), never PostgreSQL. |
 
 **Hard rules:**
 * Never use Dapper inside a command handler. Never use EF Core inside a query handler.

@@ -76,21 +76,25 @@ public interface IQueryHandler<TQuery, TResponse>      : IRequestHandler<TQuery,
 * Write repositories expose: `GetByIdAsync`, `AddAsync`, `UpdateAsync`. Never list/search/projection methods.
 
 **Read side** (queries):
-* Routes to a **separate** `I{Entity}ReadRepository` or `I{Entity}Queries` interface returning DTOs / read models.
-* Implementation chooses the appropriate read store per access pattern:
-  | Access pattern | Read store |
-  |---|---|
-  | Single entity by ID, hot read | Redis cache → fall through to PostgreSQL |
-  | Listing search, geo, faceted | Elasticsearch (mandatory — never PostgreSQL) |
-  | Reporting, paged lists, joins for projection | Dapper over PostgreSQL replica |
-  | Latest entity state with no caching needed | EF Core `.AsNoTracking()` |
+* Two read-side base interfaces exist, picked by the **shape** of the access pattern (not by performance):
+
+  | Interface | Backed by | Used for |
+  |---|---|---|
+  | `I{Entity}ReadRepository` | Dapper over PostgreSQL (optionally decorated with Redis cache via Scrutor — see `redis-patterns`) | Single entity by ID, paged lists with deterministic filters, reporting projections, joins for read DTOs. Reads of the *current state* of a known entity. |
+  | `I{Entity}SearchRepository` | `Elastic.Clients.Elasticsearch` against the search index (mandatory — never PostgreSQL for search) | Geo (radius/polygon/bounding box), full-text, faceted filtering, autocomplete, relevance-paginated results. Reads where the question is "find entities matching shape X." |
+
+* A query handler may inject **either or both**. Most handlers inject one. Aggregating handlers (e.g. "search results, then enrich each hit with detail") may inject both, but composition usually belongs in the BFF — see `bff-patterns`.
+* Each Infrastructure impl class targets **one** data store. `DapperListingReadRepository` does not touch Elasticsearch. `ElasticsearchListingSearchRepository` does not touch PostgreSQL.
+* Redis cache-aside is a **decorator over `I{Entity}ReadRepository`** only (see `redis-patterns`). Search-result caching, when needed, is a short-TTL pattern *inside* the `I{Entity}SearchRepository` impl — not a decorator, since search keys are query-hashed not entity-keyed.
+* Latest entity state with no caching may use EF Core `.AsNoTracking()` inside a `I{Entity}ReadRepository` impl, but this is the exception — Dapper is the default.
 * Read repositories return DTOs/records — never aggregate roots, never `IQueryable`.
 * Read models are decoupled from domain entities — they are reshaped for the consumer.
 
 **Hard rules:**
 * A handler that writes must not return read DTOs. Return `Result<Guid>` (new ID) or `Result` (no payload). Clients re-fetch via the query side.
 * A read repository must not be injected into a command handler. A write repository must not be injected into a query handler.
-* The same physical table may back both — the *interfaces* and the *handlers* are split. CQRS here is logical, not necessarily physical separation of databases.
+* A handler depends on the read interface(s) whose **shape** matches its access pattern; an Infrastructure impl class targets a **single** data store family.
+* The same physical table may back both write and read — the *interfaces* and the *handlers* are split. CQRS here is logical, not necessarily physical separation of databases.
 
 ### Data Access
 * EF Core for transactional writes through aggregate roots — the only write path.
@@ -169,7 +173,23 @@ public class GetListingDetailHandler(IListingReadRepository reads)
 }
 ```
 
-### Repository Interfaces — Split by Side (Domain / Application layer)
+### Search Query + Handler (read side, search-shaped)
+```csharp
+// Application layer — depends on the search repo, not the read repo
+public record SearchListingsQuery(GeoPolygon Area, string? Text, int Page) : IQuery<ListingSearchPage>;
+
+public class SearchListingsHandler(IListingSearchRepository search)
+    : IQueryHandler<SearchListingsQuery, ListingSearchPage>
+{
+    public async Task<Result<ListingSearchPage>> Handle(SearchListingsQuery q, CancellationToken ct)
+    {
+        var page = await search.SearchAsync(q.Area, q.Text, q.Page, ct);
+        return Result.Success(page);
+    }
+}
+```
+
+### Repository Interfaces — Split by Side AND by Read Shape
 ```csharp
 // Domain layer — write side, aggregate-oriented, no EF Core reference
 public interface IListingWriteRepository
@@ -179,16 +199,29 @@ public interface IListingWriteRepository
     Task UpdateAsync(Listing listing, CancellationToken ct);
 }
 
-// Application layer — read side, DTO-oriented, infrastructure picks the data store
+// Application layer — read side #1: entity-shaped reads of current state
+// Backed by Dapper over PostgreSQL. May be decorated with Redis cache (see redis-patterns).
 public interface IListingReadRepository
 {
-    Task<ListingDetailDto?>           GetDetailAsync(Guid id, CancellationToken ct);
-    Task<IReadOnlyList<ListingCardDto>> GetActiveInAreaAsync(GeoPolygon area, CancellationToken ct);
+    Task<ListingDetailDto?>             GetDetailAsync(Guid id, CancellationToken ct);
+    Task<IReadOnlyList<ListingCardDto>> GetByOwnerAsync(Guid ownerId, int page, CancellationToken ct);
 }
 
-// Infrastructure layer — implementations may pick different stores per method
-// e.g. GetDetailAsync → Redis cache + Dapper fallback
-//      GetActiveInAreaAsync → Elasticsearch geo query
+// Application layer — read side #2: search-shaped reads (geo / full-text / facets / autocomplete)
+// Backed by Elasticsearch. Never PostgreSQL — see elasticsearch-patterns.
+public interface IListingSearchRepository
+{
+    Task<ListingSearchPage> SearchAsync(GeoPolygon area, string? text, int page, CancellationToken ct);
+    Task<IReadOnlyList<string>> AutocompleteTitleAsync(string prefix, CancellationToken ct);
+}
+
+// Infrastructure layer — one impl class per data store family
+//   DapperListingReadRepository           : IListingReadRepository      (PostgreSQL via Dapper)
+//   CachedListingReadRepository           : IListingReadRepository      (Scrutor decorator over Dapper impl, adds Redis)
+//   ElasticsearchListingSearchRepository  : IListingSearchRepository    (Elasticsearch only)
+//
+// A single impl class never spans multiple stores. CachedListingReadRepository wraps the
+// read repo only; it never wraps the search repo.
 ```
 
 ### Controller (API layer)
