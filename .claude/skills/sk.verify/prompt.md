@@ -6,6 +6,20 @@ Role: architect | Level: story
 This is the final gate — not a mid-implementation check. Run sk.analyze if you need a
 consistency check earlier in the cycle (after implement, before test).
 
+## Step 0: Capability Pack Selection
+Load all packs applicable to this story for comprehensive gate evaluation.
+
+1. Read session.yaml → get `active_story_id`, `active_unit`, and `role`
+2. Read story frontmatter → check `tags` array
+3. Read ALL applicable packs for the story's role and domain. **Load ≤6 packs total.**
+
+Backend story: always `.claude/skills/csharp-clean-arch/SKILL.md`
+Frontend story: always `.claude/skills/frontend-design-system/SKILL.md`, `.claude/skills/accessibility-standards/SKILL.md`
+
+Then conditional packs per the CLAUDE.md Tech Stack Context Skills table matching the story tags.
+
+List the packs loaded before continuing.
+
 ## Input Artifacts
 story-{ID}.md (active story + frontmatter)
 All unit artifacts (architecture.md, data-model.md, contracts/)

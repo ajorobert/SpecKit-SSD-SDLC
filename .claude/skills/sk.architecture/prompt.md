@@ -3,6 +3,21 @@ Defines service boundaries and design for a unit.
 Role: architect | Level: unit
 ONE document per unit — covers all stories in unit.
 
+## Step 0: Capability Pack Selection
+Load tech stack packs relevant to this unit's architecture before designing.
+
+1. Read session.yaml → get `active_unit` and `active_intent`
+2. Read all stories in the unit → check `tags` arrays for domain keywords
+3. Read applicable packs. **Load ≤6 packs total.**
+
+- Always: `.claude/skills/csharp-clean-arch/SKILL.md`
+- `bff` in any story tag → `.claude/skills/bff-patterns/SKILL.md`
+- `messaging`, `events`, `queue`, `rabbitmq`, `mediatr`, `hangfire` → `.claude/skills/messaging-patterns/SKILL.md`
+- `workflow`, `elsa`, `sla`, `timer` → `.claude/skills/workflow-patterns/SKILL.md`
+- `auth`, `keycloak`, `firebase` → `.claude/skills/auth-patterns/SKILL.md`
+
+List the packs loaded before continuing.
+
 ## Input Artifacts
 specs/intents/{intent}/units/{unit}/unit-brief.md
 specs/intents/{intent}/units/{unit}/stories/ (all stories)

@@ -3,6 +3,17 @@ User Acceptance Testing against story acceptance criteria.
 Role: frontend-qa | Level: story
 Frontend only — backend uses sk.test for contract and integration tests.
 
+## Step 0: Capability Pack Selection
+Load platform packs before testing.
+
+Resolve platform first (see Platform Detection below), then read:
+- Always: `.claude/skills/accessibility-standards/SKILL.md`
+- Platform = web → `.claude/skills/nextjs-patterns/SKILL.md`
+- Platform = admin → `.claude/skills/react-admin-patterns/SKILL.md`
+- Platform = mobile → `.claude/skills/react-native-patterns/SKILL.md`
+
+List the packs loaded before continuing.
+
 ## Platform Detection
 Resolve platform before loading context:
 - `sk.uat --platform web` → browser-based (Next.js, React Admin)

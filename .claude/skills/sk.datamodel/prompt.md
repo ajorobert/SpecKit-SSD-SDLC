@@ -3,6 +3,20 @@ Defines data model for a unit.
 Role: architect | Level: unit
 ONE document per unit.
 
+## Step 0: Capability Pack Selection
+Load data-layer packs before designing the model.
+
+1. Read session.yaml → get `active_unit`
+2. Read unit stories → check `tags` for data-domain keywords
+3. Read applicable packs. **Load ≤4 packs total.**
+
+- Always: `.claude/skills/postgresql-patterns/SKILL.md`
+- `cache`, `redis`, `session`, `rate-limit`, `lock` → `.claude/skills/redis-patterns/SKILL.md`
+- `search`, `elasticsearch`, `geo`, `index` → `.claude/skills/elasticsearch-patterns/SKILL.md`
+- `file`, `upload`, `storage` → `.claude/skills/file-storage-patterns/SKILL.md`
+
+List the packs loaded before continuing.
+
 ## Input Artifacts
 specs/intents/{intent}/units/{unit}/architecture.md
 .specify/memory/domain-model.md
