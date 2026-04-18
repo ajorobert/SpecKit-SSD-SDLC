@@ -10,6 +10,39 @@ Production patterns for block storage of user-generated photos and videos. Cover
 
 ## Core Rules
 
+### Bounded Context & Aggregate
+
+File storage is a **bounded context** owned by a dedicated `file-svc` (or co-located inside the owning service when volume is low — but always with its own schema and aggregate). Other services reference files by `FileAssetId` only; they never read storage keys, MIME types, or scan state directly.
+
+**Aggregate root: `FileAsset`** — the consistency boundary for the lifecycle of a single binary asset. State machine:
+
+```
+PendingUpload  → (presigned URL issued, awaiting client PUT)
+   → Quarantined        (FileUploaded received; sitting in quarantine bucket)
+       → Cleared        (FileScanCleared; moved to private bucket)
+           → PublicPromoted   (owner published the entity referencing this asset)
+       → Infected       (FileScanInfected; deleted from quarantine; terminal)
+   → Rejected           (MIME or size validation failed; terminal)
+   → Archived           (soft-deleted; awaiting Hangfire physical purge; terminal)
+```
+
+* All state transitions go through methods on `FileAsset` (`MarkUploaded`, `MarkScanCleared`, `MarkScanInfected`, `PromoteToPublic`, `SoftDelete`). External code never sets state fields directly.
+* MIME-type allow-list and size limits are aggregate invariants enforced in `FileAsset.RequestUpload(...)` — see the presign example below. Controllers and consumers never duplicate these checks.
+
+**Domain events** (raised by `FileAsset`, published as integration events via the transactional outbox — see `messaging-patterns`):
+
+| Event | Raised when | Subscribers (typical) |
+|---|---|---|
+| `FileUploaded` | Client confirms PUT (or storage-side notification fires) | Virus scan consumer |
+| `FileScanCleared` | Scan returns clean and file is moved to private bucket | Image pipeline consumer; owning entity (e.g. listing) for read-model update |
+| `FileScanInfected` | Scan detects malware | Owner notification consumer; audit log |
+| `FileRejected` | MIME/size verification fails post-upload | Owner notification |
+| `ImageProcessingCompleted` | All variants written | Owning entity for read-model update; CDN warm-up |
+| `FilePromotedToPublic` | Entity that owns the file is published | CDN URL exposure |
+| `FileArchived` | Soft-delete applied | Hangfire schedule for physical purge |
+
+**Orchestration choice for the upload → scan → process pipeline:** use a **MassTransit state-machine saga** (see `messaging-patterns`), not Elsa. Rationale: the flow is a fixed technical pipeline with no SLA breach alerts, no human steps, and no business-configurable branching — exactly the shape sagas were designed for. Reserve Elsa (`workflow-patterns`) for SLA-driven business workflows (e.g. "listing must be approved within 48h"). The saga state machine owns: `Pending → Scanning → Processing → Ready` with compensating transitions to `Infected` / `Failed`, persisted via the EF Core saga repository.
+
 ### Storage Topology
 * **Block storage** (S3-compatible API): primary store for all files. Two buckets per environment:
   * `{env}-uploads-quarantine` — incoming files land here first, before virus scan clears them.
@@ -17,6 +50,14 @@ Production patterns for block storage of user-generated photos and videos. Cover
   * `{env}-assets-public` — scan-cleared files served publicly via CDN (active listing photos, public thumbnails).
 * Files never move from quarantine to public in one step — always quarantine → private → public (promotion requires explicit domain event).
 * Never expose raw bucket URLs to clients. All access via presigned URLs (private assets) or CDN URLs (public assets).
+
+### Event Publishing — Always via the Transactional Outbox
+
+Every domain event raised by `FileAsset` (`FileUploaded`, `FileScanCleared`, `FileScanInfected`, `FileRejected`, `ImageProcessingCompleted`, `FilePromotedToPublic`, `FileArchived`) is published as a MassTransit integration event through the **transactional outbox** — see `messaging-patterns` (Transactional Outbox section). Hard rules:
+
+* The command handler / consumer that mutates the `FileAsset` aggregate writes state and the outbox row in a single database transaction (`AddEntityFrameworkOutbox<FileAssetDbContext>`). Never call `IPublishEndpoint.Publish` outside the outbox-managed unit of work.
+* The virus scan consumer and image pipeline consumer below are themselves MassTransit consumers — when they update `FileAsset` state and publish a follow-on event, the same outbox guarantee applies. Any direct `Publish` call in their `Consume` method is a bug: the file's state and the downstream event must commit atomically or not at all.
+* This eliminates the dual-write problem between block storage and the database: the bucket move (quarantine → private) is done first; the state update + outbox row is committed second; the event is relayed third. If the relay never runs, retry by replaying outbox rows — the operation is naturally idempotent because storage moves are key-addressed.
 
 ### Upload Flow (Client-Initiated Direct Upload)
 1. Client requests an upload URL from the BFF/API: `POST /api/v1/uploads/presign`.
@@ -95,34 +136,75 @@ Example: `prod/listings/usr_abc/lst_xyz/fid_123/medium.webp`
 
 ## Patterns / Examples
 
-### Presign upload endpoint
+### Presign upload — thin controller, MediatR command, write-side handler
+
+The controller owns no orchestration. The command handler owns aggregate construction, persistence, and presigned URL generation through an injected port.
+
 ```csharp
-[HttpPost("presign")]
-[Authorize]
-public async Task<ActionResult<PresignedUploadResponse>> RequestUpload(
-    PresignUploadRequest request, CancellationToken ct)
+// API layer — controller does only validation + dispatch
+[ApiController]
+[Route("api/v1/uploads")]
+[Authorize(Policy = "RequireAuthenticated")]
+public class UploadsController(ISender mediator) : ControllerBase
 {
-    // Validate allowed MIME type
-    if (!_allowedMimeTypes.Contains(request.MimeType))
-        return BadRequest(ProblemDetails.From("Unsupported file type"));
+    [HttpPost("presign")]
+    [ProducesResponseType<PresignedUploadResponse>(StatusCodes.Status201Created)]
+    public async Task<ActionResult<PresignedUploadResponse>> Presign(
+        PresignUploadRequest req, CancellationToken ct)
+        => (await mediator.Send(req.ToCommand(User.GetUserId()), ct))
+              .ToActionResult(this);
+}
 
-    var fileId = Guid.NewGuid();
-    var key    = $"quarantine/{User.GetOwnerId()}/{request.EntityId}/{fileId}";
+// Application layer — CQRS command (write side: creates a FileAsset aggregate)
+public record RequestPresignedUploadCommand(
+    Guid OwnerId, Guid EntityId, string EntityType, string MimeType, long SizeBytes)
+    : ICommand<PresignedUploadResponse>;
 
-    var presignedUrl = await _storage.GeneratePresignedPutUrlAsync(
-        bucket: _options.QuarantineBucket,
-        key: key,
-        mimeType: request.MimeType,
-        maxBytes: _options.MaxImageBytes,
-        ttl: TimeSpan.FromMinutes(15),
-        ct);
+public class RequestPresignedUploadHandler(
+    IFileAssetWriteRepository repo,
+    IFileStoragePort storage,                  // port abstracting S3 — Infrastructure implements
+    IUnitOfWork uow,
+    IOptions<FileStorageOptions> options,
+    ILogger<RequestPresignedUploadHandler> logger)
+    : ICommandHandler<RequestPresignedUploadCommand, PresignedUploadResponse>
+{
+    public async Task<Result<PresignedUploadResponse>> Handle(
+        RequestPresignedUploadCommand cmd, CancellationToken ct)
+    {
+        // Domain validates MIME + size — invariants live in the aggregate, not the controller
+        var asset = FileAsset.RequestUpload(
+            ownerId:    cmd.OwnerId,
+            entityId:   cmd.EntityId,
+            entityType: cmd.EntityType,
+            mimeType:   cmd.MimeType,
+            sizeBytes:  cmd.SizeBytes,
+            policy:     options.Value.UploadPolicy);
+        if (asset.IsFailure) return Result.Failure<PresignedUploadResponse>(asset.Error);
 
-    await _fileRepo.RegisterPendingUploadAsync(fileId, User.GetOwnerId(), request.EntityId, key, ct);
-    await _uow.CommitAsync(ct);
+        await repo.AddAsync(asset.Value, ct);
 
-    return Ok(new PresignedUploadResponse(fileId, presignedUrl, ExpiresInSeconds: 900));
+        // Port returns the presigned URL — the handler does not know about S3 directly
+        var url = await storage.GeneratePresignedPutUrlAsync(
+            bucket:    options.Value.QuarantineBucket,
+            key:       asset.Value.QuarantineKey,
+            mimeType:  cmd.MimeType,
+            maxBytes:  options.Value.MaxBytesFor(cmd.MimeType),
+            ttl:       TimeSpan.FromMinutes(15),
+            ct);
+
+        await uow.CommitAsync(ct);
+        logger.LogInformation("Presigned upload requested: file {FileId} owner {OwnerId}",
+            asset.Value.Id, cmd.OwnerId);
+
+        return Result.Success(new PresignedUploadResponse(asset.Value.Id, url, ExpiresInSeconds: 900));
+    }
 }
 ```
+
+Notes:
+* `FileAsset.RequestUpload(...)` is the aggregate factory — it owns MIME-type allow-list and size limit invariants. The controller and handler never validate these themselves.
+* `IFileStoragePort` is the Application-layer abstraction; the concrete S3-compatible implementation lives in Infrastructure.
+* The response (`PresignedUploadResponse`) is a write-side acknowledgement DTO — it carries only the new ID and the URL needed to perform the upload, nothing about the asset state. Subsequent reads use the query side.
 
 ### Virus scan consumer
 ```csharp

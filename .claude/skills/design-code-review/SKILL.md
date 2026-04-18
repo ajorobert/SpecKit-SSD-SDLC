@@ -10,7 +10,7 @@ Structured review checklist for C# .NET 10 backend code. Evaluates design patter
 
 ## Core Rules
 
-### Review Dimensions (evaluate all six)
+### Review Dimensions (evaluate all seven)
 
 **1. Layer Architecture**
 * Domain layer has zero infrastructure dependencies (no EF Core, no MassTransit, no HttpClient).
@@ -47,7 +47,16 @@ Structured review checklist for C# .NET 10 backend code. Evaluates design patter
 * No sensitive data (passwords, tokens, PII) in log output.
 * Authorization checked before any domain operation — not only at route level.
 
-**6. Testability**
+**6. CQRS Compliance**
+* Every use case is implemented as either a **command** (`ICommand` / `ICommand<T>`) or a **query** (`IQuery<T>`) — never a generic `IRequest`.
+* Command handlers (`ICommandHandler<...>`) inject only **write** repositories (`I{Aggregate}WriteRepository`) and `IUnitOfWork`. They mutate aggregate roots through domain methods and return `Result` or `Result<TId>` only — never read DTOs.
+* Query handlers (`IQueryHandler<...>`) inject only **read** repositories (`I{Entity}ReadRepository` / `I{Entity}Queries`). They return DTOs / read models — never aggregate roots, never `IQueryable`.
+* No handler injects both a write repository and a read repository. No repository interface exposes both write methods (`AddAsync`, `UpdateAsync`) and projection methods (`GetXxxDtoAsync`).
+* Search-shaped queries (geo, full-text, faceted) route to Elasticsearch — never direct PostgreSQL queries from a search query handler.
+* Cache-aside lookups live on the read side only — either as a `Cached{Entity}ReadRepository` decorator or inside a query handler. Never inside a command handler.
+* After a command, clients re-fetch via the query side. Commands do not return read DTOs as a "convenience".
+
+**7. Testability**
 * All dependencies injected via constructor — no `new` for services, no static calls.
 * No static mutable state.
 * Methods are deterministic and side-effect free where possible.
@@ -60,6 +69,7 @@ Structured review checklist for C# .NET 10 backend code. Evaluates design patter
 * Hardcoded secrets or connection strings.
 * Missing input validation on public-facing endpoints.
 * `IQueryable` exposed from repository interfaces.
+* CQRS violations: a single repository interface exposing both write methods and projection/list/search methods; a command handler returning a read DTO; a query handler invoking write methods or `IUnitOfWork.CommitAsync`; a search query bypassing Elasticsearch and going directly to PostgreSQL.
 
 ### Advisory Issues (flag and recommend)
 * Methods exceeding 30 lines — extract to private methods or separate class.

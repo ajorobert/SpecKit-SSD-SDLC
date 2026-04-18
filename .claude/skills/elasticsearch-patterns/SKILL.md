@@ -10,6 +10,19 @@ Production patterns for Elasticsearch used as the search layer for the directory
 
 ## Core Rules
 
+### Role in CQRS — Mandatory Search Read Model
+
+Elasticsearch is the **only** read store for search-shaped queries in this system. See `csharp-clean-arch` (CQRS section) and `postgresql-patterns` (CQRS Data Access Split).
+
+**Mandatory routing:**
+* Any query that is geo-shaped (radius, polygon, bounding box), full-text, faceted, autocomplete, or paginated-by-relevance → must route through an `IQueryHandler<...>` that uses an `I{Entity}SearchRepository` backed by `Elasticsearch.Clients.Elasticsearch`.
+* Search query handlers must **never** fall back to PostgreSQL for the search itself. If Elasticsearch is unavailable, the handler returns `Result.Failure(new ServiceUnavailableError(...))` — it does not silently degrade to a slower PostgreSQL `LIKE` or PostGIS scan.
+* Single-entity-by-ID lookups, transactional reads, and reporting queries do **not** use Elasticsearch — those go to Redis cache or Dapper over PostgreSQL per `csharp-clean-arch`.
+
+**Write side:**
+* Nothing writes to Elasticsearch from a CQRS command handler. Indexing happens exclusively in MassTransit consumers that subscribe to integration events published by the owning service via the transactional outbox (see `messaging-patterns`).
+* The owning service's PostgreSQL is the source of truth; Elasticsearch is a derived projection. A full reindex must always be reproducible from PostgreSQL alone.
+
 ### Index Design
 * Define **explicit mappings** for every index — never rely on dynamic mapping in production. Dynamic mapping guesses wrong types and creates unmapped fields silently.
 * One index per entity type (`listings`, `vendors`, `areas`). Do not mix entity types in one index.
@@ -77,7 +90,8 @@ Production patterns for Elasticsearch used as the search layer for the directory
 
 ### Synchronisation Strategy
 * Source of truth: PostgreSQL. Elasticsearch is a derived read model — never write directly to ES from clients.
-* Sync pattern: MassTransit consumer subscribes to domain events (`ListingActivated`, `ListingUpdated`, `ListingDeleted`) and updates the ES index.
+* Sync pattern: MassTransit consumer subscribes to integration events published by the owning service **via the transactional outbox** (see `messaging-patterns` — Transactional Outbox). The owning service's command handler commits aggregate state and the outbox row in one PostgreSQL transaction; the relay publishes; the indexer consumer (`ListingActivated`, `ListingUpdated`, `ListingDeleted`) updates the ES index. There is no direct Publish from the command handler — the outbox is the single bridge between the write side and ES.
+* Indexer consumers must be idempotent (see `messaging-patterns` — Delivery Guarantee & Idempotency). At-least-once delivery means the same event may arrive twice; rely on `IndexAsync` with the document ID acting as a natural dedup key, or check the version field on the document.
 * On consumer failure: dead-letter queue + Hangfire retry job for reindexing.
 * Full reindex: zero-downtime using alias swap — write to new index, then swap alias atomically.
 * Consistency model: **eventual**. Document this explicitly in the unit knowledge base. Search results may lag domain state by seconds.

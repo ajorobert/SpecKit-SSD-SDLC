@@ -133,8 +133,18 @@ public class UserContextMiddleware(RequestDelegate next)
 * Direct-call routes: services return `ProblemDetails` themselves — no BFF translation layer needed.
 
 ### Response Shaping
-* BFF DTOs are frontend-specific projections — never a pass-through of service DTOs.
-* Direct-call routes: services own their response shape. Designed to be client-friendly from the start.
+
+**Two distinct DTO layers — do not conflate them:**
+
+| DTO type | Owner | Shape driven by | Example |
+|---|---|---|---|
+| **Application DTO** | The owning service's Application layer (read repository → query handler return type) | The use case / read model — stable, versioned per the service's API contract | `ListingDetailDto`, `BookingSummaryDto` returned from `IQueryHandler<...>` |
+| **BFF DTO** (a.k.a. View Model) | The BFF aggregation handler | The specific frontend screen consuming it — composed from one or more Application DTOs, may rename, flatten, drop, or merge fields | `ListingDetailScreenResponse` (combines `ListingDetailDto` + `ReviewSummaryDto[]` + `IsSavedDto`) |
+
+* Application DTOs are **use-case contracts**: one per query handler, named after the business read model, lifetime tied to the service's API version. They appear in the OpenAPI spec of the owning service.
+* BFF DTOs are **client-shaped projections**: one per screen / per call site, named after the screen or interaction (`ListingDetailScreenResponse`, `CheckoutPageResponse`), lifetime tied to the frontend that consumes them. They appear in the BFF's OpenAPI spec, never in any backend service's spec.
+* The BFF must not return an Application DTO directly — even if the shape is identical today. Wrap it in a BFF DTO so the frontend contract can evolve independently of the service contract. A field rename in the service DTO must not ripple to the frontend.
+* Direct-call routes (no aggregation needed) are an explicit exception: the service's Application DTO is the on-the-wire contract, and the frontend depends on it directly. Document this choice — it trades coupling for latency.
 
 ---
 

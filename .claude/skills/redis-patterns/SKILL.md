@@ -10,6 +10,33 @@ Production patterns for Redis in a primary + replica + 3-sentinel topology. Cove
 
 ## Core Rules
 
+### Role in CQRS — Read-Side Only (with two exceptions)
+
+Redis participates in the architecture in three roles. Two of them are read-side only; one is infrastructure-shared.
+
+| Role | Side | Where it lives |
+|---|---|---|
+| **Entity / DTO cache** (cache-aside) | Read side only | Inside an `IQueryHandler<...>` or as a `Cached{Entity}ReadRepository` decorator over `I{Entity}ReadRepository` (Infrastructure layer) |
+| **Rate limiting counters** | Cross-cutting | BFF or service middleware — not visible to handlers |
+| **Distributed locks** | Cross-cutting | Infrastructure utilities — used wherever exclusive coordination is needed |
+
+**Hard rules for the cache role:**
+* A command handler **never** reads from Redis. Commands always load aggregates fresh through `I{Aggregate}WriteRepository` (EF Core) — caching a domain aggregate would invite stale-write bugs.
+* A command handler **never** writes a DTO into Redis. The cache is populated lazily on the next read after a write invalidates it.
+* Cache invalidation on write happens by publishing a domain event (in-process `INotification` or integration event) that an invalidation handler consumes — the command handler does not call Redis directly.
+* Cache values are **read-model DTOs**, never aggregate roots, never EF Core entity graphs.
+
+### Consistency Model — Eventual Between Cache and Source of Truth
+
+The cache and the database are **not** kept in lockstep. Treat the cache as an eventually consistent read-side projection of the source of truth (PostgreSQL).
+
+* **Stale-read window after a write**: bounded by *(invalidation event publish + handler latency)*. Typically sub-second in steady state; can grow to seconds under load. This is acceptable by design — document it in the unit's knowledge base for any access pattern that uses cache-aside.
+* **Read-your-own-writes is NOT guaranteed via the cache**. After a command handler commits a write, the same caller's next read may still hit a stale cached value (the invalidation `INotification` runs after `CommitAsync` but races with concurrent reads). If an endpoint must reflect the user's own write immediately, the read repository must bypass the cache for that request — typically by reading directly from the underlying `inner` repository, or by routing the read to the primary database connection (not a replica).
+* **No replica reads inside the same request as a write**: if a request both writes (command) and reads (query) the same aggregate, the query must target the primary database — never a replica. Replica lag is a separate eventual-consistency surface from cache lag, and stacking the two yields user-visible regressions.
+* **Cache invalidation is best-effort**, not transactional. The `INotification` invalidation handler runs in-process after `CommitAsync` succeeds; if the process crashes between commit and invalidation, the cached value is stale until its TTL expires. **TTL is the safety net** — every key MUST have a TTL (see TTL Strategy) so any missed invalidation is bounded in blast radius. For data where stale reads are unacceptable, do not cache it.
+* **No write-through, no write-behind**: we use cache-aside only. Writes go to PostgreSQL; the cache is invalidated (deleted), never updated. The next read repopulates lazily. This avoids the dual-write consistency problems write-through introduces and matches the CQRS read/write split.
+* **Cross-service cache coherence**: when service A's data is cached inside service B (e.g., a denormalised read model), invalidation flows through MassTransit integration events, not direct Redis calls across services. Service B's MassTransit consumer subscribes to the integration event and invalidates its own local cache key.
+
 ### Topology & Connection
 * Topology: 1 primary (writes), 1+ replicas (reads), 3 sentinels (HA failover). Never connect directly to primary IP — always connect via sentinel.
 * `StackExchange.Redis` sentinel configuration:
@@ -112,28 +139,80 @@ services.AddSingleton<IConnectionMultiplexer>(_ =>
 });
 ```
 
-### Cache-aside implementation
+### Cache-aside as a read-side decorator (preferred)
+
+The query handler is unaware of caching — it depends on `IListingReadRepository` only. The cache lives in a decorator registered ahead of the concrete read repository. This keeps the Application layer agnostic of infrastructure choices.
+
 ```csharp
-public async Task<ListingDetailDto?> GetListingAsync(Guid publicId, CancellationToken ct)
+// Application layer — query handler depends on the read repository abstraction only
+public class GetListingDetailHandler(IListingReadRepository reads)
+    : IQueryHandler<GetListingDetailQuery, ListingDetailDto>
 {
-    var key = $"listing-svc:listing:{publicId}:detail";
-    var db  = _redis.GetDatabase();
-
-    var cached = await db.StringGetAsync(key);
-    if (cached.HasValue)
-        return JsonSerializer.Deserialize<ListingDetailDto>(cached!);
-
-    var listing = await _repo.GetByPublicIdAsync(publicId, ct);
-    if (listing is null) return null;
-
-    var dto = listing.ToDetailDto();
-    await db.StringSetAsync(key, JsonSerializer.Serialize(dto), TimeSpan.FromMinutes(5));
-    return dto;
+    public async Task<Result<ListingDetailDto>> Handle(GetListingDetailQuery q, CancellationToken ct)
+    {
+        var dto = await reads.GetDetailAsync(q.ListingId, ct);
+        return dto is null
+            ? Result.Failure<ListingDetailDto>(new NotFoundError("Listing not found"))
+            : Result.Success(dto);
+    }
 }
 
-// On update — invalidate, never update
-public async Task InvalidateListingCacheAsync(Guid publicId)
-    => await _redis.GetDatabase().KeyDeleteAsync($"listing-svc:listing:{publicId}:detail");
+// Infrastructure layer — cache-aside decorator over the Dapper-backed read repository
+public class CachedListingReadRepository(
+    IListingReadRepository inner,                  // the Dapper-backed concrete impl
+    IConnectionMultiplexer redis,
+    ILogger<CachedListingReadRepository> logger)
+    : IListingReadRepository
+{
+    public async Task<ListingDetailDto?> GetDetailAsync(Guid id, CancellationToken ct)
+    {
+        var key = $"listing-svc:listing:{id}:detail";
+        var db  = redis.GetDatabase();
+
+        try
+        {
+            var cached = await db.StringGetAsync(key);
+            if (cached.HasValue)
+                return JsonSerializer.Deserialize<ListingDetailDto>(cached!);
+        }
+        catch (RedisException ex)
+        {
+            // Redis unavailable — fall through to source of truth, never crash the request
+            logger.LogWarning(ex, "Cache read failed for {Key}; falling through to source", key);
+        }
+
+        var dto = await inner.GetDetailAsync(id, ct);
+        if (dto is null) return null;
+
+        try
+        {
+            await db.StringSetAsync(key, JsonSerializer.Serialize(dto), TimeSpan.FromMinutes(5));
+        }
+        catch (RedisException ex)
+        {
+            logger.LogWarning(ex, "Cache write failed for {Key}; serving uncached", key);
+        }
+        return dto;
+    }
+}
+
+// DI registration — decorator wraps the concrete impl
+services.AddScoped<IListingReadRepository, DapperListingReadRepository>();
+services.Decorate<IListingReadRepository, CachedListingReadRepository>(); // Scrutor
+```
+
+### Cache invalidation — driven by domain events, never by command handlers
+
+The command handler does not call Redis directly. It mutates the aggregate; the resulting domain event triggers an in-process notification handler that invalidates the affected keys. This keeps the write side ignorant of the cache and prevents dual-write bugs.
+
+```csharp
+// Application layer — invalidation handler subscribes to the domain event
+public class InvalidateListingCacheOnUpdated(IConnectionMultiplexer redis)
+    : INotificationHandler<ListingUpdatedNotification>
+{
+    public Task Handle(ListingUpdatedNotification n, CancellationToken ct)
+        => redis.GetDatabase().KeyDeleteAsync($"listing-svc:listing:{n.ListingId}:detail");
+}
 ```
 
 ### Rate limit counter (sliding window)

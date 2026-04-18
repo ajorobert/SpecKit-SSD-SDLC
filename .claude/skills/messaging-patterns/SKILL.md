@@ -11,10 +11,45 @@ Production patterns for async messaging (RabbitMQ + MassTransit), in-process com
 ## Core Rules
 
 ### Message Taxonomy
-* **Commands** (MassTransit): requests directed at one recipient that must happen. Named imperatively: `PlaceOrder`, `ActivateListing`. Delivered to a single consumer.
-* **Events** (MassTransit): notifications that something occurred. Named past-tense: `OrderPlaced`, `ListingActivated`. Delivered to all interested consumers via fanout/topic exchange.
-* **In-process notifications** (MediatR `INotification`): same-process side effects after a command succeeds. Not durable — use only for same-transaction side effects.
+
+**The word "command" means two different things — never conflate them.**
+
+| Term | Mechanism | Scope | Returns | Purpose |
+|---|---|---|---|---|
+| **CQRS Command** | MediatR `ICommand` / `ICommand<T>` | In-process, intra-service | `Result` / `Result<TId>` | Mutate an aggregate inside this service (write side of CQRS) |
+| **CQRS Query** | MediatR `IQuery<T>` | In-process, intra-service | `Result<TReadModel>` | Read data through a read repository (read side of CQRS) |
+| **Integration Command** | MassTransit `IConsumer<T>` over RabbitMQ direct exchange | Cross-service, durable | Void (async with delivery guarantees) | Tell another service to do something |
+| **Integration Event** | MassTransit `IConsumer<T>` over RabbitMQ fanout/topic exchange | Cross-service, durable | Void | Announce that something happened in this service |
+| **In-process notification** | MediatR `INotification` | In-process, intra-service | Void | Same-process side effects after a command succeeds (not durable) |
+
+**Hard rules:**
+* CQRS queries are **never** sent through MassTransit. Reads are always in-process MediatR queries that hit a read repository (PostgreSQL via Dapper / Elasticsearch / Redis cache). Cross-service reads are done through synchronous HTTP (BFF aggregation) or by subscribing to integration events and maintaining a local read model — never request/response over the bus.
+* MassTransit commands are not CQRS commands. A MassTransit consumer that receives an integration command typically dispatches a MediatR CQRS command internally to perform the actual aggregate mutation.
+* MediatR `INotification` is for same-process side effects only. If the side effect must survive a process crash, publish a MassTransit integration event from the command handler (via the transactional outbox).
+* **Naming**:
+  * MediatR commands: imperative (`CreateListingCommand`, `ActivateListingCommand`).
+  * MediatR queries: question-form (`GetListingDetailQuery`, `SearchListingsByAreaQuery`).
+  * MassTransit integration commands: imperative, contract-versioned (`v1.CreateOrderCommand`).
+  * MassTransit integration events: past-tense, contract-versioned (`v1.OrderPlaced`, `v1.ListingActivated`).
 * **Documents**: data transfer objects passed through messages. Always versioned; include a `SchemaVersion` field.
+
+### Typical Flow Combining All Three
+
+```
+HTTP request
+  → Controller dispatches MediatR ICommand<Guid> (CQRS write)
+      → CommandHandler loads aggregate via IListingWriteRepository,
+        mutates aggregate, calls IUnitOfWork.CommitAsync,
+        publishes MassTransit integration event via outbox (v1.ListingActivated)
+      → CommandHandler returns Result<Guid>
+  → Controller returns 201 Created
+
+(asynchronously)
+  → MassTransit consumer in Search service receives v1.ListingActivated
+      → dispatches local MediatR ICommand to upsert into the Elasticsearch read model
+```
+
+The shape of "command" depends on which boundary you are crossing — in-process (MediatR + CQRS) or inter-service (MassTransit + integration contract).
 
 ### RabbitMQ Topology (MassTransit)
 * Use MassTransit's topology conventions — it creates exchanges and queues automatically. Do not configure RabbitMQ manually unless topology must be shared with non-.NET consumers.
@@ -40,10 +75,10 @@ Production patterns for async messaging (RabbitMQ + MassTransit), in-process com
 * Never publish events directly inside a command handler that also writes state — dual-write risk.
 
 ### In-Process Messaging (MediatR)
-* Use `INotification` + `INotificationHandler` for same-process side effects after a successful domain operation.
-* MediatR notifications are not durable — they are lost on process crash. If durability is required, publish via MassTransit instead.
-* Use `IRequest<Result<T>>` for commands and queries — never `IRequest<T>` for fallible operations.
-* Pipeline behaviours for cross-cutting concerns: validation (`ValidationBehavior`), logging (`LoggingBehavior`), transaction (`TransactionBehavior`).
+* Use the project's CQRS marker interfaces — `ICommand` / `ICommand<T>` for writes, `IQuery<T>` for reads — defined in `csharp-clean-arch`. Never `IRequest<T>` directly; the markers carry the CQRS intent and let pipeline behaviours target the correct side.
+* All return shapes are `Result` / `Result<T>` for fallible operations. Exceptions are reserved for unexpected infrastructure faults and bugs.
+* Use `INotification` + `INotificationHandler` for same-process side effects after a successful command. Not durable — lost on process crash; if durability is required, publish a MassTransit integration event from the command handler via the outbox.
+* Pipeline behaviours for cross-cutting concerns: validation (`ValidationBehavior` — applies to both commands and queries), logging (`LoggingBehavior`), transaction (`TransactionBehavior` — **command side only**, never wraps a query).
 
 ### Sagas (MassTransit StateMachine)
 * Use sagas for multi-step business processes with compensation logic.

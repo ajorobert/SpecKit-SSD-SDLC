@@ -10,6 +10,22 @@ Production schema design and data access patterns for PostgreSQL used across all
 
 ## Core Rules
 
+### CQRS Data Access Split (mandatory)
+
+Within a single service, PostgreSQL is accessed differently for the write side vs the read side. See `csharp-clean-arch` for the marker interfaces and handler split.
+
+| Side | Tool | Used by | Notes |
+|---|---|---|---|
+| **Write** | EF Core (`DbContext`) | `ICommandHandler<...>` only | Loads aggregates by ID, mutates through domain methods, commits via `IUnitOfWork`. Tracking enabled. |
+| **Read** | Dapper (raw SQL → DTO) | `IQueryHandler<...>` only | Returns DTOs / read models directly. No tracking. May read from a PostgreSQL replica. |
+| **Read (search-shaped)** | — | — | Goes to **Elasticsearch**, never PostgreSQL. See `elasticsearch-patterns`. |
+
+**Hard rules:**
+* Never use Dapper inside a command handler. Never use EF Core inside a query handler.
+* Never project to a DTO from a tracked EF Core query — that is a write-side abuse. If you need a DTO from EF Core for a one-off case, use `.AsNoTracking()` and document why Dapper was not used.
+* Reads inside a query handler may target a read replica (`ReadOnlyConnectionString`) — writes always target the primary.
+* Repository interfaces are split per `csharp-clean-arch`: `I{Aggregate}WriteRepository` (EF Core impl) vs `I{Entity}ReadRepository` (Dapper impl).
+
 ### Primary Keys
 * Use `BIGINT GENERATED ALWAYS AS IDENTITY` as default — efficient, sequential, no gaps concern.
 * Use `UUID` (v7 with `gen_random_uuid()` or `uuidv7()`) only when global uniqueness, opacity, or external reference is required (e.g., listing IDs exposed in URLs).
@@ -105,6 +121,34 @@ CREATE POLICY tenant_isolation ON listings
 ```
 * Set `app.tenant_id` at session start via `SET LOCAL app.tenant_id = '...'`.
 * Apply to all tables containing tenant data. EF Core global query filter is an additional safeguard, not a replacement.
+
+**Bridging `ITenantContext` → PostgreSQL session GUC** — use a `DbConnectionInterceptor` so RLS sees the tenant on every connection, including ones returned from the Npgsql pool:
+
+```csharp
+public sealed class TenantConnectionInterceptor(ITenantContext tenant) : DbConnectionInterceptor
+{
+    public override async Task ConnectionOpenedAsync(
+        DbConnection connection, ConnectionEndEventData eventData, CancellationToken ct = default)
+    {
+        if (tenant.TenantId is null) return;       // unauthenticated requests bypass — RLS still denies
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = "SELECT set_config('app.tenant_id', @tid, false)";
+        var p = cmd.CreateParameter(); p.ParameterName = "tid"; p.Value = tenant.TenantId.ToString();
+        cmd.Parameters.Add(p);
+        await cmd.ExecuteNonQueryAsync(ct);
+    }
+}
+
+// Registration — same interceptor for EF Core (writes) AND a Dapper connection factory (reads)
+services.AddScoped<TenantConnectionInterceptor>();
+services.AddDbContext<AppDbContext>((sp, opts) =>
+    opts.UseNpgsql(connStr).AddInterceptors(sp.GetRequiredService<TenantConnectionInterceptor>()));
+```
+
+* `ITenantContext` is populated from the JWT claim by middleware (see `auth-patterns`). The interceptor is the **only** place application code sets `app.tenant_id` — never call `SET LOCAL` from a handler.
+* Use `set_config(..., false)` (session scope) — Npgsql's connection multiplexer keeps the connection bound to the request scope, so this is safe. If you switch to a transaction-pooled topology (PgBouncer transaction mode), change to `set_config(..., true)` (LOCAL scope) and ensure every query runs inside an explicit transaction.
+* The same interceptor must be applied to the Dapper read path's connection factory — otherwise the read side bypasses RLS entirely, defeating the defence-in-depth goal.
+* Replica connections (read-only) need the same interceptor — replicas enforce RLS independently.
 
 ## Patterns / Examples
 

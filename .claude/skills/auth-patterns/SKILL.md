@@ -138,6 +138,10 @@ public class ListingsController(ISender mediator) : ControllerBase
 
 RBAC answers "can this role access this area?". ABAC answers "can *this specific user* act on *this specific resource* given its current state?". ABAC is enforced in application command/query handlers — not at the route level.
 
+**ABAC applies equally to reads and writes.** "Can this user *view* this draft listing?", "Can this vendor *see* another vendor's booking?", "Can this user *download* this private file?" are all ABAC questions. A `IQueryHandler<...>` that returns a single resource (or a filtered collection scoped to the caller) must run the same `IAuthorizationService.AuthorizeAsync(user, resource, policy)` check before returning the DTO — never assume "it's just a read, RBAC at the route is enough." Cross-ownership data leaks happen on the read side just as easily as on the write side.
+
+For collection queries, ABAC is enforced by **scoping the query** itself (e.g., `WHERE owner_id = @callerId`) rather than per-row authorization after the fact — but the scoping predicate is still derived from the caller's attributes (resolved via `IUserContext`), and the choice of predicate is an authorization decision that lives in the query handler.
+
 ### The Three Attribute Sources
 | Source | Examples |
 |---|---|
@@ -226,6 +230,41 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddScoped<IAuthorizationHandler, ListingOwnerHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, ListingTenantHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, ListingEditableStatusHandler>();
+```
+
+### ABAC in Query Handlers (Reads Are Not Exempt)
+```csharp
+public class GetListingDetailHandler(
+    IListingReadRepository reads,
+    IAuthorizationService authz,
+    IUserContext user)
+    : IQueryHandler<GetListingDetailQuery, ListingDetailDto>
+{
+    public async Task<Result<ListingDetailDto>> Handle(GetListingDetailQuery q, CancellationToken ct)
+    {
+        var dto = await reads.GetDetailAsync(q.ListingId, ct);
+        if (dto is null)
+            return Result.Failure<ListingDetailDto>(new NotFoundError("Listing not found"));
+
+        // ABAC on the read: a draft listing is only visible to its owner / admins
+        var authResult = await authz.AuthorizeAsync(user.Principal, dto, "CanViewListing");
+        if (!authResult.Succeeded)
+            return Result.Failure<ListingDetailDto>(new NotFoundError("Listing not found"));
+            // Return NotFound (not Forbidden) to avoid leaking existence of unauthorized resources
+
+        return Result.Success(dto);
+    }
+}
+```
+
+For collection queries, scope the SQL/ES query by the caller's attributes — never fetch all rows and filter in memory:
+
+```csharp
+// In the read repository — scoping predicate is derived from IUserContext
+public Task<IReadOnlyList<ListingSummaryDto>> ListMineAsync(CancellationToken ct)
+    => connection.QueryAsync<ListingSummaryDto>(
+        "SELECT ... FROM listings WHERE owner_id = @ownerId AND deleted_at IS NULL",
+        new { ownerId = user.UserId });
 ```
 
 ### ABAC in Command Handlers (Where It Belongs)

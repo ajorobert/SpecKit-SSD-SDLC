@@ -20,6 +20,8 @@ Production patterns for Elsa v3 embedded workflows in .NET 10 services. Covers w
 ### Workflow Design
 * Model workflows as explicit state machines — every state and every transition named in business terms.
 * Keep workflows thin: activities orchestrate calls to domain services; business logic lives in domain/application layer, not inside activities.
+* **Activities dispatch domain operations through MediatR** — they never call repositories, `DbContext`, or domain methods directly. An activity that needs to mutate state injects `ISender` and sends the appropriate `ICommand` / `ICommand<T>` (see `csharp-clean-arch` and `messaging-patterns`). An activity that needs to read state sends an `IQuery<T>`. This keeps the CQRS boundary intact: a workflow is just another caller of the application layer, not a parallel pathway around it. Validation, authorization, transactions, outbox publishing, and pipeline behaviours all run automatically because the call goes through the same MediatR pipeline as an HTTP request.
+* Activities **never** call EF Core, Dapper, MassTransit `IPublishEndpoint`, or Redis directly — those are infrastructure details owned by command/query handlers. If a domain operation does not yet have a MediatR handler, create one rather than reaching past it from inside the activity.
 * Workflows are long-running and durable — do not assume in-memory state survives. Persist all correlation data in workflow variables.
 * Correlation: every workflow instance correlates to a business entity ID (`listingId`, `bookingId`). Use `CorrelateWithAsync` to prevent duplicate instances.
 * Workflow triggers: HTTP endpoint, MassTransit message, timer. Prefer message-based triggers for reliability.

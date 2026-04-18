@@ -51,13 +51,56 @@ Production patterns for C# ASP.NET Core 10 services using Clean Architecture wit
 * Never throw domain exceptions across service boundaries — translate to Result or integration events.
 * Provide explicit error types: `NotFoundError`, `ValidationError`, `ConflictError`, `UnauthorizedError`.
 
+### CQRS — Mandatory Separation of Reads and Writes
+
+This solution enforces CQRS at the Application layer. Every use case is either a **command** (changes state, returns `Result` or `Result<TId>`) or a **query** (reads data, returns `Result<TReadModel>`). They never share handlers, never share repositories, and never share the same data path.
+
+**Marker interfaces** (defined in Application):
+```csharp
+public interface ICommand               : IRequest<Result> { }
+public interface ICommand<TResponse>    : IRequest<Result<TResponse>> { }
+public interface IQuery<TResponse>      : IRequest<Result<TResponse>> { }
+
+public interface ICommandHandler<TCommand>             : IRequestHandler<TCommand, Result>
+    where TCommand : ICommand { }
+public interface ICommandHandler<TCommand, TResponse>  : IRequestHandler<TCommand, Result<TResponse>>
+    where TCommand : ICommand<TResponse> { }
+public interface IQueryHandler<TQuery, TResponse>      : IRequestHandler<TQuery, Result<TResponse>>
+    where TQuery : IQuery<TResponse> { }
+```
+
+**Write side** (commands):
+* Loads aggregate roots through `I{Aggregate}WriteRepository` — methods return rich domain entities, never DTOs.
+* Mutates aggregates by invoking domain methods (`listing.Activate()`), never by setting properties.
+* Persists through EF Core via Unit of Work; emits domain events that become integration events via the transactional outbox (see `messaging-patterns`).
+* Write repositories expose: `GetByIdAsync`, `AddAsync`, `UpdateAsync`. Never list/search/projection methods.
+
+**Read side** (queries):
+* Routes to a **separate** `I{Entity}ReadRepository` or `I{Entity}Queries` interface returning DTOs / read models.
+* Implementation chooses the appropriate read store per access pattern:
+  | Access pattern | Read store |
+  |---|---|
+  | Single entity by ID, hot read | Redis cache → fall through to PostgreSQL |
+  | Listing search, geo, faceted | Elasticsearch (mandatory — never PostgreSQL) |
+  | Reporting, paged lists, joins for projection | Dapper over PostgreSQL replica |
+  | Latest entity state with no caching needed | EF Core `.AsNoTracking()` |
+* Read repositories return DTOs/records — never aggregate roots, never `IQueryable`.
+* Read models are decoupled from domain entities — they are reshaped for the consumer.
+
+**Hard rules:**
+* A handler that writes must not return read DTOs. Return `Result<Guid>` (new ID) or `Result` (no payload). Clients re-fetch via the query side.
+* A read repository must not be injected into a command handler. A write repository must not be injected into a query handler.
+* The same physical table may back both — the *interfaces* and the *handlers* are split. CQRS here is logical, not necessarily physical separation of databases.
+
 ### Data Access
-* EF Core for transactional writes and complex relational queries with navigation properties.
-* Dapper for performance-critical read projections and reporting queries.
-* Always use `.AsNoTracking()` for read-only queries.
+* EF Core for transactional writes through aggregate roots — the only write path.
+* Dapper over PostgreSQL (or replica) for performance-critical read projections and reporting queries — read side only.
+* Elasticsearch for search-shaped reads (geo, full-text, faceted) — read side only.
+* Redis cache-aside for hot single-entity reads — read side only, never on the write path.
+* Always use `.AsNoTracking()` for any EF Core query in a query handler.
 * Apply global query filters for soft deletes (`IsDeleted`) and multi-tenancy (`TenantId`).
 * Repositories expose domain-semantic methods (`GetActiveListingsForAreaAsync`), not `IQueryable`.
-* Use the Unit of Work pattern for transaction coordination across multiple repositories.
+* Use the Unit of Work pattern on the **write side only** for transaction coordination across multiple write repositories.
 
 ### Error Handling & Logging
 * Structured logging via `Microsoft.Extensions.Logging` with JSON output. No unstructured plain text in production.
@@ -85,17 +128,17 @@ Production patterns for C# ASP.NET Core 10 services using Clean Architecture wit
 
 ## Patterns / Examples
 
-### Command + Handler
+### Command + Handler (write side)
 ```csharp
 // Application layer
 public record CreateListingCommand(Guid OwnerId, string Title, decimal Price, GeoPoint Location)
-    : IRequest<Result<Guid>>;
+    : ICommand<Guid>;
 
 public class CreateListingHandler(
-    IListingRepository repo,
+    IListingWriteRepository repo,
     IUnitOfWork uow,
     ILogger<CreateListingHandler> logger)
-    : IRequestHandler<CreateListingCommand, Result<Guid>>
+    : ICommandHandler<CreateListingCommand, Guid>
 {
     public async Task<Result<Guid>> Handle(CreateListingCommand cmd, CancellationToken ct)
     {
@@ -108,16 +151,44 @@ public class CreateListingHandler(
 }
 ```
 
-### Repository Interface (Domain layer)
+### Query + Handler (read side)
 ```csharp
-// Domain layer — no EF Core reference
-public interface IListingRepository
+// Application layer — returns a DTO, never an aggregate
+public record GetListingDetailQuery(Guid ListingId) : IQuery<ListingDetailDto>;
+
+public class GetListingDetailHandler(IListingReadRepository reads)
+    : IQueryHandler<GetListingDetailQuery, ListingDetailDto>
 {
-    Task<Listing?> GetByIdAsync(Guid id, CancellationToken ct);
-    Task<IReadOnlyList<Listing>> GetActiveInAreaAsync(GeoPolygon area, CancellationToken ct);
+    public async Task<Result<ListingDetailDto>> Handle(GetListingDetailQuery q, CancellationToken ct)
+    {
+        var dto = await reads.GetDetailAsync(q.ListingId, ct);
+        return dto is null
+            ? Result.Failure<ListingDetailDto>(new NotFoundError("Listing not found"))
+            : Result.Success(dto);
+    }
+}
+```
+
+### Repository Interfaces — Split by Side (Domain / Application layer)
+```csharp
+// Domain layer — write side, aggregate-oriented, no EF Core reference
+public interface IListingWriteRepository
+{
+    Task<Listing?> GetByIdAsync(Guid id, CancellationToken ct);   // load aggregate for mutation
     Task AddAsync(Listing listing, CancellationToken ct);
     Task UpdateAsync(Listing listing, CancellationToken ct);
 }
+
+// Application layer — read side, DTO-oriented, infrastructure picks the data store
+public interface IListingReadRepository
+{
+    Task<ListingDetailDto?>           GetDetailAsync(Guid id, CancellationToken ct);
+    Task<IReadOnlyList<ListingCardDto>> GetActiveInAreaAsync(GeoPolygon area, CancellationToken ct);
+}
+
+// Infrastructure layer — implementations may pick different stores per method
+// e.g. GetDetailAsync → Redis cache + Dapper fallback
+//      GetActiveInAreaAsync → Elasticsearch geo query
 ```
 
 ### Controller (API layer)
