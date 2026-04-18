@@ -3,6 +3,33 @@ Spec-aware code review: validates against bounded context, contracts, and ADRs.
 Role: backend, frontend | Level: story
 gstack: optional enhancement — if installed, invoke after Claude's own review for additional signal
 
+## Step 0: Capability Pack Selection
+Load the tech stack packs relevant to this review before reading any code.
+
+1. Read session.yaml → get `role` (backend | frontend) and `active_story_id`
+2. Read the active story frontmatter → check `tags` array
+3. Read applicable packs. **Load ≤6 packs total.**
+
+**Role = backend**
+- Always: `.claude/skills/csharp-clean-arch/SKILL.md`, `.claude/skills/design-code-review/SKILL.md`
+- `bff` → `.claude/skills/bff-patterns/SKILL.md`
+- `messaging`, `events`, `queue`, `rabbitmq`, `mediatr`, `hangfire` → `.claude/skills/messaging-patterns/SKILL.md`
+- `workflow`, `elsa`, `sla`, `timer` → `.claude/skills/workflow-patterns/SKILL.md`
+- `auth`, `keycloak`, `firebase`, `session` → `.claude/skills/auth-patterns/SKILL.md`
+- `db`, `schema`, `migration`, `postgres` → `.claude/skills/postgresql-patterns/SKILL.md`
+- `cache`, `redis` → `.claude/skills/redis-patterns/SKILL.md`
+- `search`, `elasticsearch` → `.claude/skills/elasticsearch-patterns/SKILL.md`
+- `file`, `upload` → `.claude/skills/file-storage-patterns/SKILL.md`
+
+**Role = frontend**
+- Always: `.claude/skills/frontend-design-system/SKILL.md`, `.claude/skills/react-component-patterns/SKILL.md`, `.claude/skills/accessibility-standards/SKILL.md`
+- Portal (Next.js): `.claude/skills/nextjs-patterns/SKILL.md`
+- Admin SPA: `.claude/skills/react-admin-patterns/SKILL.md`
+- Mobile: `.claude/skills/react-native-patterns/SKILL.md`
+- `state`, `zustand` → `.claude/skills/zustand-state-management/SKILL.md`
+
+List the packs loaded before continuing.
+
 ## Pre-flight
 1. Read session.yaml active_story_id
    NULL → STOP: run sk.session focus --story {id} first
@@ -69,8 +96,8 @@ Status: REJECTED | APPROVED
 - {finding}: {description}
 ```
 
-On REJECTED: write/overwrite the file with current findings. Set story status → review-rejected in frontmatter.
-On APPROVED: Set story status → testing in frontmatter (ready for sk.test).
+On REJECTED: write/overwrite the file with current findings.
+On APPROVED: keep the review report at its path.
 1. If any blocking findings were raised during this review cycle (i.e. the story was previously REJECTED):
    Append a `## Implementation Pitfalls` entry to the unit knowledge base:
      specs/intents/{intent}/units/{unit}/knowledge-base.md
@@ -100,3 +127,8 @@ Domain logic findings and observability gaps reported with severity from gstack 
 - No ADR constraint violations
 - No module boundary violations
 - All other findings reported with gstack /review output
+
+## Completion Signal
+Last line of output must be exactly one of:
+`SK_RESULT: PASS` — Status is APPROVED, no blocking findings
+`SK_RESULT: FAIL` — Status is REJECTED, blocking findings present

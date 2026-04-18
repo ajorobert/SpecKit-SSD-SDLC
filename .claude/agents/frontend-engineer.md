@@ -66,3 +66,18 @@ Before marking any task complete:
 - Loading, error, and empty states all handled
 - No console errors or warnings
 - Tests written and passing
+
+## Capability Packs
+Loaded by sk.implement/sk.review Step 0 based on active surface and story tags. You do not need to load them.
+
+| Pack | When loaded |
+|---|---|
+| `nextjs-patterns` | Portal (Next.js) surface — always |
+| `react-admin-patterns` | Admin SPA surface — always |
+| `react-native-patterns` | Mobile surface — always |
+| `frontend-design-system` | Portal and Admin surfaces — always |
+| `react-component-patterns` | Portal and Admin surfaces — always |
+| `accessibility-standards` | Portal and Admin surfaces — always |
+| `auth-patterns` | `auth` tag |
+| `zustand-state-management` | `state`, `zustand` tags |
+| `file-storage-patterns` | `file`, `upload` tags |

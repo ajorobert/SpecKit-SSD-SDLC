@@ -3,6 +3,27 @@ Generates and runs test suite for active story.
 Role: backend (backend tests) | frontend (frontend tests)
 Level: story
 
+## Step 0: Capability Pack Selection
+Load packs before generating tests.
+
+1. Read session.yaml → get `role` and `active_story_id`
+2. Read story frontmatter → check `tags`
+
+**Role = backend**
+- Always: `.claude/skills/csharp-clean-arch/SKILL.md`
+- `db`, `schema` → `.claude/skills/postgresql-patterns/SKILL.md`
+- `auth`, `keycloak` → `.claude/skills/auth-patterns/SKILL.md`
+- `messaging`, `events` → `.claude/skills/messaging-patterns/SKILL.md`
+- `cache`, `redis` → `.claude/skills/redis-patterns/SKILL.md`
+
+**Role = frontend**
+- Always: `.claude/skills/accessibility-standards/SKILL.md`
+- Portal: `.claude/skills/nextjs-patterns/SKILL.md`
+- Admin: `.claude/skills/react-admin-patterns/SKILL.md`
+- Mobile: `.claude/skills/react-native-patterns/SKILL.md`
+
+List packs loaded before continuing.
+
 ## Input Artifacts
 specs/intents/{intent}/units/{unit}/knowledge-base.md
   (tier 3 — invariants inform test design)
@@ -60,3 +81,8 @@ tests/components/{unit}/ (frontend)
 - Tests runnable without manual setup
 - Test names describe scenarios not implementation
 - Coverage report generated and displayed
+
+## Completion Signal
+Last line of output must be exactly one of:
+`SK_RESULT: PASS` — all tests passed
+`SK_RESULT: FAIL` — one or more tests failed

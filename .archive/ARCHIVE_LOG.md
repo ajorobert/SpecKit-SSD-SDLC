@@ -18,3 +18,9 @@ approved and let a human run the cleanup.
 
 
 
+
+## 2026-04-17 — .claude/hooks/post-command.md
+**Reason:** Superseded by post-skill.sh — logic is now wired as a real PostToolUse hook in settings.json
+**Original path:** .claude/hooks/post-command.md
+**Archived to:** .archive/2026-04-17/post-command.md
+**Review:** [ ] approved for permanent delete

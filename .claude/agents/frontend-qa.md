@@ -55,3 +55,8 @@ tests/components/{unit}/
 - Accessibility: axe-core or equivalent passes with zero violations
 - Loading, error, and empty states all have tests
 - Tests describe user behavior not implementation details
+
+## Capability Packs
+sk.uat Step 0 loads platform and accessibility packs. You do not need to load them.
+
+`accessibility-standards` (always), `nextjs-patterns` (web), `react-admin-patterns` (admin), `react-native-patterns` (mobile)

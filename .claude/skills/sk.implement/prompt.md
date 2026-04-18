@@ -2,6 +2,42 @@
 Executes implementation tasks for a story phase-by-phase.
 Role: backend | frontend | Level: story
 
+## Step 0: Capability Pack Selection
+Before any other steps, load the tech stack packs relevant to this task.
+
+1. Read session.yaml → get `role` (backend | frontend) and `active_story_id`
+2. Read the active story frontmatter → check `tags` array for domain keywords
+3. Determine the active service surface (from `active_unit` or story context)
+4. Read applicable packs. **Load ≤6 packs total** — prioritise specialist packs when the limit is reached.
+
+**Role = backend**
+- Always: `.claude/skills/csharp-clean-arch/SKILL.md`
+- `bff` → `.claude/skills/bff-patterns/SKILL.md`
+- `messaging`, `events`, `queue`, `rabbitmq`, `mediatr`, `hangfire` → `.claude/skills/messaging-patterns/SKILL.md`
+- `workflow`, `elsa`, `sla`, `timer`, `breach` → `.claude/skills/workflow-patterns/SKILL.md`
+- `auth`, `keycloak`, `firebase`, `session`, `token` → `.claude/skills/auth-patterns/SKILL.md`
+- `db`, `schema`, `migration`, `postgres`, `postgis` → `.claude/skills/postgresql-patterns/SKILL.md`
+- `cache`, `redis`, `rate-limit`, `lock` → `.claude/skills/redis-patterns/SKILL.md`
+- `search`, `elasticsearch`, `geo` → `.claude/skills/elasticsearch-patterns/SKILL.md`
+- `file`, `upload`, `storage`, `image`, `virus` → `.claude/skills/file-storage-patterns/SKILL.md`
+
+**Role = frontend — Customer Portal (Next.js)**
+- Always: `.claude/skills/nextjs-patterns/SKILL.md`, `.claude/skills/frontend-design-system/SKILL.md`, `.claude/skills/react-component-patterns/SKILL.md`, `.claude/skills/accessibility-standards/SKILL.md`
+- `auth` → `.claude/skills/auth-patterns/SKILL.md`
+- `state`, `zustand` → `.claude/skills/zustand-state-management/SKILL.md`
+- `file`, `upload` → `.claude/skills/file-storage-patterns/SKILL.md`
+
+**Role = frontend — Admin SPA**
+- Always: `.claude/skills/react-admin-patterns/SKILL.md`, `.claude/skills/frontend-design-system/SKILL.md`, `.claude/skills/react-component-patterns/SKILL.md`, `.claude/skills/accessibility-standards/SKILL.md`
+- `state`, `zustand` → `.claude/skills/zustand-state-management/SKILL.md`
+
+**Role = frontend — Mobile**
+- Always: `.claude/skills/react-native-patterns/SKILL.md`
+- `auth` → `.claude/skills/auth-patterns/SKILL.md`
+- `file`, `upload` → `.claude/skills/file-storage-patterns/SKILL.md`
+
+List the packs loaded before continuing to Pre-flight.
+
 ## Pre-flight
 1. Read session.yaml active_story_id
    NULL → STOP: run sk.session focus --story {id} first
@@ -50,7 +86,6 @@ If ignore file exists: verify it contains essential patterns, append only missin
 Update story-{ID}.md frontmatter at these points:
 - Start of execution (normal mode): set status → in-progress
 - Refine mode entry: set status → in-progress (was: review)
-- All tasks marked [X]: set status → review (ready for sk.review / sk.test)
 
 ## Task execution (phase-by-phase)
 Parse tasks.md and execute phases in order. Do not start a phase until the prior phase is complete.

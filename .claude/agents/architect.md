@@ -57,3 +57,18 @@ specs/intents/                        ← all stories for context
 - Additive changes over breaking changes
 - One bounded context per unit
 - Stateless services where possible
+
+## Capability Packs
+The active skill's Step 0 selects and loads these packs before your workflow begins.
+You do not need to load them yourself — they will be in context when you start.
+
+| Pack | Loaded by |
+|---|---|
+| `csharp-clean-arch` | sk.architecture, sk.verify (backend) |
+| `bff-patterns` | sk.architecture when unit is a BFF service |
+| `messaging-patterns` | sk.architecture when story has messaging tags |
+| `workflow-patterns` | sk.architecture when story has workflow tags |
+| `auth-patterns` | sk.architecture when story has auth tags |
+| `postgresql-patterns` | sk.datamodel (always) |
+| `redis-patterns` | sk.datamodel when story has cache tags |
+| `elasticsearch-patterns` | sk.datamodel when story has search tags |
