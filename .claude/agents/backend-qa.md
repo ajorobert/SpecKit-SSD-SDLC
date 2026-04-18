@@ -54,3 +54,9 @@ tests/unit/{unit}/
 - Tests are deterministic — same result every run
 - Test names describe the scenario not the implementation
 - No hardcoded IDs or environment-specific values
+
+## Capability Packs
+sk.test Step 0 loads applicable packs based on story tags. You do not need to load them.
+
+`csharp-clean-arch` (always), `postgresql-patterns` (`db` tag), `auth-patterns` (`auth` tag),
+`messaging-patterns` (`messaging` tag), `redis-patterns` (`cache` tag)

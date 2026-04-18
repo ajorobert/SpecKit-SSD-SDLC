@@ -59,6 +59,25 @@ In [BUG MODE]: set `story_type: bug` in frontmatter and populate:
   - `reproduction_steps`
   - `related_story` (if provided)
 
+### Step 5b — Tag Story with Domain Keywords
+After writing the story, scan the story title and acceptance criteria for tech domain signals.
+Set the `tags` array in story frontmatter using keywords from this list:
+
+| Keyword to add | When present in story |
+|---|---|
+| `auth` | login, logout, session, token, keycloak, firebase, permission, role, authorization |
+| `messaging` | event, queue, rabbitmq, masstransit, mediatr, publish, subscribe, hangfire, background job |
+| `workflow` | elsa, workflow, sla, timer, breach, escalation, state machine |
+| `db` | schema, migration, entity, table, postgres, postgis, seed |
+| `cache` | redis, cache, ttl, rate-limit, distributed lock, session store |
+| `search` | elasticsearch, search, geo, location, index, facet |
+| `file` | upload, download, image, virus, scan, storage, r2, cdn |
+| `bff` | api gateway, bff, backend-for-frontend, aggregation, forwarding |
+| `state` | zustand, global state, shared state, store |
+
+Add matched tags to story frontmatter as: `tags: [tag1, tag2]`
+Empty array if none match: `tags: []`
+
 ### Step 6 — Classify Checkpoint
 Read governance skill → set checkpoint_mode in story frontmatter.
 Bug stories default to checkpoint_mode: standard unless the fix touches

@@ -59,3 +59,19 @@ Before marking any task complete:
 - Error cases handled per api-standards.md error format
 - No hardcoded credentials or secrets
 - Logging added for non-trivial operations
+
+## Capability Packs
+Loaded by sk.implement/sk.review Step 0 based on story tags. You do not need to load them.
+
+| Pack | When loaded |
+|---|---|
+| `csharp-clean-arch` | Always (all backend stories) |
+| `design-code-review` | sk.review — always |
+| `bff-patterns` | `bff` tag |
+| `messaging-patterns` | `messaging`, `events`, `queue` tags |
+| `workflow-patterns` | `workflow`, `elsa`, `sla` tags |
+| `auth-patterns` | `auth`, `keycloak`, `firebase` tags |
+| `postgresql-patterns` | `db`, `schema`, `migration` tags |
+| `redis-patterns` | `cache`, `redis` tags |
+| `elasticsearch-patterns` | `search`, `elasticsearch` tags |
+| `file-storage-patterns` | `file`, `upload` tags |
