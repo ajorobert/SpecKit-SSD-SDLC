@@ -1,6 +1,6 @@
 ---
 name: postgresql-patterns
-description: "Load when: designing schemas, writing migrations, choosing data types, defining indexes, or reviewing PostgreSQL table design. Loaded by: sk.datamodel, sk.implement (backend)."
+description: "Load when: designing schemas, writing migrations, choosing data types, defining indexes, or reviewing PostgreSQL table design."
 ---
 
 # PostgreSQL Patterns
@@ -206,9 +206,9 @@ DO UPDATE SET
 ```
 
 ## When to Use
-* `sk.datamodel` — designing any new table or schema change
-* `sk.implement` — writing EF Core migrations, Dapper queries, or repository implementations
-* `sk.review` — reviewing schema changes or data access code
+* Designing any new table or schema change
+* Writing EF Core migrations, Dapper queries, or repository implementations
+* Reviewing schema changes or data access code
 
 ## When NOT to Use
 * Elasticsearch index design (see `elasticsearch-patterns`)

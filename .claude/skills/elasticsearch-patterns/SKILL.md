@@ -1,6 +1,6 @@
 ---
 name: elasticsearch-patterns
-description: "Load when: designing Elasticsearch indexes, writing search queries, implementing geo search (polygon/radius), or using Elastic.Clients.Elasticsearch in .NET. Loaded by: sk.datamodel, sk.contracts, sk.implement (backend)."
+description: "Load when: designing Elasticsearch indexes, writing search queries, implementing geo search (polygon/radius), or using Elastic.Clients.Elasticsearch in .NET."
 ---
 
 # Elasticsearch Patterns
@@ -176,8 +176,8 @@ public class ListingIndexConsumer(ElasticsearchClient esClient, ILogger<ListingI
 * Designing the search index for any searchable entity
 * Implementing geo search (radius, polygon, bounding box)
 * Full-text search, autocomplete, faceted filtering
-* `sk.datamodel` for units with a search access pattern
-* `sk.implement` for search service or indexer consumer implementation
+* Units with a search, geo, or full-text access pattern
+* Search service or indexer consumer implementation
 
 ## When NOT to Use
 * Transactional data storage → PostgreSQL

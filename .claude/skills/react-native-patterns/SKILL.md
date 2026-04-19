@@ -1,6 +1,6 @@
 ---
 name: react-native-patterns
-description: "Load when: implementing or reviewing the vendor mobile app (React Native, Expo managed workflow, NativeWind v5). List performance, animations, navigation, Expo APIs, platform-specific styling. Loaded by: sk.implement (frontend/mobile), sk.plan, sk.review (frontend)."
+description: "Load when: implementing or reviewing the vendor mobile app (React Native, Expo managed workflow, NativeWind v5). List performance, animations, navigation, Expo APIs, platform-specific styling."
 ---
 
 # React Native Patterns (Expo Managed + NativeWind v5)
@@ -154,7 +154,7 @@ export function SwipeableListItem({ children, onDelete }: Props) {
 * List rendering, animations, gestures in the mobile app
 * Expo SDK API usage (camera, location, notifications)
 * NativeWind styling decisions
-* `sk.implement (frontend/mobile)` for any mobile story
+* Any mobile feature implementation or mobile story
 
 ## When NOT to Use
 * Customer portal (Next.js — see `nextjs-patterns`)

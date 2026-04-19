@@ -1,6 +1,6 @@
 ---
 name: file-storage-patterns
-description: "Load when: designing or implementing file upload, storage, retrieval, image processing pipeline, or virus scanning for photos and videos. Block storage, presigned URLs, CDN delivery. Loaded by: sk.architecture, sk.implement (backend)."
+description: "Load when: designing or implementing file upload, storage, retrieval, image processing pipeline, or virus scanning for photos and videos. Block storage, presigned URLs, CDN delivery."
 ---
 
 # File Storage Patterns
@@ -241,7 +241,7 @@ public class VirusScanConsumer(IStorageService storage, IVirusScanService scanne
 * Any feature that accepts user-uploaded photos or videos
 * Designing the file storage schema and bucket structure
 * Implementing the upload flow, scan pipeline, or image processing
-* `sk.architecture` when a service needs to handle binary assets
+* When a service needs to handle binary assets (photos, videos, documents)
 
 ## When NOT to Use
 * CMS images (Strapi + Cloudflare R2 — separate pipeline managed by Strapi)

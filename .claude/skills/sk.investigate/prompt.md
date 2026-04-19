@@ -44,7 +44,7 @@ If gstack is installed (`command -v gstack`): also invoke `gstack /investigate` 
 Classify each finding as one of:
 - **Implementation bug**: behavior deviates from correct implementation of the spec → fix in src/
 - **Spec/contract mismatch**: spec or contract needs updating → flag to architect;
-  may require sk.contracts or sk.clarify before implementation changes
+  may require sk.design --targeted contracts or sk.clarify before implementation changes
 
 No spec files may be modified based on investigation findings without architect confirmation.
 
@@ -111,7 +111,7 @@ Next steps:
 1. Update the affected acceptance criteria in story-{ID}.md directly
    (or ask the PO/lead if scope is unclear).
 2. If the contract shape (endpoint, field, response code) needs to change:
-   run /sk.contracts in REFINE MODE (architect role recommended).
+   run /sk.design --targeted contracts in REFINE MODE (architect role recommended).
 3. Once spec is corrected, resume /sk.implement.
 
 Candidate invariant(s) from this session appended to unit knowledge-base for architect review.

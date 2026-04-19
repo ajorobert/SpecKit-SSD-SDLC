@@ -1,9 +1,9 @@
 ---
 name: domain-model
-description: "Load when: working with domain entities, planning data models, checking for entity conflicts, running sk.architecture, sk.datamodel, sk.plan"
+description: "Load when: working with domain entities, planning data models, or checking for entity conflicts across bounded contexts"
 ---
 
 Domain Model Skill
 Source: .specify/memory/domain-model.md
-Loaded by: sk.architecture, sk.plan, sk.datamodel
+Read .specify/memory/domain-model.md in full before working with entities or data models.
 Read .specify/memory/domain-model.md in full before proceeding.

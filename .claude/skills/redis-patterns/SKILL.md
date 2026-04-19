@@ -1,6 +1,6 @@
 ---
 name: redis-patterns
-description: "Load when: designing or implementing caching, session stores, rate limiting, or distributed locks using Redis. Primary/replica/sentinel topology, key naming, TTL strategy, cache-aside, eviction. Loaded by: sk.datamodel, sk.architecture, sk.implement (backend)."
+description: "Load when: designing or implementing caching, session stores, rate limiting, or distributed locks using Redis. Primary/replica/sentinel topology, key naming, TTL strategy, cache-aside, eviction."
 ---
 
 # Redis Patterns (Primary / Replica / Sentinel)
@@ -241,7 +241,7 @@ public async Task<bool> IsAllowedAsync(string userId, int limitPerMinute)
 * Implementing token or session caches
 * Rate limiting at BFF or service level
 * Distributed locks for critical sections (e.g., preventing duplicate job execution)
-* `sk.datamodel` for any unit whose data model includes a Redis access pattern
+* Any unit whose data model includes a Redis access pattern (cache, session, rate-limit, lock)
 
 ## When NOT to Use
 * Durable message queuing → RabbitMQ + MassTransit

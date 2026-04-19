@@ -9,7 +9,9 @@
       "Bash(* --help *)",
       "Edit(/.claude/skills/sk.uat/**)",
       "Edit(/.claude/skills/sk.ff/**)",
-      "Edit(/.claude/**)"
+      "Edit(/.claude/**)",
+      "Edit(/.claude/skills/sk.design/**)",
+      "Edit(/.claude/skills/governance/**)"
     ],
     "deny": [
       "Bash(rm *)",

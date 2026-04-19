@@ -1,9 +1,9 @@
 ---
 name: service-registry
-description: "Load when: working with service boundaries, API contracts, inter-service dependencies, running sk.architecture, sk.contracts, sk.plan, sk.impact"
+description: "Load when: working with service boundaries, API contracts, or inter-service dependencies"
 ---
 
 Service Registry Skill
 Source: .specify/memory/service-registry.md
-Loaded by: sk.plan, sk.architecture, sk.contracts, sk.impact
+Read .specify/memory/service-registry.md in full before designing or modifying service boundaries.
 Read .specify/memory/service-registry.md in full before proceeding.

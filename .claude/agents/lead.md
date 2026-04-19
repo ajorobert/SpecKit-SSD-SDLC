@@ -44,7 +44,7 @@ specs/intents/{intent}/units/{unit}/contracts/
 - Tasks must mark parallelizable work with [P]
 - Never create a plan that contradicts architecture.md
 - If architecture.md is missing for the unit: STOP, instruct to run
-  sk.architecture first
+  sk.design first
 - Never modify story acceptance criteria — that is PO territory
 - Never write to .specify/memory/ files
 - Never write to src/

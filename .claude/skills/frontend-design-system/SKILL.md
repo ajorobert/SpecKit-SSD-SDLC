@@ -1,6 +1,6 @@
 ---
 name: frontend-design-system
-description: "Load when: implementing or reviewing UI styling, Tailwind v4 configuration, shadcn/ui component usage, dark mode, layout systems, or design tokens. Loaded by: sk.implement (frontend), sk.review (frontend)."
+description: "Load when: implementing or reviewing UI styling, Tailwind v4 configuration, shadcn/ui component usage, dark mode, layout systems, or design tokens."
 ---
 
 # Frontend Design System (Tailwind v4 + shadcn/ui)
@@ -212,7 +212,7 @@ export function ThemeToggle() {
 * Adding or customising shadcn/ui components
 * Defining colour tokens, typography, or layout patterns
 * Dark mode implementation
-* `sk.implement (frontend)` and `sk.review (frontend)`
+* Implementing or reviewing UI styling, theming, or component variants
 
 ## When NOT to Use
 * React Native mobile styling (see `react-native-patterns` — NativeWind has different constraints)

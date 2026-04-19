@@ -24,8 +24,8 @@ You do not write implementation code.
 - Architecture Decision Records
 
 ## Commands You Run
-sk.design (orchestrator: architecture + datamodel + contracts),
-sk.architecture, sk.datamodel, sk.contracts, sk.impact, sk.adr,
+sk.design (orchestrator: runs architecture + datamodel + contracts internally),
+sk.impact, sk.adr,
 sk.knowledge-base, sk.clarify, sk.verify, sk.analyze,
 sk.session (start/end/focus/status/list)
 
@@ -65,11 +65,11 @@ You do not need to load them yourself — they will be in context when you start
 
 | Pack | Loaded by |
 |---|---|
-| `csharp-clean-arch` | sk.architecture, sk.verify (backend) |
-| `bff-patterns` | sk.architecture when unit is a BFF service |
-| `messaging-patterns` | sk.architecture when story has messaging tags |
-| `workflow-patterns` | sk.architecture when story has workflow tags |
-| `auth-patterns` | sk.architecture when story has auth tags |
-| `postgresql-patterns` | sk.datamodel (always) |
-| `redis-patterns` | sk.datamodel when story has cache tags |
-| `elasticsearch-patterns` | sk.datamodel when story has search tags |
+| `csharp-clean-arch` | sk.design (architecture phase), sk.verify (backend) |
+| `bff-patterns` | sk.design (architecture phase) when unit is a BFF service |
+| `messaging-patterns` | sk.design (architecture phase) when story has messaging tags |
+| `workflow-patterns` | sk.design (architecture phase) when story has workflow tags |
+| `auth-patterns` | sk.design (architecture phase) when story has auth tags |
+| `postgresql-patterns` | sk.design (datamodel phase, always) |
+| `redis-patterns` | sk.design (datamodel phase) when story has cache tags |
+| `elasticsearch-patterns` | sk.design (datamodel phase) when story has search tags |

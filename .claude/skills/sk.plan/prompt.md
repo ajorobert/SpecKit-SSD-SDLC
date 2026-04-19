@@ -10,7 +10,7 @@ story-{ID}.md (active story)
 .specify/memory/standards/tech-stack.md
 
 ## Steps
-1. Verify architecture.md exists — if missing: STOP, run sk.architecture first
+1. Verify architecture.md exists — if missing: STOP, run sk.design first
 2. [REFINE MODE] if plan.md exists, [CREATE MODE] if not
 3. Write technical plan covering:
    - Technical approach and key decisions

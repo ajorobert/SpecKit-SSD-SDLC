@@ -9,7 +9,7 @@ isolated context — state is passed via the file system (session.yaml + spec ar
 - `sk.ff` → [FEATURE MODE] full pipeline: specify → clarify → design → plan → tasks
 - `sk.ff --bug` → [BUG MODE] fix pipeline: specify --bug → clarify → plan → tasks
   Architecture step is skipped in bug mode — the unit architecture already exists.
-  If the bug fix requires a data model or contract change, stop and run sk.architecture manually.
+  If the bug fix requires a data model or contract change, stop and run sk.design --targeted manually.
 
 ## Pre-flight
 1. Read session.yaml — verify system-context.md and tech-stack.md populated

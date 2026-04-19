@@ -1,6 +1,6 @@
 ---
 name: accessibility-standards
-description: "Load when: implementing or reviewing any frontend UI for accessibility compliance. WCAG 2.2 AA, semantic HTML, keyboard navigation, ARIA, colour contrast, focus management, form accessibility. Loaded by: sk.implement (frontend), sk.verify, sk.uat."
+description: "Load when: implementing or reviewing any frontend UI for accessibility compliance. WCAG 2.2 AA, semantic HTML, keyboard navigation, ARIA, colour contrast, focus management, form accessibility."
 ---
 
 # Accessibility Standards (WCAG 2.2 AA)
@@ -102,7 +102,7 @@ Production accessibility requirements for all web frontends (customer portal and
 * **Screen reader** (manual): NVDA + Chrome (Windows), VoiceOver + Safari (macOS/iOS). Verify all content is announced correctly.
 * **Zoom**: test at 200% and 400% browser zoom — no horizontal scrolling, no overlapping content.
 * **Reduced motion**: test with `prefers-reduced-motion: reduce` media query active. All animations must stop or simplify.
-* Accessibility review is part of `sk.uat` — the story is not shippable with blocking a11y issues.
+* Accessibility review is part of user acceptance testing — the story is not shippable with blocking a11y issues.
 
 ## Patterns / Examples
 
@@ -166,10 +166,10 @@ Production accessibility requirements for all web frontends (customer portal and
 ```
 
 ## When to Use
-* Every frontend implementation (`sk.implement`) — accessibility is not an afterthought
-* `sk.uat` — blocking issues prevent ship
-* `sk.verify` — accessibility audit is part of the quality gate
-* `sk.review (frontend)` — review checklist includes WCAG 2.2 AA items
+* Implementing any frontend UI — accessibility is not an afterthought
+* User acceptance testing — blocking issues prevent ship
+* Quality gate verification — accessibility audit is mandatory
+* Frontend code review — WCAG 2.2 AA items are on the checklist
 
 ## When NOT to Use
 * Backend code, API design, or database schema

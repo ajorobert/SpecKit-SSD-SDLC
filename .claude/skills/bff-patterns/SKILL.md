@@ -1,6 +1,6 @@
 ---
 name: bff-patterns
-description: "Load when: designing or implementing BFF (Backend-for-Frontend) API layer, deciding whether a route needs BFF vs. direct service call, or implementing aggregation/fan-out flows. Loaded by: sk.architecture, sk.contracts, sk.implement (backend)."
+description: "Load when: designing or implementing BFF (Backend-for-Frontend) API layer, deciding whether a route needs BFF vs. direct service call, or implementing aggregation/fan-out flows."
 ---
 
 # BFF (Backend-for-Frontend) Patterns
@@ -197,9 +197,9 @@ var listing = await _listingClient.GetAsync(listingId, ct);
 ---
 
 ## When to Use This Skill
-* `sk.architecture` — deciding which routes use BFF vs. direct for a new unit
-* `sk.contracts` — documenting the chosen flow per route in the API contract
-* `sk.implement` — implementing a BFF aggregation route
+* Deciding which routes use BFF vs. direct service call for a new unit
+* Documenting the chosen flow per route in the API contract
+* Implementing a BFF aggregation or fan-out route
 
 ## When NOT to Use
 * Service-to-service internal calls (always M2M, no BFF involved)

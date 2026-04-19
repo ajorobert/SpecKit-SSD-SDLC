@@ -32,7 +32,7 @@ Implementation Gate (before merge)
 - [ ] All tasks in tasks.md marked complete
 - [ ] PHR created if novel tradeoffs were resolved
 - [ ] Standards compliance: coding-standards.md
-- [ ] No new domain entities introduced outside sk.datamodel
+- [ ] No new domain entities introduced outside sk.design (datamodel phase)
 - [ ] If CQRS is ON: all command objects have commandId field (UUID v4)
 - [ ] If CQRS is ON: all command handlers check commandId against dedup store before executing
 - [ ] If messaging_context = true: no dual-write (event publish without outbox pattern)

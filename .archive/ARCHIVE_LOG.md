@@ -24,3 +24,39 @@ approved and let a human run the cleanup.
 **Original path:** .claude/hooks/post-command.md
 **Archived to:** .archive/2026-04-17/post-command.md
 **Review:** [ ] approved for permanent delete
+
+## 2026-04-19 — .claude/skills/sk.architecture/SKILL.md
+**Reason:** moved to sk.design/sk.architecture/ — now internal sub-skill
+**Original path:** .claude/skills/sk.architecture/SKILL.md
+**Archived to:** .archive/2026-04-19/SKILL.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-19 — .claude/skills/sk.architecture/prompt.md
+**Reason:** moved to sk.design/sk.architecture/ — now internal sub-skill
+**Original path:** .claude/skills/sk.architecture/prompt.md
+**Archived to:** .archive/2026-04-19/prompt.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-19 — .claude/skills/sk.datamodel/SKILL.md
+**Reason:** moved to sk.design/sk.datamodel/ — now internal sub-skill
+**Original path:** .claude/skills/sk.datamodel/SKILL.md
+**Archived to:** .archive/2026-04-19/SKILL.md-121106
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-19 — .claude/skills/sk.datamodel/prompt.md
+**Reason:** moved to sk.design/sk.datamodel/ — now internal sub-skill
+**Original path:** .claude/skills/sk.datamodel/prompt.md
+**Archived to:** .archive/2026-04-19/prompt.md-121107
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-19 — .claude/skills/sk.contracts/SKILL.md
+**Reason:** moved to sk.design/sk.contracts/ — now internal sub-skill
+**Original path:** .claude/skills/sk.contracts/SKILL.md
+**Archived to:** .archive/2026-04-19/SKILL.md-121107
+**Review:** [ ] approved for permanent delete
+
+## 2026-04-19 — .claude/skills/sk.contracts/prompt.md
+**Reason:** moved to sk.design/sk.contracts/ — now internal sub-skill
+**Original path:** .claude/skills/sk.contracts/prompt.md
+**Archived to:** .archive/2026-04-19/prompt.md-121108
+**Review:** [ ] approved for permanent delete

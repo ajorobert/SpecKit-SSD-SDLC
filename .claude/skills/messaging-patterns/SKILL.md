@@ -1,6 +1,6 @@
 ---
 name: messaging-patterns
-description: "Load when: designing or implementing async messaging, background jobs, or in-process commands. RabbitMQ + MassTransit topology, MediatR internal dispatch, Hangfire jobs, outbox pattern, saga orchestration. Loaded by: sk.architecture, sk.plan, sk.implement (backend)."
+description: "Load when: designing or implementing async messaging, background jobs, or in-process commands. RabbitMQ + MassTransit topology, MediatR internal dispatch, Hangfire jobs, outbox pattern, saga orchestration."
 ---
 
 # Messaging, Jobs & Event Patterns

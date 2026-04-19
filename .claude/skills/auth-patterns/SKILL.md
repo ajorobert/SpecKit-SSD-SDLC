@@ -1,6 +1,6 @@
 ---
 name: auth-patterns
-description: "Load when: implementing or reviewing authentication, authorization, Keycloak integration, RBAC policies, or ABAC resource handlers in C# .NET 10. Loaded by: sk.architecture, sk.implement (backend), sk.security-audit."
+description: "Load when: implementing or reviewing authentication, authorization, Keycloak integration, RBAC policies, or ABAC resource handlers in C# .NET 10."
 ---
 
 # Auth Patterns (Keycloak + RBAC + ABAC)
@@ -538,8 +538,8 @@ The app is stateless: it cannot invalidate tokens. If a user's role is revoked i
 * Any backend service requiring authentication or access control
 * Defining new RBAC policies for a new surface or role
 * Implementing ABAC handlers for a new resource type (Listing, Booking, Review, etc.)
-* `sk.security-audit` — authorization coverage review
-* `sk.architecture` — access control design for a new service
+* Authorization coverage review or security audit
+* Access control design for a new service
 
 ## When NOT to Use
 * Keycloak realm/client configuration (done in Keycloak admin console or Terraform/IaC)

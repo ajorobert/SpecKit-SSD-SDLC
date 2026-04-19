@@ -1,6 +1,6 @@
 ---
 name: zustand-state-management
-description: "Load when: implementing or reviewing Zustand stores for global/shared UI state in any frontend. TypeScript patterns, hydration safety, persist middleware, slice composition. Loaded by: sk.implement (frontend), sk.review (frontend)."
+description: "Load when: implementing or reviewing Zustand stores for global/shared UI state in any frontend. TypeScript patterns, hydration safety, persist middleware, slice composition."
 ---
 
 # Zustand State Management
