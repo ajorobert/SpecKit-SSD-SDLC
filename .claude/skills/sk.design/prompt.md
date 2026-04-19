@@ -174,6 +174,30 @@ Invoke skill: sk.contracts
 - Waits for: api-spec.json, test-plan.md, provider tests written,
   service-registry.md updated
 
+### Phase 4 — Knowledge Base Assessment
+Condition: always runs after any phase completes (FRESH, RESUME, REFRESH, TARGETED)
+
+Evaluate whether this design run produced non-derivable content worth capturing:
+
+**Triggers that warrant a KB update (any one is sufficient):**
+- A non-obvious architectural decision was made (pattern chosen over alternatives, tradeoff accepted)
+- An external constraint surfaced that will not be visible in code (regulatory, legacy system, SLA)
+- A new invariant was identified that spans multiple files or services in this unit
+- REFRESH mode recorded a custom design decision in unit knowledge-base.md
+- An open question was resolved in a non-obvious way
+
+**Triggers that do NOT warrant a KB update:**
+- Standard CRUD unit with no unusual decisions
+- All phases were skipped (nothing ran)
+- TARGETED run produced no new decisions
+- Content is fully derivable from reading the artifacts just written
+
+**Decision:**
+- If any trigger is met: invoke sk.knowledge-base --tier unit
+  Log: "KB update triggered — {reason}"
+- If no trigger: log "KB update skipped — no non-derivable content identified" and proceed to
+  Completion Report
+
 ## Checkpoint Pause Protocol
 When a review gate pause is required:
 1. Display the gate message clearly with the artifact paths
@@ -198,6 +222,8 @@ Artifacts written:
 Phases skipped:
   {list skipped phases with reason: not needed | already complete | not targeted}
 
+Knowledge base: {updated | skipped — {reason}}
+
 Next step: /sk.plan
 ```
 
@@ -212,3 +238,4 @@ Next step: /sk.plan
 - 'cancel' at any active gate preserves all artifacts written up to that point
 - Each sub-skill invocation is self-contained — no state leaks between phases
 - Completion report lists only what actually ran and what was skipped, with reasons
+- KB update is conditional — only invoked when non-derivable content was produced; reason always logged
