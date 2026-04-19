@@ -6,7 +6,7 @@ READ-ONLY — no files written, analysis report only.
 **When to run:** After sk.implement completes, before sk.test begins.
 Catches spec drift introduced during implementation — mismatches between what was built
 and what architecture.md, api-spec.json, and data-model.md describe.
-CRITICAL findings must be resolved before sk.test or sk.verify proceed.
+CRITICAL, HIGH, or MEDIUM findings must be resolved before sk.test or sk.verify proceed.
 
 ## Pre-flight
 1. Read session.yaml active_unit_id
@@ -67,7 +67,7 @@ Severity scale: CRITICAL | HIGH | MEDIUM | LOW
 Followed by:
 - **Summary**: total findings by severity
 - **Coverage map**: story-{ID} → in architecture.md (yes/no)
-- **Next actions**: if CRITICAL findings exist, recommend resolution before sk.implement proceeds
+- **Next actions**: if any MEDIUM, HIGH, or CRITICAL findings exist, STOP — list all findings and require resolution before sk.test or sk.verify may proceed. LOW findings are reported but do not block.
 
 If no findings: report "All consistency checks passed" with coverage metrics.
 

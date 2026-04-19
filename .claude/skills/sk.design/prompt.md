@@ -96,6 +96,22 @@ Invoke skill: sk.architecture
   architecture-decisions.md, design-principles/SKILL.md
 - Waits for: architecture.md written and engineering review passed
 
+AUTOPILOT ENGINEERING REVIEW HARD STOP — autopilot mode only
+After sk.architecture completes, check the engineering review result:
+- If any BLOCKING or MEDIUM findings exist: STOP pipeline immediately.
+  Display:
+  ```
+  sk.design | Autopilot blocked — Engineering Review FAILED  [checkpoint_mode: autopilot]
+
+  The engineering review found issues that must be resolved before proceeding:
+  {list all BLOCKING and MEDIUM findings}
+
+  Fix the architecture and re-run sk.design, or escalate checkpoint_mode to 'confirm'.
+  ```
+  Do NOT continue to Phase 2.
+- If only ADVISORY findings: log them and proceed automatically.
+- If no findings: proceed automatically.
+
 REVIEW GATE 1 — validate mode only (skip for autopilot and confirm)
 If gate is active, display:
 ```
@@ -107,7 +123,7 @@ Review the following before continuing:
 
 Check for:
   - Bounded context is correct and scoped to this unit only
-  - No unresolved BLOCKING findings from the engineering review
+  - No unresolved BLOCKING or MEDIUM findings from the engineering review
   - Any ADVISORY findings (new cross-service decisions) have an ADR planned
   - Open questions are acceptable to carry into data model design
 
