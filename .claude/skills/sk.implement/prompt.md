@@ -1,11 +1,12 @@
 # sk.implement — Full Implementation Pipeline (Orchestrator)
-Executes implementation for a story in two distinct phases: structural scaffolding, followed by code generation.
+Executes implementation for a story in three distinct phases: task generation, structural scaffolding, and code generation.
 Role: backend | frontend (orchestrator) | Level: story
 
 This skill orchestrates two sub-skills in strict sequence. Each sub-skill runs with its own isolated context — state is passed via the file system (session.yaml + spec artifacts).
 
 ## Invocation Forms
-- `sk.implement`               — run both phases automatically
+- `sk.implement`               — run all phases automatically
+- `sk.implement --tasks`       — run Phase 0 only (TARGETED)
 - `sk.implement --scaffolding` — run Phase 1 only (TARGETED)
 - `sk.implement --codegen`     — run Phase 2 only (TARGETED)
 
@@ -17,23 +18,23 @@ This skill orchestrates two sub-skills in strict sequence. Each sub-skill runs w
    STORY_DIR = specs/intents/{intent}/units/{unit}/stories/{story-id}/
 3. Verify plan.md exists: STORY_DIR/plan.md
    MISSING → STOP: run sk.plan first
-4. Verify tasks.yaml exists: STORY_DIR/tasks.yaml
-   MISSING → STOP: run sk.tasks first
-5. Read checkpoint_mode from session.yaml (default to validate)
-6. Check for review report: STORY_DIR/review-{story-id}.md. If it exists, note it down for Execution Mode Detection.
+4. Read checkpoint_mode from session.yaml (default to validate)
+5. Check for review report: STORY_DIR/review-{story-id}.md. If it exists, note it down for Execution Mode Detection.
 
 ## Execution Mode Detection
 Evaluate in this order:
 
-**TARGETED** — a phase flag was passed (`--scaffolding` or `--codegen`)
-  → run exactly that one phase, skip the other.
+**TARGETED** — a phase flag was passed (`--tasks`, `--scaffolding`, or `--codegen`)
+  → run exactly that one phase, skip all others.
 
 **REFINE** — `review-{story-id}.md` EXISTS
-  → Log: "Refine mode active — skipping Phase 1 (Scaffolding). Running sk.codegen to resolve review findings."
-  → Run Phase 2 (sk.codegen) only.
+  → Log: "Refine mode active — skipping Phase 0 (Tasks) and Phase 1 (Scaffolding). Running Phase 2 (sk.codegen) to resolve review findings."
+  → Run Phase 2: sk.codegen only.
 
-**NORMAL** — no flag, no review report
-  → Run sequence: Phase 1 (sk.scaffolding) → [Gate] → Phase 2 (sk.codegen).
+**NORMAL / RESUME** — no flag, no review report
+  → If `tasks.yaml` is missing: run Phase 0 (sk.tasks).
+  → If scaffold is missing: run Phase 1 (sk.scaffolding).
+  → Run Phase 2 (sk.codegen).
 
 ## Status Transitions
 Before invoking any sub-skill (in both normal or refine modes):
@@ -43,8 +44,13 @@ Update `story-{ID}.md` frontmatter `status` block:
 
 ## Orchestration
 
+### Phase 0 — Task Generation
+Condition: run if NORMAL with missing `tasks.yaml`, or TARGETED `--tasks`.
+Invoke skill: `sk.tasks`
+- Waits for: `tasks.yaml` written in story directory.
+
 ### Phase 1 — Structural Scaffolding
-Condition: run if NORMAL, or TARGETED `--scaffolding`.
+Condition: run if NORMAL with missing scaffold, or TARGETED `--scaffolding`.
 Invoke skill: `sk.scaffolding`
 - Waits for: File structure generated, class interfaces, DTOs, and test fixtures written. Everything compiles. No business logic.
 
@@ -80,7 +86,7 @@ Story: {story-id}
 Mode: {NORMAL | REFINE | TARGETED}
 
 Phases run:
-  {list phases that actually ran: sk.scaffolding / sk.codegen}
+  {list phases that actually ran: sk.tasks / sk.scaffolding / sk.codegen}
 
 Tasks:
   {Report final task count and phase summary from tasks.yaml}

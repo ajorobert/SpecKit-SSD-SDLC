@@ -17,7 +17,7 @@ Unit-level skills (sk.architecture, sk.datamodel, sk.contracts):
 - Require active_unit_id set in session.yaml
 - If null: instruct user to run sk.session focus --unit {unit-id}
 
-Story-level skills (sk.plan, sk.tasks, sk.implement, sk.clarify):
+Story-level skills (sk.plan, sk.implement, sk.clarify):
 - Require active_story_id set in session.yaml
 - If null: instruct user to run sk.session focus --story {story-id}
 

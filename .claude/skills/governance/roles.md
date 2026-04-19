@@ -16,12 +16,12 @@ Architect
 Backend Lead
 - Owns: implementation plan for backend units, API contract detail
 - Gates: Plan Gate approval for backend units
-- Commands: sk.plan, sk.tasks
+- Commands: sk.plan
 
 Frontend Lead
 - Owns: implementation plan for frontend units
 - Gates: Plan Gate approval for frontend units
-- Commands: sk.plan, sk.tasks
+- Commands: sk.plan
 
 Engineer
 - Owns: task execution, PHR creation

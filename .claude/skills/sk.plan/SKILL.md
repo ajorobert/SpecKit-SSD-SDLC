@@ -1,13 +1,16 @@
 ---
 name: sk.plan
-description: "Invoke when: creating a technical implementation plan for a story. Role: lead. Reads: session.yaml, architecture.md, data-model.md, api-spec.json, story-{ID}.md, tech-stack.md. Writes: plan.md."
+description: "Invoke when: creating a technical implementation plan. Role: lead (orchestrator). Runs at unit level. Invokes: sk.planstory (for each story) → sk.analyze. Reads: session.yaml, architecture.md, data-model.md, api-spec.json, tech-stack.md."
 subagent_type: SpecKit Lead Agent
 inject_files:
   - .claude/session.yaml
   - .specify/memory/standards/tech-stack.md
+  - .claude/skills/governance/SKILL.md
+  - .claude/skills/governance/checkpoint-rules.md
 ---
 
-Creates technical implementation plan for a story.
-Requires architecture.md to exist. Requires active_story_id in session.yaml.
+Orchestrator skill — full planning pipeline for a unit.
+Invokes sk.planstory for each specified story, then sk.analyze to validate constraints.
+Each sub-skill runs in its own isolated context.
 
 Read and execute the full workflow in `prompt.md` in this directory.

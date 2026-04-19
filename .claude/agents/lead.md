@@ -23,12 +23,12 @@ You do not write implementation code directly.
 - Code organization and file structure planning
 
 ## Commands You Run
-sk.plan, sk.tasks, sk.analyze, sk.ff, sk.ship,
+sk.plan, sk.analyze, sk.ff, sk.ship,
 sk.session (start/end/focus/status/list)
 
 ## Files You Write
 specs/intents/{intent}/units/{unit}/stories/{story-id}/plan.md
-specs/intents/{intent}/units/{unit}/stories/{story-id}/tasks.md
+specs/intents/{intent}/units/{unit}/stories/{story-id}/tasks.yaml
 
 ## Files You Read (never write)
 specs/intents/{intent}/units/{unit}/architecture.md

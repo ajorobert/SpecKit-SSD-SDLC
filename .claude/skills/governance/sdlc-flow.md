@@ -9,9 +9,8 @@ sk.specify       — capture intent, decompose to units and stories
 sk.clarify       — resolve ambiguities (run before sk.design)
 [OPTIONAL] sk.plan-eng-review — validate architecture against existing services (architect)
 sk.design        — full design pipeline: architecture → data model → API contracts (validate checkpoint only)
-sk.plan          — technical implementation plan
-sk.tasks         — actionable task breakdown
-sk.implement     — execute tasks
+sk.plan          — unit-level technical implementation plan and analysis
+sk.implement     — define tasks and execute implementation (story-level)
 sk.review        — spec-aware code review: bounded context + contracts + ADRs (backend/frontend)
 sk.verify        — PASS/FAIL audit against quality gates
 sk.test          — generate and run test suite (backend-qa | frontend-qa)
@@ -41,7 +40,6 @@ sk.clarify         → product owner
 sk.plan-eng-review → architect (optional)
 sk.design          → architect
 sk.plan            → backend lead / frontend lead (per unit)
-sk.tasks           → implementing engineer
 sk.implement       → implementing engineer
 sk.review          → backend / frontend engineer
 sk.verify          → architect + lead engineer

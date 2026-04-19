@@ -11,7 +11,7 @@ Spec Gate (before sk.plan)
 - [ ] All user stories have acceptance criteria
 - [ ] No undefined external dependencies
 
-Architecture Gate (before sk.tasks)
+Architecture Gate (before sk.implement)
 - [ ] Architecture doc exists for this intent
 - [ ] All new services registered in service-registry.md
 - [ ] All new domain entities added to domain-model.md

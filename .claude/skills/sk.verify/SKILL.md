@@ -15,6 +15,6 @@ inject_files:
 ---
 
 PASS/FAIL quality gate for active story. Run after sk.test passes, before sk.ship.
-Not a mid-implementation check — use sk.analyze for that.
+Not a mid-implementation check. If you need to verify spec consistency before writing code, use sk.plan --analyze-only.
 
 Read and execute the full workflow in `prompt.md` in this directory.

@@ -2,6 +2,8 @@
 Generates actionable task breakdown for a story.
 Role: lead | Level: story
 
+Internal sub-skill — invoked by sk.implement orchestrator. Do not invoke directly.
+
 ## Input Artifacts
 specs/intents/{intent}/units/{unit}/stories/{story-id}/plan.md (required)
 story-{ID}.md frontmatter (checkpoint_status)

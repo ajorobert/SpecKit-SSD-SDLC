@@ -1,13 +1,13 @@
 # sk.ff — Fast Forward (Orchestrator)
-Runs the SDLC pipeline from story capture through task breakdown in one invocation.
+Runs the SDLC pipeline from story capture through planning in one invocation.
 Role: lead (orchestrator) | Level: story
 
 This skill orchestrates other skills in sequence. Each sub-skill runs with its own
 isolated context — state is passed via the file system (session.yaml + spec artifacts).
 
 ## Mode Detection
-- `sk.ff` → [FEATURE MODE] full pipeline: specify → clarify → design → plan → tasks
-- `sk.ff --bug` → [BUG MODE] fix pipeline: specify --bug → clarify → plan → tasks
+- `sk.ff` → [FEATURE MODE] full pipeline: specify → clarify → design → plan
+- `sk.ff --bug` → [BUG MODE] fix pipeline: specify --bug → clarify → plan
   Architecture step is skipped in bug mode — the unit architecture already exists.
   If the bug fix requires a data model or contract change, stop and run sk.design --targeted manually.
 
@@ -46,15 +46,7 @@ If invoked:
 ### Phase 4 — Implementation Plan
 Invoke skill: sk.plan
 - Context injected: session.yaml, tech-stack.md
-- If checkpoint_mode = confirm: PAUSE after plan written
-  Display: "Plan written. Review plan.md then type 'approved' to continue."
-  On approval: set story frontmatter checkpoint_status: approved
-- Waits for: plan.md written
-
-### Phase 5 — Task Breakdown
-Invoke skill: sk.tasks
-- Context injected: session.yaml
-- Waits for: tasks.yaml written
+- Waits for: sk.plan to complete (it manages its own checkpoint gate internally).
 
 ## Orchestration: [BUG MODE]
 
@@ -68,12 +60,8 @@ Invoke skill: sk.clarify
 
 ### Phase 3 — Implementation Plan (no architecture step)
 Invoke skill: sk.plan
-- If checkpoint_mode = confirm: PAUSE for approval
-- Waits for: plan.md written
+- Waits for: sk.plan to complete (it manages its own checkpoint gate).
 - Verify story_type: bug in story frontmatter before proceeding
-
-### Phase 4 — Task Breakdown
-Invoke skill: sk.tasks
 
 ## Checkpoint Pause Protocol
 When a checkpoint pause is required:
@@ -95,7 +83,6 @@ Artifacts created:
   ✓ story-{ID}.md         (sk.clarify — clarifications added)
   ✓ architecture.md       (sk.design — if validate checkpoint)
   ✓ plan.md               (sk.plan)
-  ✓ tasks.yaml              (sk.tasks)
 
 Next step: /sk.implement
 ```
