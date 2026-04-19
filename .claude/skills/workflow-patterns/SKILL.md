@@ -1,6 +1,6 @@
 ---
 name: workflow-patterns
-description: "Load when: designing or implementing business workflows, SLA enforcement, breach alerts, or multi-channel notifications. Elsa v3 embedded workflows in .NET 10. Loaded by: sk.architecture, sk.implement (backend)."
+description: "Load when: designing or implementing business workflows, SLA enforcement, breach alerts, or multi-channel notifications. Elsa v3 embedded workflows in .NET 10."
 ---
 
 # Workflow Patterns (Elsa v3)

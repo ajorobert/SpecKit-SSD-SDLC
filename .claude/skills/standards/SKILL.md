@@ -1,13 +1,9 @@
 ---
 name: standards
-description: "Load when: enforcing conventions, API design, data modeling rules. Load specific file only — not all at once. sk.plan: tech-stack.md | sk.implement: coding-standards.md | sk.contracts: api-standards.md | sk.datamodel: data-standards.md | sk.verify: all files"
+description: "Load when: enforcing conventions, API design, or data modeling rules. Load specific file only — not all at once. Planning: tech-stack.md | Implementation: coding-standards.md | API contract design: api-standards.md | Data modeling: data-standards.md | Quality gate verification: all files"
 ---
 
 Standards Skill
 Source: .specify/memory/standards/
-Loaded by: sk.verify (all), sk.plan (tech-stack only),
-sk.implement (coding-standards only),
-sk.contracts (api-standards only),
-sk.datamodel (data-standards only)
-Read only the listed file from .specify/memory/standards/
-not the entire directory unless running sk.verify.
+Read only the listed file from .specify/memory/standards/ based on the task context (see description).
+Load all files only for quality gate verification.

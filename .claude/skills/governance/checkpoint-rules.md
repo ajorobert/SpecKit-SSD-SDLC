@@ -16,7 +16,7 @@ Confirm (1 checkpoint — after sk.plan, before sk.tasks)
 - New endpoints on existing service
 - Non-breaking schema additions
 
-Validate (2 checkpoints — after sk.architecture AND after sk.plan)
+Validate (2 checkpoints — after sk.design AND after sk.plan)
 - New service or bounded context
 - Breaking API contract changes
 - Cross-service data model changes
@@ -26,6 +26,6 @@ Validate (2 checkpoints — after sk.architecture AND after sk.plan)
 Checkpoint Behaviour
 Autopilot: proceed without stopping
 Confirm:   stop after sk.plan, show plan summary, wait for explicit approval
-Validate:  stop after sk.architecture, wait for approval
+Validate:  stop after sk.design, wait for approval
            stop again after sk.plan, wait for approval
            only then proceed to sk.tasks

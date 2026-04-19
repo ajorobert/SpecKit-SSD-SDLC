@@ -1,6 +1,6 @@
 ---
 name: design-principles
-description: "Load when: sk.architecture, sk.datamodel, sk.contracts — DDD bounded context rules, DDIA access-pattern-first data modeling, consistency declarations, failure modes, idempotency"
+description: "Load when: designing service architecture, data models, or API contracts — DDD bounded context rules, DDIA access-pattern-first data modeling, consistency declarations, failure modes, idempotency"
 ---
 
 # Design Principles

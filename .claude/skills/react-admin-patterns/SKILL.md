@@ -1,6 +1,6 @@
 ---
 name: react-admin-patterns
-description: "Load when: implementing or reviewing the admin SPA (React + Vite + Tanstack Router). Production React patterns, bundle optimisation, parallel data fetching, re-render control, error boundaries, view transitions. Loaded by: sk.implement (frontend/admin), sk.plan, sk.review (frontend)."
+description: "Load when: implementing or reviewing the admin SPA (React + Vite + Tanstack Router). Production React patterns, bundle optimisation, parallel data fetching, re-render control, error boundaries, view transitions."
 ---
 
 # React Admin SPA Patterns (Vite + Tanstack Router)

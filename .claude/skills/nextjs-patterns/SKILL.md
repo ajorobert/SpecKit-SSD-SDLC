@@ -1,6 +1,6 @@
 ---
 name: nextjs-patterns
-description: "Load when: implementing or reviewing the customer portal (Next.js App Router, NextAuth v5, Strapi v2, Cloudflare R2, SSR, SEO, geo search UI). Loaded by: sk.implement (frontend/nextjs), sk.plan, sk.review (frontend)."
+description: "Load when: implementing or reviewing the customer portal (Next.js App Router, NextAuth v5, Strapi v2, Cloudflare R2, SSR, SEO, geo search UI)."
 ---
 
 # Next.js Patterns (App Router, Customer Portal)

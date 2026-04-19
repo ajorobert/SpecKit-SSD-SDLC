@@ -1,6 +1,6 @@
 ---
 name: react-component-patterns
-description: "Load when: designing or reviewing React component structure, decomposition, TypeScript prop interfaces, custom hooks, form handling with react-hook-form + Zod. Applies to customer portal and admin SPA. Loaded by: sk.implement (frontend), sk.review (frontend)."
+description: "Load when: designing or reviewing React component structure, decomposition, TypeScript prop interfaces, custom hooks, form handling with react-hook-form + Zod. Applies to customer portal and admin SPA."
 ---
 
 # React Component Patterns
@@ -189,8 +189,8 @@ export function CreateListingForm({ onSuccess }: { onSuccess: () => void }) {
 * Any React component design decision (customer portal or admin SPA)
 * Form implementation with validation
 * Custom hook extraction
-* `sk.review (frontend)` — component structure review
-* `sk.implement (frontend)` — implementing new components or feature modules
+* Reviewing component structure, decomposition, or TypeScript props
+* Implementing new components or feature modules
 
 ## When NOT to Use
 * React Native components (see `react-native-patterns`)

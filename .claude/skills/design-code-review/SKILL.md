@@ -1,6 +1,6 @@
 ---
 name: design-code-review
-description: "Load when: reviewing C# .NET 10 backend code. Design pattern compliance, SOLID, architecture conventions, async correctness, security, performance, testability. Loaded by: sk.review (backend)."
+description: "Load when: reviewing C# .NET 10 backend code. Design pattern compliance, SOLID, architecture conventions, async correctness, security, performance, testability."
 ---
 
 # .NET Design Pattern Review
@@ -129,7 +129,7 @@ public interface IListingRepository
 ```
 
 ## When to Use
-* `sk.review` for any backend C# code change
+* Any backend C# code review for design pattern or SOLID compliance
 * Pre-merge review of pull requests touching Application, Domain, or Infrastructure layers
 * Architecture audit of an existing service
 

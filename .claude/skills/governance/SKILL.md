@@ -1,10 +1,9 @@
 ---
 name: governance
-description: "Load when: checkpoint classification, quality gate evaluation, phase ownership decisions, running sk.verify, sk.ff, sk.impact"
+description: "Load when: checkpoint classification, quality gate evaluation, phase ownership decisions, or verifying SDLC compliance"
 ---
 
 Governance Skill
-Loaded by: sk.verify, sk.ff, sk.impact
 Files
 
 checkpoint-rules.md  — complexity classification, checkpoint behaviour

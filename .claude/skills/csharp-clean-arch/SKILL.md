@@ -1,6 +1,6 @@
 ---
 name: csharp-clean-arch
-description: "Load when: implementing or reviewing C# .NET 10 backend services. Clean Architecture layer rules, DI, async, EF Core, Dapper, Result pattern, xUnit+Moq testing. Loaded by: sk.implement (backend), sk.review (backend), sk.plan."
+description: "Load when: implementing or reviewing C# .NET 10 backend services. Clean Architecture layer rules, DI, async, EF Core, Dapper, Result pattern, xUnit+Moq testing."
 ---
 
 # C# Clean Architecture (.NET 10)
