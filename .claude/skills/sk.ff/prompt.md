@@ -54,7 +54,7 @@ Invoke skill: sk.plan
 ### Phase 5 — Task Breakdown
 Invoke skill: sk.tasks
 - Context injected: session.yaml
-- Waits for: tasks.md written
+- Waits for: tasks.yaml written
 
 ## Orchestration: [BUG MODE]
 
@@ -95,7 +95,7 @@ Artifacts created:
   ✓ story-{ID}.md         (sk.clarify — clarifications added)
   ✓ architecture.md       (sk.design — if validate checkpoint)
   ✓ plan.md               (sk.plan)
-  ✓ tasks.md              (sk.tasks)
+  ✓ tasks.yaml              (sk.tasks)
 
 Next step: /sk.implement
 ```

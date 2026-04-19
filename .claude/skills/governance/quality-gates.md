@@ -29,7 +29,7 @@ Plan Gate (before sk.implement)
 - [ ] Idempotency-Key declared on all mutation endpoints
 
 Implementation Gate (before merge)
-- [ ] All tasks in tasks.md marked complete
+- [ ] All tasks in tasks.yaml have status: done
 - [ ] PHR created if novel tradeoffs were resolved
 - [ ] Standards compliance: coding-standards.md
 - [ ] No new domain entities introduced outside sk.design (datamodel phase)

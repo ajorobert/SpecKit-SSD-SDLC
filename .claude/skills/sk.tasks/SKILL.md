@@ -1,6 +1,6 @@
 ---
 name: sk.tasks
-description: "Invoke when: generating actionable task breakdown from a plan for a story. Role: lead. Reads: session.yaml, plan.md, story frontmatter. Writes: tasks.md."
+description: "Invoke when: generating actionable task breakdown from a plan for a story. Role: lead. Reads: session.yaml, plan.md, story frontmatter. Writes: tasks.yaml (YAML with id, phase, depends_on, parallel, agent, artifacts_needed fields)."
 subagent_type: SpecKit Lead Agent
 inject_files:
   - .claude/session.yaml

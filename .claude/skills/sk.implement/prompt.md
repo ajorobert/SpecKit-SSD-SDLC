@@ -47,7 +47,7 @@ List the packs loaded before continuing to Pre-flight.
    STORY_DIR = specs/intents/{intent}/units/{unit}/stories/{story-id}/
 4. Verify plan.md exists: STORY_DIR/plan.md
    MISSING → STOP: run sk.plan first
-5. Verify tasks.md exists: STORY_DIR/tasks.md
+5. Verify tasks.yaml exists: STORY_DIR/tasks.yaml
    MISSING → STOP: run sk.tasks first
 6. Check for review report: STORY_DIR/review-{story-id}.md
    EXISTS → read it; all blocking findings MUST be resolved before proceeding
@@ -57,7 +57,7 @@ List the packs loaded before continuing to Pre-flight.
 2. specs/intents/{intent}/units/{unit}/knowledge-base.md (tier 3 — if exists)
    Note: knowledge bases contain non-derivable context only (the "why", not the "what")
 3. STORY_DIR/plan.md — tech approach, component breakdown, data/API changes
-4. STORY_DIR/tasks.md — full task list with phases and parallel markers
+4. STORY_DIR/tasks.yaml — full task list with phases, depends_on, parallel, agent fields
 5. specs/intents/{intent}/units/{unit}/contracts/api-spec.json (if exists)
 6. specs/intents/{intent}/units/{unit}/contracts/README.md (if exists — contains known gaps and contract decisions)
 7. specs/intents/{intent}/units/{unit}/architecture.md (if exists)
@@ -83,24 +83,24 @@ If ignore file exists: verify it contains essential patterns, append only missin
 - review-{story-id}.md ABSENT → **Normal mode**: execute tasks phase-by-phase as below.
 
 ## Status transitions
-Update story-{ID}.md frontmatter at these points:
-- Start of execution (normal mode): set status → in-progress
-- Refine mode entry: set status → in-progress (was: review)
+Update story-{ID}.md frontmatter `status` block at these points:
+- Start of execution (normal mode): set status.current → in-progress, status.entered_at → now (ISO 8601)
+- Refine mode entry: set status.current → in-progress, status.entered_at → now (was: review)
 
 ## Task execution (phase-by-phase)
-Parse tasks.md and execute phases in order. Do not start a phase until the prior phase is complete.
-Skip any task already marked [X] — do not re-execute.
+Parse tasks.yaml and execute phases in order. Do not start a phase until the prior phase is complete.
+Skip any task with status: done — do not re-execute.
 
-Standard phase order from tasks.md:
-- Phase 1: Setup — project structure, config, dependencies
-- Phase 2: Foundational — blocking prerequisites (schema migrations, shared utilities)
-- Phase 3+: User story tasks — follow TDD order (test tasks before their implementation tasks)
-- Final phase: Cross-cutting concerns (logging, error handling, observability)
+Standard phase order from tasks.yaml (phases[].id):
+- setup       — project structure, config, dependencies
+- foundation  — blocking prerequisites (schema migrations, shared utilities)
+- story-N     — user story tasks, follow TDD order (test tasks before implementation tasks)
+- crosscut    — logging, error handling, observability
 
 For each task:
-- Tasks marked [P] may execute in parallel with other [P] tasks in the same phase
-- Sequential tasks must complete before the next sequential task starts
-- After completing each task: mark it [X] in tasks.md immediately
+- tasks with parallel: true may execute concurrently with other parallel:true tasks in the same phase
+- Respect depends_on: execute only after all listed task ids have status: done
+- After completing each task: set its status to done in tasks.yaml immediately
 - Report task completion inline; do not batch completions
 - If a non-parallel task fails: halt and report with context before proceeding
 
@@ -120,4 +120,4 @@ After all tasks marked [X]:
 ## Output Artifacts
 src/{service}/** (backend role)
 src/{frontend-surface}/** (frontend role)
-tasks.md (all tasks marked [X])
+tasks.yaml (all tasks with status: done)
