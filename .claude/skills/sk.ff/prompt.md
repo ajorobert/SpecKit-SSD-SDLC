@@ -6,7 +6,7 @@ This skill orchestrates other skills in sequence. Each sub-skill runs with its o
 isolated context — state is passed via the file system (session.yaml + spec artifacts).
 
 ## Mode Detection
-- `sk.ff` → [FEATURE MODE] full pipeline: specify → clarify → architecture → plan → tasks
+- `sk.ff` → [FEATURE MODE] full pipeline: specify → clarify → design → plan → tasks
 - `sk.ff --bug` → [BUG MODE] fix pipeline: specify --bug → clarify → plan → tasks
   Architecture step is skipped in bug mode — the unit architecture already exists.
   If the bug fix requires a data model or contract change, stop and run sk.architecture manually.
@@ -31,17 +31,17 @@ Invoke skill: sk.clarify
 - Waits for: story-{ID}.md updated with Clarifications section
 - No checkpoint gate here — clarify always runs
 
-### Phase 3 — Architecture [FEATURE MODE only]
-Condition: checkpoint_mode = validate → invoke sk.architecture
+### Phase 3 — Design [FEATURE MODE only]
+Condition: checkpoint_mode = validate → invoke sk.design
            checkpoint_mode = standard or confirm → skip to Phase 4
 
 If invoked:
-- Invoke skill: sk.architecture
-- Context injected: session.yaml, domain-model.md, service-registry.md, architecture-decisions.md, design-principles/SKILL.md
-- Waits for: architecture.md written
-- PAUSE for user approval before continuing to Phase 4
-  Display: "Architecture written. Review architecture.md then type 'approved' to continue."
-  On approval: set story frontmatter checkpoint_status: approved
+- Invoke skill: sk.design
+- sk.design auto-detects FRESH or RESUME mode and runs only phases needed for this unit
+  (architecture always; data model and contracts only if unit stories signal the need)
+- Gates inside sk.design are governed by checkpoint_mode per its own gate schedule
+- Waits for: all needed design artifacts written (architecture.md at minimum)
+- On sk.design completion: set story frontmatter checkpoint_status: approved
 
 ### Phase 4 — Implementation Plan
 Invoke skill: sk.plan
@@ -93,7 +93,7 @@ Mode: {FEATURE | BUG}
 Artifacts created:
   ✓ story-{ID}.md         (sk.specify)
   ✓ story-{ID}.md         (sk.clarify — clarifications added)
-  ✓ architecture.md       (sk.architecture — if validate checkpoint)
+  ✓ architecture.md       (sk.design — if validate checkpoint)
   ✓ plan.md               (sk.plan)
   ✓ tasks.md              (sk.tasks)
 

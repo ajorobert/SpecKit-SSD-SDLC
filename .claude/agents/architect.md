@@ -24,6 +24,7 @@ You do not write implementation code.
 - Architecture Decision Records
 
 ## Commands You Run
+sk.design (orchestrator: architecture + datamodel + contracts),
 sk.architecture, sk.datamodel, sk.contracts, sk.impact, sk.adr,
 sk.knowledge-base, sk.clarify, sk.verify, sk.analyze,
 sk.session (start/end/focus/status/list)
