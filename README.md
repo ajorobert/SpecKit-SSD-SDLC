@@ -90,26 +90,25 @@ Commands marked `[optional]` are skippable. Commands marked `[conditional]` are 
 [/sk.impact]             ← [optional] assess blast radius on existing services (architect)
 
 ── ARCHITECTURE ─────────────────────────────────────────────────────────────────
-/sk.architecture         ← [conditional: validate checkpoint or new services] service boundaries (architect)
-                           Includes mandatory engineering review: checks service-registry, domain-model, ADRs
-/sk.datamodel            ← [conditional: new domain entities] data model per unit (architect)
-/sk.contracts            ← [conditional: new or modified endpoints] API contracts + per-consumer test plan (architect)
-                           Test plan has separate sections for web / mobile / admin consumers
+/sk.design               ← full design pipeline: architecture → data model → API contracts (architect)
+                           [conditional: runs based on unit stories and checkpoint mode]
 [/sk.adr]                ← [optional] record a significant architecture decision (architect)
 
 ── PLAN ─────────────────────────────────────────────────────────────────────────
-/sk.plan                 ← technical implementation plan for active story (lead)
-/sk.tasks                ← actionable task breakdown in TDD order (lead)
+/sk.plan                 ← unit-level technical implementation plan and cross-story analysis (lead)
 [/sk.knowledge-base]     ← [optional] generate or update knowledge base tiers (architect)
 
 ── FAST TRACK ───────────────────────────────────────────────────────────────────
-[/sk.ff]                 ← specify→clarify→architecture→plan→tasks in one shot (lead)
+[/sk.ff]                 ← specify→clarify→architecture→plan in one shot (lead)
                            --bug flag: skips architecture step; runs sk.specify --bug instead
+[/sk.hotfix]             ← P0 incident fast path: plan→implement→ship (lead)
 
 ── IMPLEMENT ────────────────────────────────────────────────────────────────────
-/sk.implement            ← execute tasks phase-by-phase in TDD order (backend/frontend)
+/sk.implement            ← define tasks and execute implementation phase-by-phase (backend/frontend)
 [/sk.investigate]        ← [optional] spec-aware debugging when blocked (backend/frontend)
-[/sk.analyze]            ← [recommended] cross-artifact consistency check after implement, before test (lead/architect)
+[/sk.perf]               ← [optional] performance profiling and optimization cycle (backend/frontend)
+[/sk.migrate]            ← [optional] db migration lifecycle via expand/contract (backend)
+[/sk.refactor]           ← [optional] scoped technical debt resolution (backend/frontend)
 [/sk.phr]                ← [optional] record significant decisions or tradeoffs made (any)
 
 ── REVIEW & QUALITY ─────────────────────────────────────────────────────────────
@@ -121,10 +120,11 @@ Commands marked `[optional]` are skippable. Commands marked `[conditional]` are 
                            --platform admin  → Playwright/Cypress (React Admin)
 /sk.security-audit       ← OWASP Top 10 + STRIDE audit, secrets scan (security)
 /sk.verify               ← PASS/FAIL across all quality gates — must pass before ship (architect/lead)
-                           Run after sk.test passes. Use sk.analyze earlier in the cycle.
+                           Run after sk.test passes. Use sk.plan --analyze-only earlier in the cycle.
 
 ── SHIP ─────────────────────────────────────────────────────────────────────────
 /sk.ship                 ← quality-gated release; /sk.verify must pass (lead)
+/sk.rollback             ← automated or manual rollback plan for a shipped story (lead)
 ```
 
 ---
@@ -142,19 +142,19 @@ Commands marked `[optional]` are skippable. Commands marked `[conditional]` are 
 /sk.specify          ← Capture intent → unit → story; --bug for bug report framing (po)
 /sk.clarify          ← Resolve ambiguities before planning (po/architect/lead)
 /sk.impact           ← Assess blast radius of proposed work (architect)
-/sk.architecture     ← Define service boundaries, one doc per unit; includes engineering review (architect)
-/sk.datamodel        ← Define data model, one doc per unit (architect)
-/sk.contracts        ← Define API contracts + per-consumer test plan (web/mobile/admin) (architect)
-/sk.plan             ← Technical implementation plan (lead)
-/sk.tasks            ← Actionable task breakdown [TDD order] (lead)
-/sk.ff               ← Fast-forward: specify→clarify→architecture→plan→tasks; --bug skips architecture (lead)
+/sk.design           ← Full design pipeline: architecture → data model → API contracts → routing guide (architect)
+/sk.plan             ← Unit-level technical implementation plan and validation (lead)
+/sk.ff               ← Fast-forward: specify→clarify→architecture→plan; --bug skips architecture (lead)
+/sk.hotfix           ← P0 incident fast path: plan→implement→ship (lead)
 ```
 
 ### 💻 Implement & Review
 ```text
-/sk.implement        ← Execute tasks phase-by-phase [TDD order, marks X per task] (backend/frontend)
+/sk.implement        ← Define tasks and execute implementation phase-by-phase (backend/frontend)
+/sk.refactor         ← Scoped technical debt resolution [no new behavior] (backend/frontend)
+/sk.perf             ← Performance profiling, diagnosis, and optimization (backend/frontend)
+/sk.migrate          ← Database migration lifecycle [expand/contract] (backend)
 /sk.review           ← Spec-aware code review: boundaries + contracts + ADRs (backend/frontend)
-/sk.analyze          ← Cross-artifact consistency check [run after implement, before test] (lead/architect)
 ```
 
 ### 🛡️ Quality & Security
@@ -176,6 +176,7 @@ Commands marked `[optional]` are skippable. Commands marked `[conditional]` are 
 ### 🚀 Operations & Shipping
 ```text
 /sk.ship             ← Quality-gated release: /sk.verify must pass (lead)
+/sk.rollback         ← Rollback plan for a shipped story (lead)
 ```
 
 ---
@@ -198,13 +199,14 @@ Created by Product Owners using `/sk.specify` and `/sk.clarify` to define *what*
 
 ### 3. System Design & Technical Planning
 Generated by Architects and Tech Leads before coding begins.
-- **`architecture.md` (via `/sk.architecture`)**: The structure and pattern for a specific unit.
-- **`data-model.md` (via `/sk.datamodel`)**: Formalizes entity schemas and database structures.
-- **`contracts/api-spec.json` (via `/sk.contracts`)**: Defines API boundaries between backend and frontend. The accompanying `test-plan.md` has per-consumer sections (`### web`, `### mobile`, `### admin`) so contract changes surface which frontend is affected.
-- **`plan.md` & `tasks.md` (via `/sk.plan` and `/sk.tasks`)**: The technical approach and sequential checklist for implementation.
+- **`architecture.md` (via `/sk.design`)**: The structure and pattern for a specific unit.
+- **`data-model.md` (via `/sk.design`)**: Formalizes entity schemas and database structures.
+- **`contracts/api-spec.json` (via `/sk.design`)**: Defines API boundaries between backend and frontend. The accompanying `test-plan.md` has per-consumer sections (`### web`, `### mobile`, `### admin`) so contract changes surface which frontend is affected.
+- **`plan.md` (via `/sk.plan`) & `tasks.yaml` (via `/sk.implement`)**: The technical approach and sequential checklist for implementation.
 
-### 4. Knowledge & Historical Tracking (`history/`)
-Ensures the framework remembers *why* decisions were made, not just what was changed.
+### 4. Knowledge & Historical Tracking (`history/` and `specs/`)
+Ensures the framework remembers *why* decisions were made, and *where* to look.
+- **`guide.yaml` (via `/sk.design`)**: Auto-generated 3-tier routing index that tells agents exactly where to look for relevant code and modules before they start debugging.
 - **`knowledge-base.md` (via `/sk.knowledge-base`)**: Caches non-derivable context at the System (≤300 lines), Domain (≤250 lines), or Unit (≤150 lines) tier. Content exceeding a tier's limit is extracted to the next tier down.
 - **`ADR-{NNN}.md` (via `/sk.adr`)**: Architecture Decision Records capturing context, options, and justification for significant tech choices.
 - **`PHR-{NNN}-{date}.md` (via `/sk.phr`)**: Prompt History Records to save highly effective AI prompts for future reuse.
@@ -220,25 +222,6 @@ Created by Developers or QA/Security agents executing the plan.
 ## 🏗️ Architecture & Implementation Details
 
 For developers actively working inside the framework or wanting a deep dive into its internals.
-
-<details>
-<summary><strong>What The Framework Adds Over Plain spec-kit</strong></summary>
-
-| Gap in spec-kit | SpecKit-SSD-SDLC solution |
-|-----------------|--------------------------|
-| No architecture step | `/sk.architecture`, `/sk.datamodel`, `/sk.contracts` |
-| No system context awareness | Memory layer + skills auto-loading |
-| No multi-service thinking | Service registry + domain model + impact analysis |
-| No team workflow | Session model + role-based agents + branch management |
-| No quality gates | 6-phase PASS/FAIL gates + `/sk.verify` |
-| No decision history | ADR + PHR systems |
-| No QA layer | `/sk.test` with backend-qa and frontend-qa agents |
-| No security layer | `/sk.security-audit` with security agent |
-| No non-derivable context | Three-tier knowledge base system |
-| Single tool dependency | Generic execution layer mapping for Claude and Gemini |
-| No project bootstrap | `setup.sh` + `/sk.init` for one-command initialization |
-
-</details>
 
 
 <details>
@@ -336,7 +319,7 @@ Intent (e.g. CHK)
     └── stories/
         └── story-CHK-PAY-001.md   ← frontmatter: status, checkpoint_mode
             ├── plan.md            ← story-level
-            └── tasks.md           ← story-level
+            └── tasks.yaml         ← story-level
 ```
 
 </details>

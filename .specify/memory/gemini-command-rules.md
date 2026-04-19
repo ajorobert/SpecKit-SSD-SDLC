@@ -5,9 +5,10 @@ Apply on every sk.* skill.
 @imports in CLAUDE.md are not processed in this environment.
 Explicitly read the following files at the start of every sk.* skill,
 before any other work, if they exist:
-1. `specs/knowledge-base.md` — Tier 1 system knowledge base
-2. `.specify/memory/command-rules.md` — skill rules and role behavior
-3. `.specify/project-config.md` — project identity and overrides (if exists)
+1. `specs/guide.yaml` — Tier 1 system routing index
+2. `specs/knowledge-base.md` — Tier 1 system knowledge base
+3. `.specify/memory/command-rules.md` — skill rules and role behavior
+4. `.specify/project-config.md` — project identity and overrides (if exists)
 
 ## Session Resolution
 Every skill resolves context from .claude/session.yaml
@@ -56,11 +57,15 @@ Create automatically after:
 - sk.architecture
 - sk.implement when novel tradeoffs resolved
 
-## Knowledge Base Loading Order
-For sk.implement, sk.test, sk.security-audit:
-1. Read specs/domains/{domain}/knowledge-base.md (tier 2) if exists
-2. Read unit knowledge-base.md (tier 3) if exists
-3. Then read code and detail files
+## Context Loading Order
+For sk.implement, sk.test, sk.security-audit, sk.investigate:
+1. Read session.yaml — know what you are doing
+2. Read specs/guide.yaml (tier 1) — know where to look
+3. Read specs/domains/{domain}/guide.yaml (tier 2) if exists — narrow to units
+4. Read unit guide.yaml (tier 3) if exists — narrow to modules/files
+5. Read specs/domains/{domain}/knowledge-base.md (tier 2) if exists — understand why
+6. Read unit knowledge-base.md (tier 3) if exists — understand unit decisions
+7. Then read code and detail files
 Knowledge bases contain non-derivable context only.
 They complement code reading — do not treat them as
 a substitute for reading the actual implementation.

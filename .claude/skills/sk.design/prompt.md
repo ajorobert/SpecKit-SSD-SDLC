@@ -195,8 +195,18 @@ Evaluate whether this design run produced non-derivable content worth capturing:
 **Decision:**
 - If any trigger is met: invoke sk.knowledge-base --tier unit
   Log: "KB update triggered — {reason}"
-- If no trigger: log "KB update skipped — no non-derivable content identified" and proceed to
-  Completion Report
+- If no trigger: log "KB update skipped — no non-derivable content identified" and proceed to Phase 5.
+
+### Phase 5 — Guide Update
+Condition: always runs after any phase completes (all modes).
+
+Auto-generate a unit-level routing index.
+1. Read `unit-brief.md`, `architecture.md`, `data-model.md`, and contracts to understand unit components.
+2. Read the actual directory structure (`src/**`) to identify where modules and files live.
+3. Generate or overwrite `specs/intents/{intent}/units/{unit}/guide.yaml`. Use `templates/artifacts/guide-template.yaml` as reference. It must contain the non-obvious cross-cutting constraints in the `also-check:` field.
+4. If missing, create/update the domain-level guide entry for this unit in `specs/domains/{domain}/guide.yaml`.
+5. If missing, create/update the system-level guide entry for this domain in `specs/guide.yaml`.
+6. Log: "Guide updated — {unit-id}".
 
 ## Checkpoint Pause Protocol
 When a review gate pause is required:
@@ -223,6 +233,7 @@ Phases skipped:
   {list skipped phases with reason: not needed | already complete | not targeted}
 
 Knowledge base: {updated | skipped — {reason}}
+Guide: {updated | no changes}
 
 Next step: /sk.plan
 ```

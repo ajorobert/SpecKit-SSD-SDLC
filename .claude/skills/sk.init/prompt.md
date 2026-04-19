@@ -192,6 +192,7 @@ All sections must be declarative and testable. Replace vague adjectives with mea
 ### Step 3 — Scaffold (if not exists)
 
 Create these only if they don't already exist:
+- `specs/guide.yaml` — empty system-level guide, generated from `templates/artifacts/guide-template.yaml` (Tier 1 structure)
 - `specs/knowledge-base.md` — pre-fill Why This System Exists and Core Actors from interview
 - `history/adr/` — empty directory (create `.gitkeep` if needed)
 - `history/prompts/` — empty directory (create `.gitkeep` if needed)
@@ -208,6 +209,7 @@ Report what was created:
 ✓ .specify/memory/standards/coding-standards.md
 ✓ .specify/memory/standards/api-standards.md
 ✓ .specify/memory/standards/data-standards.md
+✓ specs/guide.yaml
 ✓ specs/knowledge-base.md
 
 Next: run /sk.session start to set your role, then /sk.specify to begin your first intent.
@@ -262,6 +264,7 @@ For each selected item:
 - `.specify/memory/standards/coding-standards.md`
 - `.specify/memory/standards/api-standards.md`
 - `.specify/memory/standards/data-standards.md`
+- `specs/guide.yaml` (NEW PROJECT only, if absent)
 - `specs/knowledge-base.md` (NEW PROJECT only, if absent)
 
 ## Quality Bar
