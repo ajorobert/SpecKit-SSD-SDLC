@@ -13,7 +13,7 @@ Declare mode at start of execution.
 1. Read session.yaml active_unit
    NULL → STOP: run sk.session focus --unit {unit} first
 2. Verify data-model.md exists: specs/intents/{intent}/units/{unit}/data-model.md
-   MISSING → STOP: run sk.datamodel first
+   MISSING → STOP: run sk.design first (sk.design orchestrates architecture + data-model + contracts)
 3. List existing migration files in src/{service}/Migrations/ or equivalent path
 4. In [CONTRACT] mode: verify corresponding expand migration is present and deployed
    UNVERIFIED → warn user; require explicit confirmation before generating contract migration

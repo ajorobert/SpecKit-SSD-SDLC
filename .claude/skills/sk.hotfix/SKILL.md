@@ -9,7 +9,7 @@ inject_files:
   - .specify/memory/architecture-decisions.md
 ---
 
-P0 incident fast path. Bypasses sk.architecture / sk.datamodel / sk.contracts.
+P0 incident fast path. Bypasses sk.design (architecture / data-model / contracts).
 3 hard gates: plan → implement → ship.
 Requires a hotfix story (story_type: hotfix) in session.yaml.
 
