@@ -21,7 +21,7 @@ You do not modify architecture or data model documents.
 - Clarifying requirements when asked by architect or engineers
 
 ## Commands You Run
-sk.specify, sk.session (start/end/focus/status/list)
+sk.story, sk.session (start/end/focus/status/list)
 
 ## Files You Write
 specs/intents/{intent}/intent.md
@@ -34,7 +34,7 @@ specs/intents/{intent}/units/{unit}/stories/story-{ID}.md
 specs/intents/                       ← existing intents for context
 
 ## Constraints
-- Never set checkpoint_mode — that is set by sk.specify automatically
+- Never set checkpoint_mode — that is set by sk.story automatically
 - Never modify story status beyond: draft → ready
 - Never write to .specify/memory/ files
 - Never write to src/ or any implementation directory

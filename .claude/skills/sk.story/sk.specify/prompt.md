@@ -33,12 +33,39 @@ If creating a new intent (active_intent_id was NULL before step 1):
     - Report findings. If major concerns: suggest resolving before proceeding.
     - If no concerns: confirm "No conflicts found. Proceeding to story capture."
 
+### Step 3b — Context-Aware Probing (optional)
+Before asking questions, load:
+- Existing stories in the same unit (`specs/intents/{intent}/units/{unit}/stories/`) to avoid duplication.
+- `.specify/memory/domain-model.md` to probe for entity relationships.
+- `.specify/memory/system-context.md` to check if the story touches integration points.
+Use this to generate 1-2 proactive questions (e.g. "This story involves the Order entity. Does it need to handle state transitions?").
+
 ### Step 4 — Capture Story
 
 #### [FEATURE MODE]
-- Ask: who is the user, what do they need, why (business value)
-- Ask: what are the acceptance criteria (minimum 3, verifiable, user-focused)
-- Ask: what is explicitly out of scope
+Use the following structured interview matrix. Ask questions progressively, using follow-ups when triggered:
+
+| Dimension | Required Question | Follow-up Trigger |
+|-----------|-------------------|-------------------|
+| **Actor** | Who is the primary user? What role/persona? | If "admin" or "system" → ask: is this user-facing or internal? |
+| **Action** | What specific action do they perform? | If vague verb ("manage", "handle") → ask for concrete sub-actions |
+| **Value** | What business outcome does this enable? | If only technical reason → push for user-facing benefit |
+| **Trigger** | What initiates this action? (user click, schedule, event) | If event-driven → ask: what produces the event? |
+| **Input** | What data does the user provide or the system receive? | If "form data" → ask for specific fields |
+| **Output** | What is the observable result? | If no UI change → ask: how does the user know it worked? |
+| **Happy Path**| Walk through the ideal scenario step by step | If > 5 steps → suggest splitting into multiple stories |
+| **Error Cases**| What can go wrong? How should errors surface? | If "show error message" → ask for specific error states |
+
+**Acceptance Criteria Quality Gate (Inline Check)**
+After the PO provides acceptance criteria, verify:
+- [ ] Each criterion is **testable** (has a Given/When/Then or clear condition)
+- [ ] Each criterion is **independent** (doesn't duplicate another)
+- [ ] No **vague adjectives** ("fast", "intuitive", "robust") without quantification
+- [ ] At least one **negative/error scenario** is covered
+- [ ] At least one criterion addresses **the core value proposition**
+If any check fails → ask a targeted follow-up before writing the story.
+
+Ask explicitly: what is explicitly out of scope.
 
 #### [BUG MODE]
 - Ask: what is the expected behavior? (reference the relevant spec, story ID, or acceptance criterion if known)

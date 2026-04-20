@@ -6,8 +6,8 @@ This skill orchestrates other skills in sequence. Each sub-skill runs with its o
 isolated context — state is passed via the file system (session.yaml + spec artifacts).
 
 ## Mode Detection
-- `sk.ff` → [FEATURE MODE] full pipeline: specify → clarify → design → plan
-- `sk.ff --bug` → [BUG MODE] fix pipeline: specify --bug → clarify → plan
+- `sk.ff` → [FEATURE MODE] full pipeline: sk.story → design → plan
+- `sk.ff --bug` → [BUG MODE] fix pipeline: sk.story --bug → plan
   Architecture step is skipped in bug mode — the unit architecture already exists.
   If the bug fix requires a data model or contract change, stop and run sk.design --targeted manually.
 
@@ -19,21 +19,15 @@ isolated context — state is passed via the file system (session.yaml + spec ar
 ## Orchestration: [FEATURE MODE]
 
 ### Phase 1 — Story Capture
-Invoke skill: sk.specify
+Invoke skill: sk.story
 - Context injected: session.yaml, system-context.md, architecture-decisions.md, domain-model.md
-- Waits for: story-{ID}.md written with checkpoint_mode set in frontmatter
-- Reads back: active_story_id from session.yaml (updated by sk.specify)
+- Waits for: story-{ID}.md written and clarified, with checkpoint_mode set in frontmatter
+- Reads back: active_story_id from session.yaml (updated by sk.story -> sk.specify)
 - Reads back: checkpoint_mode from story-{ID}.md frontmatter
 
-### Phase 2 — Clarification
-Invoke skill: sk.clarify
-- Context injected: session.yaml
-- Waits for: story-{ID}.md updated with Clarifications section
-- No checkpoint gate here — clarify always runs
-
-### Phase 3 — Design [FEATURE MODE only]
+### Phase 2 — Design [FEATURE MODE only]
 Condition: checkpoint_mode = validate → invoke sk.design
-           checkpoint_mode = standard or confirm → skip to Phase 4
+           checkpoint_mode = standard or confirm → skip to Phase 3
 
 If invoked:
 - Invoke skill: sk.design
@@ -43,7 +37,7 @@ If invoked:
 - Waits for: all needed design artifacts written (architecture.md at minimum)
 - On sk.design completion: set story frontmatter checkpoint_status: approved
 
-### Phase 4 — Implementation Plan
+### Phase 3 — Implementation Plan
 Invoke skill: sk.plan
 - Context injected: session.yaml, tech-stack.md
 - Waits for: sk.plan to complete (it manages its own checkpoint gate internally).
@@ -51,14 +45,10 @@ Invoke skill: sk.plan
 ## Orchestration: [BUG MODE]
 
 ### Phase 1 — Bug Report Capture
-Invoke skill: sk.specify --bug
-- Same as feature mode Phase 1, bug framing
+Invoke skill: sk.story --bug
+- This will run the specify phase --bug and then clarify the buggy behavior conditions.
 
-### Phase 2 — Clarification
-Invoke skill: sk.clarify
-- Focus clarify on: reproduction conditions, edge cases, regression risk
-
-### Phase 3 — Implementation Plan (no architecture step)
+### Phase 2 — Implementation Plan (no architecture step)
 Invoke skill: sk.plan
 - Waits for: sk.plan to complete (it manages its own checkpoint gate).
 - Verify story_type: bug in story frontmatter before proceeding
@@ -79,8 +69,7 @@ Story: {story-id} — {story title}
 Mode: {FEATURE | BUG}
 
 Artifacts created:
-  ✓ story-{ID}.md         (sk.specify)
-  ✓ story-{ID}.md         (sk.clarify — clarifications added)
+  ✓ story-{ID}.md         (sk.story)
   ✓ architecture.md       (sk.design — if validate checkpoint)
   ✓ plan.md               (sk.plan)
 

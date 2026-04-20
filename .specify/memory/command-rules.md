@@ -14,7 +14,7 @@ NULL role → STOP. Do not proceed. Do not prompt for role inline — instruct u
 Role determines subagent_type: backend → SpecKit Backend Engineer Agent / QA Backend Agent; frontend → SpecKit Frontend Engineer Agent / QA Frontend Agent.
 
 ### Group B — Self-asserting (no session role needed)
-sk.specify (po), sk.architecture, sk.datamodel, sk.contracts, sk.adr, sk.impact,
+sk.story (po), sk.design, sk.adr, sk.impact,
 sk.knowledge-base (architect), sk.plan, sk.ff, sk.ship (lead),
 sk.security-audit (security), sk.uat (frontend-qa)
 Skill declares its own subagent_type — session role not consulted.
@@ -22,7 +22,6 @@ MUST NOT read or write session.yaml role field. MUST NOT prompt user to switch r
 Read session.yaml for active_intent_id, active_unit_id, active_story_id only.
 
 ### Group C — Self-asserting with defined default
-sk.clarify → SpecKit Architect Agent
 sk.analyze → SpecKit Lead Agent
 sk.verify → SpecKit Architect Agent
 No session role needed. Skill operates under its declared default subagent_type.
@@ -46,5 +45,5 @@ Each skill has:
 inject_files declares static file dependencies injected before agent execution.
 Dynamic paths (story-{ID}.md, architecture.md) are resolved by the agent after reading session.yaml.
 
-sk.ff is an orchestrator skill — it invokes sk.specify → sk.clarify → [sk.architecture] → sk.plan in sequence via the Skill tool.
+sk.ff is an orchestrator skill — it invokes sk.story → [sk.design] → sk.plan in sequence via the Skill tool.
 
