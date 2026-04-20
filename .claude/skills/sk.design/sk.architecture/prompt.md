@@ -47,10 +47,16 @@ Validate the written architecture against:
 Flag findings as:
 - BLOCKING: boundary violation, entity ownership conflict, or direct ADR contradiction
   → fix architecture before proceeding
+- MEDIUM: consistency violation (undeclared or incorrect consistency level for a write path),
+  missing index coverage for a query pattern, N+1 risk on a read path, undeclared
+  transaction boundary on a write path, or missing failure mode for an external dependency
+  → must be resolved before proceeding; counts as a blocker in autopilot mode
 - ADVISORY: new cross-service decision introduced
   → suggest creating an ADR via sk.adr before implementation begins
 
-If all checks pass: report "Engineering review passed — no boundary violations or ADR conflicts."
+If all checks pass: report "Engineering review passed — no findings."
+If only ADVISORY findings: report "Engineering review passed with advisories." and list them.
+If any MEDIUM or BLOCKING findings exist: report "Engineering review FAILED." and list all findings.
 
 ## Output Artifacts
 specs/intents/{intent}/units/{unit}/architecture.md

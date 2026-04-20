@@ -3,7 +3,11 @@ id: {INTENT-CODE}-{UNIT-CODE}-{NNN}
 intent: {INTENT-CODE}
 unit: {INTENT-CODE}-{UNIT-CODE}
 title: {title}
-status: draft | ready | in-progress | review | review-rejected | testing | security-review | done
+status:
+  current: draft        # draft | ready | in-progress | review | review-rejected | testing | security-review | done
+  entered_at: {date}    # ISO 8601 datetime when current state was entered
+  completed_at: null    # ISO 8601 datetime when story reached 'done'
+  blocked_by: null      # task id, story id, or free-text reason if blocked
 owner: null
 checkpoint_mode: null   # autopilot | confirm | validate
 checkpoint_status: null # null | approved

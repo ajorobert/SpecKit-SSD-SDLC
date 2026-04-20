@@ -11,7 +11,7 @@ Autopilot (0 checkpoints)
 - No new domain entities
 - UI-only or bug fix
 
-Confirm (1 checkpoint — after sk.plan, before sk.tasks)
+Confirm (1 checkpoint — after sk.plan, before sk.implement)
 - New feature within existing bounded context
 - New endpoints on existing service
 - Non-breaking schema additions
@@ -28,4 +28,4 @@ Autopilot: proceed without stopping
 Confirm:   stop after sk.plan, show plan summary, wait for explicit approval
 Validate:  stop after sk.design, wait for approval
            stop again after sk.plan, wait for approval
-           only then proceed to sk.tasks
+           only then proceed to sk.implement

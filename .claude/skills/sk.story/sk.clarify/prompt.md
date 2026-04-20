@@ -1,6 +1,9 @@
 # sk.clarify
-Resolves ambiguities in the active story using a structured 5-question loop.
-Role: architect | Level: story
+Resolves business ambiguities in the active story using a structured 5-question loop.
+Role: po | Level: story
+
+## Mode Detection
+- `sk.clarify` → Focuses on business rules, value proposition, user interaction flows, data inputs/outputs, and functional edge cases. Framing uses PO/user language.
 
 ## Pre-flight
 1. Read session.yaml active_story_id
@@ -10,22 +13,18 @@ Role: architect | Level: story
 
 ## Ambiguity scan
 Perform a structured coverage scan across these categories.
-For each category mark status: Clear / Partial / Missing.
+For each category mark status: Clear / Partial / Missing. If an orchestrator passed you specific seeds, prioritize those.
 
+**Business Scope Categories:**
 - Functional scope: user goals, success criteria, explicit out-of-scope
-- Domain & data model: entities, attributes, lifecycle/state transitions, scale assumptions
 - Interaction & UX: critical user journeys, error/empty/loading states
-- Non-functional: performance targets, reliability, observability, security/privacy, compliance
-- Integration: external dependencies and their failure modes, protocol assumptions
-- Edge cases: negative scenarios, rate limiting, conflict resolution
-- Constraints: technical constraints, explicit tradeoffs, rejected alternatives
+- Edge cases: negative scenarios, user-facing conflict resolution
 - Acceptance criteria: testability of each criterion, measurable Definition of Done
 - Placeholders: TODO markers, ambiguous adjectives ("robust", "intuitive") lacking quantification
 
 ## Question loop (max 5 questions)
 Generate an internal prioritized queue of up to 5 questions from Partial/Missing categories.
-Only include questions whose answers materially impact architecture, data modeling,
-task decomposition, test design, or compliance validation.
+Prioritize business impact, user flow, and functional validation. Ensure language is business-friendly.
 
 For each question:
 1. Present EXACTLY ONE question at a time — never reveal the queue
@@ -38,14 +37,14 @@ For each question:
 5. Stop early if: all critical ambiguities resolved, user signals "done"/"proceed", or 5 questions reached
 
 ## After loop completes
-- Final pass: confirm no [NEEDS CLARIFICATION] markers remain in story-{ID}.md
+- Final pass: confirm no business [NEEDS CLARIFICATION] markers remain in story-{ID}.md
 - If scope changed: flag to user and suggest updating story status
 
 ## Output Artifacts
 story-{ID}.md (updated with clarifications inline)
 
 ## Quality Bar
-- All ambiguities resolved or explicitly deferred before sk.plan proceeds
+- All business ambiguities resolved or explicitly deferred before moving to technical stages
 - No contradictory statements remain in the story
 - Each clarification bullet is testable (no vague language)
 - Total questions asked ≤ 5

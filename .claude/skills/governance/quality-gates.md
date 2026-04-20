@@ -11,7 +11,7 @@ Spec Gate (before sk.plan)
 - [ ] All user stories have acceptance criteria
 - [ ] No undefined external dependencies
 
-Architecture Gate (before sk.tasks)
+Architecture Gate (before sk.implement)
 - [ ] Architecture doc exists for this intent
 - [ ] All new services registered in service-registry.md
 - [ ] All new domain entities added to domain-model.md
@@ -29,7 +29,7 @@ Plan Gate (before sk.implement)
 - [ ] Idempotency-Key declared on all mutation endpoints
 
 Implementation Gate (before merge)
-- [ ] All tasks in tasks.md marked complete
+- [ ] All tasks in tasks.yaml have status: done
 - [ ] PHR created if novel tradeoffs were resolved
 - [ ] Standards compliance: coding-standards.md
 - [ ] No new domain entities introduced outside sk.design (datamodel phase)

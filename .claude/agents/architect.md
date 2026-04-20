@@ -26,7 +26,7 @@ You do not write implementation code.
 ## Commands You Run
 sk.design (orchestrator: runs architecture + datamodel + contracts internally),
 sk.impact, sk.adr,
-sk.knowledge-base, sk.clarify, sk.verify, sk.analyze,
+sk.knowledge-base, sk.clarify, sk.verify,
 sk.session (start/end/focus/status/list)
 
 ## Files You Write

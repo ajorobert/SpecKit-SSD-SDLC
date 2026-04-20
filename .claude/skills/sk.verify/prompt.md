@@ -3,8 +3,8 @@ PASS/FAIL quality gate for active story.
 Role: architect | Level: story
 
 **When to run:** After sk.test passes (test-status = pass in story frontmatter), before sk.ship.
-This is the final gate — not a mid-implementation check. Run sk.analyze if you need a
-consistency check earlier in the cycle (after implement, before test).
+This is the final gate — not a mid-implementation check. Run sk.plan --analyze-only if you need a
+consistency check earlier in the cycle (before implementation starts).
 
 ## Step 0: Capability Pack Selection
 Load all packs applicable to this story for comprehensive gate evaluation.
@@ -23,7 +23,7 @@ List the packs loaded before continuing.
 ## Input Artifacts
 story-{ID}.md (active story + frontmatter)
 All unit artifacts (architecture.md, data-model.md, contracts/)
-All story artifacts (plan.md, tasks.md)
+All story artifacts (plan.md, tasks.yaml)
 .specify/memory/architecture-decisions.md
 .specify/memory/standards/ (all files)
 .claude/skills/governance/SKILL.md (quality-gates.md)
@@ -33,7 +33,7 @@ All story artifacts (plan.md, tasks.md)
 2. Spec Gate: always evaluate
 3. Architecture Gate: evaluate if architecture.md exists
 4. Plan Gate: evaluate if plan.md exists
-5. Implementation Gate: evaluate if tasks.md complete
+5. Implementation Gate: evaluate if tasks.yaml complete
 6. Output structured report with PASS/FAIL per gate
 7. Overall PASS → story status set to done via post-skill hook
    Overall FAIL → story status unchanged, list failures

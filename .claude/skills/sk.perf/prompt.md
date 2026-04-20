@@ -52,8 +52,8 @@ For each selected optimization, write a task entry:
 - Acceptance criterion: measurable, tied to perf_target
 - Test method: how the improvement will be verified (benchmark, re-run load test, Lighthouse CI)
 
-Write tasks to: specs/intents/{intent}/units/{unit}/stories/{story-id}/tasks.md
-(If no active story: write to .specify/perf-tasks.md and remind user to create a story)
+Write tasks to: specs/intents/{intent}/units/{unit}/stories/{story-id}/tasks.yaml
+(If no active story: write to .specify/perf-tasks.yaml and remind user to create a story)
 
 ## Step 4 — Implement
 Execute tasks in priority order:
@@ -61,7 +61,7 @@ Execute tasks in priority order:
 - Implement the optimization (query rewrite, index addition, cache layer, lazy load, code split, etc.)
 - Add or update the benchmark/test for each change
 - After each task: report metric delta if measurable inline (e.g. "query reduced from 12 to 1 round trip")
-- Mark each task [X] in tasks.md
+- After each task: set its status to done in tasks.yaml
 
 ## Step 5 — Verify
 Run the agreed test method for each completed optimization:
@@ -72,7 +72,7 @@ If target missed: report remaining gap and suggest next candidate optimization.
 
 ## Output Artifacts
 perf-findings.md (diagnosis + ranked bottlenecks)
-specs/intents/{intent}/units/{unit}/stories/{story-id}/tasks.md (or .specify/perf-tasks.md)
+specs/intents/{intent}/units/{unit}/stories/{story-id}/tasks.yaml (or .specify/perf-tasks.yaml)
 src/** (optimized files)
 benchmark results summary (inline report)
 

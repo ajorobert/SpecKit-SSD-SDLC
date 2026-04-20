@@ -14,6 +14,7 @@ inject_files:
 
 Orchestrator skill — full design pipeline for a unit.
 Invokes sk.architecture -> sk.datamodel -> sk.contracts in sequence.
+Auto-generates the unit guide.yaml index after completion.
 Each sub-skill runs in its own isolated context. Review gates enforced between phases.
 
 Read and execute the full workflow in `prompt.md` in this directory.

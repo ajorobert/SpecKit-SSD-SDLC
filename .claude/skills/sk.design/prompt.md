@@ -96,6 +96,22 @@ Invoke skill: sk.architecture
   architecture-decisions.md, design-principles/SKILL.md
 - Waits for: architecture.md written and engineering review passed
 
+AUTOPILOT ENGINEERING REVIEW HARD STOP — autopilot mode only
+After sk.architecture completes, check the engineering review result:
+- If any BLOCKING or MEDIUM findings exist: STOP pipeline immediately.
+  Display:
+  ```
+  sk.design | Autopilot blocked — Engineering Review FAILED  [checkpoint_mode: autopilot]
+
+  The engineering review found issues that must be resolved before proceeding:
+  {list all BLOCKING and MEDIUM findings}
+
+  Fix the architecture and re-run sk.design, or escalate checkpoint_mode to 'confirm'.
+  ```
+  Do NOT continue to Phase 2.
+- If only ADVISORY findings: log them and proceed automatically.
+- If no findings: proceed automatically.
+
 REVIEW GATE 1 — validate mode only (skip for autopilot and confirm)
 If gate is active, display:
 ```
@@ -107,7 +123,7 @@ Review the following before continuing:
 
 Check for:
   - Bounded context is correct and scoped to this unit only
-  - No unresolved BLOCKING findings from the engineering review
+  - No unresolved BLOCKING or MEDIUM findings from the engineering review
   - Any ADVISORY findings (new cross-service decisions) have an ADR planned
   - Open questions are acceptable to carry into data model design
 
@@ -158,6 +174,40 @@ Invoke skill: sk.contracts
 - Waits for: api-spec.json, test-plan.md, provider tests written,
   service-registry.md updated
 
+### Phase 4 — Knowledge Base Assessment
+Condition: always runs after any phase completes (FRESH, RESUME, REFRESH, TARGETED)
+
+Evaluate whether this design run produced non-derivable content worth capturing:
+
+**Triggers that warrant a KB update (any one is sufficient):**
+- A non-obvious architectural decision was made (pattern chosen over alternatives, tradeoff accepted)
+- An external constraint surfaced that will not be visible in code (regulatory, legacy system, SLA)
+- A new invariant was identified that spans multiple files or services in this unit
+- REFRESH mode recorded a custom design decision in unit knowledge-base.md
+- An open question was resolved in a non-obvious way
+
+**Triggers that do NOT warrant a KB update:**
+- Standard CRUD unit with no unusual decisions
+- All phases were skipped (nothing ran)
+- TARGETED run produced no new decisions
+- Content is fully derivable from reading the artifacts just written
+
+**Decision:**
+- If any trigger is met: invoke sk.knowledge-base --tier unit
+  Log: "KB update triggered — {reason}"
+- If no trigger: log "KB update skipped — no non-derivable content identified" and proceed to Phase 5.
+
+### Phase 5 — Guide Update
+Condition: always runs after any phase completes (all modes).
+
+Auto-generate a unit-level routing index.
+1. Read `unit-brief.md`, `architecture.md`, `data-model.md`, and contracts to understand unit components.
+2. Read the actual directory structure (`src/**`) to identify where modules and files live.
+3. Generate or overwrite `specs/intents/{intent}/units/{unit}/guide.yaml`. Use `templates/artifacts/guide-template.yaml` as reference. It must contain the non-obvious cross-cutting constraints in the `also-check:` field.
+4. If missing, create/update the domain-level guide entry for this unit in `specs/domains/{domain}/guide.yaml`.
+5. If missing, create/update the system-level guide entry for this domain in `specs/guide.yaml`.
+6. Log: "Guide updated — {unit-id}".
+
 ## Checkpoint Pause Protocol
 When a review gate pause is required:
 1. Display the gate message clearly with the artifact paths
@@ -182,6 +232,9 @@ Artifacts written:
 Phases skipped:
   {list skipped phases with reason: not needed | already complete | not targeted}
 
+Knowledge base: {updated | skipped — {reason}}
+Guide: {updated | no changes}
+
 Next step: /sk.plan
 ```
 
@@ -196,3 +249,4 @@ Next step: /sk.plan
 - 'cancel' at any active gate preserves all artifacts written up to that point
 - Each sub-skill invocation is self-contained — no state leaks between phases
 - Completion report lists only what actually ran and what was skipped, with reasons
+- KB update is conditional — only invoked when non-derivable content was produced; reason always logged
