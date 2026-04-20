@@ -25,9 +25,7 @@ It natively supports both **Claude Code** and **Google Antigravity (Gemini)** vi
 > **🔧 Optional dependency:** [garrytan/gstack](https://github.com/garrytan/gstack) enhances three commands when installed:
 > - `sk.review` and `sk.investigate` — run natively without gstack; gstack adds supplementary signal if present
 > - `sk.ship` — falls back to `gh pr create` without gstack (requires [GitHub CLI](https://cli.github.com/))
-> - `sk.qa` — does **not** use gstack; runs platform-native tooling directly (Playwright/Cypress for web/admin, Maestro/Detox for mobile)
->
-> gstack's primary value is for **frontend** work: visual mockup generation (`/design-shotgun`), HTML conversion, and real browser QA.
+> gstack's primary value is for **frontend** work: visual mockup generation (`/design-shotgun`), HTML conversion, and real browser testing via **sk.uat**.
 
 SpecKit is designed to be added as a **git subtree** to any project repository.
 
@@ -39,11 +37,21 @@ bash .speckit/setup.sh
 
 ### 2. Start a session
 
-Begin your work by adopting a persona (`po`, `architect`, `lead`, `backend`, `frontend`, `backend-qa`, `frontend-qa`, `security`):
+Begin your work by adopting a persona (role shorthands: `po`, `architect`, `lead`, `backend`, `frontend`, `backend-qa`, `frontend-qa`, `security`):
 
 ```bash
 /sk.session start --role po
 ```
+
+> **🎭 Role Mapping:**
+> - `po` $\rightarrow$ `po.md`
+> - `architect` $\rightarrow$ `architect.md`
+> - `lead` $\rightarrow$ `lead.md`
+> - `backend` $\rightarrow$ `backend-engineer.md`
+> - `frontend` $\rightarrow$ `frontend-engineer.md`
+> - `backend-qa` $\rightarrow$ `backend-qa.md`
+> - `frontend-qa` $\rightarrow$ `frontend-qa.md`
+> - `security` $\rightarrow$ `security.md`
 
 > **🏁 Ending your session:** 
 > When your work is done, run `/sk.session end` to autonomously save state, commit, push your branch, and open your Pull Request.
@@ -57,6 +65,15 @@ SpecKit organizes work into a strict top-down structure:
 - **Intent**: A high-level business goal or feature (e.g., *User Authentication*).
 - **Unit**: A specific technical bounded context or service (e.g., *Auth API*).
 - **Story**: A single developer task or atomic slice of work (e.g., *Add password reset endpoint*).
+
+```mermaid
+graph TD
+    Intent[Intent: User Authentication] --> Unit1[Unit: Auth API]
+    Intent --> Unit2[Unit: Auth Client]
+    Unit1 --> Story1[Story: Add Login]
+    Unit1 --> Story2[Story: Add Password Reset]
+    Unit2 --> Story3[Story: Implement Login UI]
+```
 
 **How do commands know what to work on?**
 You use `/sk.session focus` to lock your agent onto a specific level. SpecKit saves this in a local `.claude/session.yaml` file. Every `/sk.*` command automatically reads this file, so the agent intrinsically knows which story or unit it is modifying without you having to repeatedly specify it.
@@ -79,15 +96,29 @@ You use `/sk.session focus` to lock your agent onto a specific level. SpecKit sa
 
 ### 4. Run the SDLC
 
+```mermaid
+sequenceDiagram
+    participant PO as Product Owner
+    participant AR as Architect/Lead
+    participant DEV as Engineer
+    participant QA as QA/Security
+
+    PO->>PO: /sk.story (specify + clarify)
+    AR->>AR: /sk.design + /sk.plan
+    DEV->>DEV: /sk.implement
+    QA->>QA: /sk.test + /sk.uat + /sk.security-audit
+    AR->>AR: /sk.verify
+    AR->>PO: /sk.ship
+```
+
 Commands marked `[optional]` are skippable. Commands marked `[conditional]` are required only in certain cases. Everything else is mandatory.
 
 ```
 ── SPECIFY ──────────────────────────────────────────────────────────────────────
 /sk.story                ← capture intent → units → stories; ensures completeness via clarify loop (po)
                            --bug flag: bug report framing (expected/actual/repro) instead of user story
-                           New intent: optional pre-validation against existing intents + ADRs
-/sk.story --specify      ← [targeted] run Capture phase only (po)
-/sk.story --clarify      ← [targeted] run Clarify phase only; --po or --architect framing (po/architect/lead)
+/sk.story --specify      ← [targeted] run Capture phase only: interview matrix → decomposition (po)
+/sk.story --clarify      ← [targeted] run Clarify loop: resolves ambiguities via architect/po (architect/lead)
 [/sk.impact]             ← [optional] assess blast radius on existing services (architect)
 
 ── ARCHITECTURE ─────────────────────────────────────────────────────────────────
@@ -115,13 +146,15 @@ Commands marked `[optional]` are skippable. Commands marked `[conditional]` are 
 ── REVIEW & QUALITY ─────────────────────────────────────────────────────────────
 [/sk.review]             ← [recommended] spec-aware code review: boundaries + contracts + ADRs (backend/frontend)
 /sk.test                 ← generate & run contract + integration tests (backend-qa/frontend-qa)
-[/sk.qa]                 ← [conditional: frontend work] acceptance testing by platform (frontend-qa)
+[/sk.uat]                ← [conditional: frontend work] user acceptance testing by platform (frontend-qa)
                            --platform web   → Playwright/Cypress (Next.js)
                            --platform mobile → Maestro/Detox (React Native) — no browser tooling
                            --platform admin  → Playwright/Cypress (React Admin)
 /sk.security-audit       ← OWASP Top 10 + STRIDE audit, secrets scan (security)
 /sk.verify               ← PASS/FAIL across all quality gates — must pass before ship (architect/lead)
-                           Run after sk.test passes. Use sk.plan --analyze-only earlier in the cycle.
+                           Gate 1: Spec (BCR/Stories) | Gate 2: Architecture (Entities/ADRs)
+                           Gate 3: Plan (Contracts) | Gate 4: Implementation (Tasks/Standards)
+                           Gate 5: Test (Contract/E2E) | Gate 6: Security (OWASP/Secrets)
 
 ── SHIP ─────────────────────────────────────────────────────────────────────────
 /sk.ship                 ← quality-gated release; /sk.verify must pass (lead)
@@ -163,7 +196,7 @@ Commands marked `[optional]` are skippable. Commands marked `[conditional]` are 
 ```text
 /sk.verify           ← PASS/FAIL quality gate across all gates [run after test, before ship] (architect/lead)
 /sk.test             ← Generate & run contract + integration tests (QA agents)
-/sk.qa               ← Acceptance testing by platform: --platform web|mobile|admin (frontend-qa)
+/sk.uat              ← Acceptance testing by platform: --platform web|mobile|admin (frontend-qa)
 /sk.security-audit   ← OWASP Top 10 + STRIDE audit, secrets scan (security)
 /sk.investigate      ← Spec-aware debugging (backend/frontend)
 ```
@@ -208,8 +241,8 @@ Generated by Architects and Tech Leads before coding begins.
 
 ### 4. Knowledge & Historical Tracking (`history/` and `specs/`)
 Ensures the framework remembers *why* decisions were made, and *where* to look.
-- **`guide.yaml` (via `/sk.design`)**: Auto-generated 3-tier routing index that tells agents exactly where to look for relevant code and modules before they start debugging.
-- **`knowledge-base.md` (via `/sk.knowledge-base`)**: Caches non-derivable context at the System (≤300 lines), Domain (≤250 lines), or Unit (≤150 lines) tier. Content exceeding a tier's limit is extracted to the next tier down.
+- **`guide.yaml` (via `/sk.design`)**: Auto-generated 3-tier routing index (System, Domain, Unit) that tells agents exactly where to look for relevant code and modules before they start debugging.
+- **`knowledge-base.md` (via `/sk.knowledge-base`)**: Caches non-derivable context at the System (≤300 lines), Domain (≤250 lines), or Unit (≤150 lines) tier. Content exceeding a tier's limit is automatically extracted to the next tier down.
 - **`ADR-{NNN}.md` (via `/sk.adr`)**: Architecture Decision Records capturing context, options, and justification for significant tech choices.
 - **`PHR-{NNN}-{date}.md` (via `/sk.phr`)**: Prompt History Records to save highly effective AI prompts for future reuse.
 
