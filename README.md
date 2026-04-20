@@ -1,55 +1,95 @@
 # 🚀 SpecKit-SSD-SDLC
 
-> A spec-driven development framework for full-stack multi-service systems.
+> **The SDLC framework for AI-Native Engineering Teams.**
+
+**SpecKit-SSD-SDLC** (Spec-Driven Development) provides a structured, high-fidelity process for cross-functional teams to collaborate with AI agents. It eliminates "hallucination-by-omission" by enforcing a strict hierarchy of truth from business intent to verified code.
 
 ---
 
-## 🎯 What This Is
-
-**SpecKit-SSD-SDLC** gives a team of AI agents—and the humans working with them—a shared, structured process for going from business intent to working code.
-
-It enforces:
-- A hierarchy of artifacts (Intent → Unit → Story)
-- A team-based session model with role-specific agents
-- Adaptive quality checkpoints
-- A full SDLC workflow from specification through implementation and verification
-
-It natively supports both **Claude Code** and **Google Antigravity (Gemini)** via the `.claude/` command layer.
+## 📖 Table of Contents
+- [🎯 The SpecKit Way (Philosophy)](#-the-speckit-way-philosophy)
+- [⚡ Quick Start: Team Onramp](#-quick-start-team-onramp)
+- [🎭 Role-Based Workflows](#-role-based-workflows)
+- [📜 Command Reference](#-command-reference)
+- [📦 Artifact Reference](#-artifact-reference)
+- [🏗️ FAQ & Technical Details](#-faq--technical-details)
 
 ---
 
-## ⚡ Quick Start: How To Use It
+## 🎯 The SpecKit Way (Philosophy)
 
-### 1. Initialize your project
+SpecKit is built on a single core principle: **Context is the currency of AI productivity.** 
 
-> **🔧 Optional dependency:** [garrytan/gstack](https://github.com/garrytan/gstack) enhances three commands when installed:
-> - `sk.review` and `sk.investigate` — run natively without gstack; gstack adds supplementary signal if present
-> - `sk.ship` — falls back to `gh pr create` without gstack (requires [GitHub CLI](https://cli.github.com/))
-> - `sk.qa` — does **not** use gstack; runs platform-native tooling directly (Playwright/Cypress for web/admin, Maestro/Detox for mobile)
->
-> gstack's primary value is for **frontend** work: visual mockup generation (`/design-shotgun`), HTML conversion, and real browser QA.
+Most AI failures occur because the model lacks context on *why* a decision was made. SpecKit solves this via:
+1. **The Hierarchy of Truth**: Intent (Business Value) → Unit (Technical Domain) → Story (Atomic Task).
+2. **Atomic Context Tiers**: 3-tiered Knowledge Bases that prevent LLM context-overflow.
+3. **Spec-Aware Gates**: Every implementation step is validated against high-level specs before it can be shipped.
 
-SpecKit is designed to be added as a **git subtree** to any project repository.
+---
+
+## ⚡ Quick Start: Team Onramp
+
+### 1. Initialize for the Team
+SpecKit is added as a **git subtree** so you can stay in sync with our upstream framework improvements.
 
 ```bash
 git subtree add --prefix=.speckit https://github.com/ajorobert/SpecKit-SSD-SDLC master --squash
 bash .speckit/setup.sh
-/sk.init    # interactive interview → generates framework memory files
+/sk.init    # Runs interactive interview to build your .specify/memory files
 ```
 
-### 2. Start a session
-
-Begin your work by adopting a persona (`po`, `architect`, `lead`, `backend`, `frontend`, `backend-qa`, `frontend-qa`, `security`):
+### 2. Enter a Session
+Every member of the team adopts a persona to unlock specialized commands:
 
 ```bash
-/sk.session start --role po
+/sk.session start --role {po | architect | lead | backend-engineer | frontend-engineer | security}
 ```
 
-> **🏁 Ending your session:** 
-> When your work is done, run `/sk.session end` to autonomously save state, commit, push your branch, and open your Pull Request.
+### 3. Set Your Focus
+Agents work best when they have a laser-focus. Use `/sk.session focus` to lock onto a story.
+```bash
+/sk.session focus --story story-AUTH-001
+```
 
-> **🔁 Recovering a lost session:**
-> If `session.yaml` is accidentally deleted while on an active branch, run `/sk.session restore` — it reconstructs the session from the current branch name without creating a new branch. Then run `/sk.session focus --story {id}` to re-lock your active story context.
+---
+
+## 🎭 Role-Based Workflows
+
+SpecKit provides specialized "rails" for every team member. Follow the path for your role:
+
+### 🖋️ Product Owner: From Intent to Story
+Your goal is to define *what* gets built without getting bogged down in implementation.
+1. **Capture Intent**: `/sk.story` — Decompose a business goal into Units and Stories.
+2. **Clarify**: The agent will loop until the story meets the "Definition of Ready."
+3. **Review Ready**: Use `/sk.session list` to see which stories are `ready` for the Architect.
+
+> **🔍 Review Ritual:** Audit `intent.md` and `story-{ID}.md` in `specs/intents/{intent}/`. Ensure the **Acceptance Criteria** are measurable and match your original business goal.
+
+### 📐 Architect: From Requirement to Contract
+Your goal is to ensure technical consistency across services.
+1. **Design**: `/sk.design` — Generate the `architecture.md`, `data-model.md`, and `API contracts`.
+2. **ADR**: `/sk.adr` — Record significant technical decisions.
+3. **Guide**: The routing `guide.yaml` is auto-generated to keep future developers oriented.
+
+> **🔍 Review Ritual:** Audit `architecture.md` and `api-spec.json` in `specs/intents/**/units/{unit}/`. Verify that the **Domain Boundaries** are respected and that the data model doesn't create circular dependencies.
+
+### 💻 Engineer: From Plan to Code
+Your goal is high-quality implementation with zero technical debt.
+1. **Plan**: `/sk.plan` — Generate a story-level technical implementation plan.
+2. **Implement**: `/sk.implement` — Follow the plan's checklist to write code and tests.
+3. **Review**: `/sk.review` — Perform a spec-aware self-review before submitting.
+
+> **🔍 Review Ritual:** Audit `plan.md` and `tasks.yaml` in `specs/intents/**/stories/{ID}/`. Check `history/prompts/` for any novel tradeoffs recorded during complex implementations.
+
+### 🛡️ QA & Security: The Quality Gate
+Your goal is to certify that the work meets the team's standards.
+1. **Verify Contracts**: `/sk.test` — Run provider/consumer contract tests.
+2. **UAT**: `/sk.uat` — Perform acceptance testing against the criteria in the story.
+3. **Audit**: `/sk.security-audit` — Run OWASP/STRIDE scans before shipping.
+
+> **🔍 Review Ritual:** Audit `test-plan.md` in `specs/intents/**/contracts/` and `security-audit.md` in root. Verify that **all** Acceptance Criteria have mapped tests and no CRITICAL vulnerabilities are open.
+
+---
 
 ### 3. Understand the Hierarchy & Session Focus
 
@@ -57,6 +97,15 @@ SpecKit organizes work into a strict top-down structure:
 - **Intent**: A high-level business goal or feature (e.g., *User Authentication*).
 - **Unit**: A specific technical bounded context or service (e.g., *Auth API*).
 - **Story**: A single developer task or atomic slice of work (e.g., *Add password reset endpoint*).
+
+```mermaid
+graph TD
+    Intent[Intent: User Authentication] --> Unit1[Unit: Auth API]
+    Intent --> Unit2[Unit: Auth Client]
+    Unit1 --> Story1[Story: Add Login]
+    Unit1 --> Story2[Story: Add Password Reset]
+    Unit2 --> Story3[Story: Implement Login UI]
+```
 
 **How do commands know what to work on?**
 You use `/sk.session focus` to lock your agent onto a specific level. SpecKit saves this in a local `.claude/session.yaml` file. Every `/sk.*` command automatically reads this file, so the agent intrinsically knows which story or unit it is modifying without you having to repeatedly specify it.
@@ -79,15 +128,29 @@ You use `/sk.session focus` to lock your agent onto a specific level. SpecKit sa
 
 ### 4. Run the SDLC
 
+```mermaid
+sequenceDiagram
+    participant PO as Product Owner
+    participant AR as Architect/Lead
+    participant DEV as Engineer
+    participant QA as QA/Security
+
+    PO->>PO: /sk.story (specify + clarify)
+    AR->>AR: /sk.design + /sk.plan
+    DEV->>DEV: /sk.implement
+    QA->>QA: /sk.test + /sk.uat + /sk.security-audit
+    AR->>AR: /sk.verify
+    AR->>PO: /sk.ship
+```
+
 Commands marked `[optional]` are skippable. Commands marked `[conditional]` are required only in certain cases. Everything else is mandatory.
 
 ```
 ── SPECIFY ──────────────────────────────────────────────────────────────────────
 /sk.story                ← capture intent → units → stories; ensures completeness via clarify loop (po)
                            --bug flag: bug report framing (expected/actual/repro) instead of user story
-                           New intent: optional pre-validation against existing intents + ADRs
-/sk.story --specify      ← [targeted] run Capture phase only (po)
-/sk.story --clarify      ← [targeted] run Clarify phase only; --po or --architect framing (po/architect/lead)
+/sk.story --specify      ← [targeted] run Capture phase only: interview matrix → decomposition (po)
+/sk.story --clarify      ← [targeted] run Clarify loop: resolves ambiguities via architect/po (architect/lead)
 [/sk.impact]             ← [optional] assess blast radius on existing services (architect)
 
 ── ARCHITECTURE ─────────────────────────────────────────────────────────────────
@@ -115,13 +178,15 @@ Commands marked `[optional]` are skippable. Commands marked `[conditional]` are 
 ── REVIEW & QUALITY ─────────────────────────────────────────────────────────────
 [/sk.review]             ← [recommended] spec-aware code review: boundaries + contracts + ADRs (backend/frontend)
 /sk.test                 ← generate & run contract + integration tests (backend-qa/frontend-qa)
-[/sk.qa]                 ← [conditional: frontend work] acceptance testing by platform (frontend-qa)
+[/sk.uat]                ← [conditional: frontend work] user acceptance testing by platform (frontend-qa)
                            --platform web   → Playwright/Cypress (Next.js)
                            --platform mobile → Maestro/Detox (React Native) — no browser tooling
                            --platform admin  → Playwright/Cypress (React Admin)
 /sk.security-audit       ← OWASP Top 10 + STRIDE audit, secrets scan (security)
 /sk.verify               ← PASS/FAIL across all quality gates — must pass before ship (architect/lead)
-                           Run after sk.test passes. Use sk.plan --analyze-only earlier in the cycle.
+                           Gate 1: Spec (BCR/Stories) | Gate 2: Architecture (Entities/ADRs)
+                           Gate 3: Plan (Contracts) | Gate 4: Implementation (Tasks/Standards)
+                           Gate 5: Test (Contract/E2E) | Gate 6: Security (OWASP/Secrets)
 
 ── SHIP ─────────────────────────────────────────────────────────────────────────
 /sk.ship                 ← quality-gated release; /sk.verify must pass (lead)
@@ -163,7 +228,7 @@ Commands marked `[optional]` are skippable. Commands marked `[conditional]` are 
 ```text
 /sk.verify           ← PASS/FAIL quality gate across all gates [run after test, before ship] (architect/lead)
 /sk.test             ← Generate & run contract + integration tests (QA agents)
-/sk.qa               ← Acceptance testing by platform: --platform web|mobile|admin (frontend-qa)
+/sk.uat              ← Acceptance testing by platform: --platform web|mobile|admin (frontend-qa)
 /sk.security-audit   ← OWASP Top 10 + STRIDE audit, secrets scan (security)
 /sk.investigate      ← Spec-aware debugging (backend/frontend)
 ```
@@ -208,8 +273,8 @@ Generated by Architects and Tech Leads before coding begins.
 
 ### 4. Knowledge & Historical Tracking (`history/` and `specs/`)
 Ensures the framework remembers *why* decisions were made, and *where* to look.
-- **`guide.yaml` (via `/sk.design`)**: Auto-generated 3-tier routing index that tells agents exactly where to look for relevant code and modules before they start debugging.
-- **`knowledge-base.md` (via `/sk.knowledge-base`)**: Caches non-derivable context at the System (≤300 lines), Domain (≤250 lines), or Unit (≤150 lines) tier. Content exceeding a tier's limit is extracted to the next tier down.
+- **`guide.yaml` (via `/sk.design`)**: Auto-generated 3-tier routing index (System, Domain, Unit) that tells agents exactly where to look for relevant code and modules before they start debugging.
+- **`knowledge-base.md` (via `/sk.knowledge-base`)**: Caches non-derivable context at the System (≤300 lines), Domain (≤250 lines), or Unit (≤150 lines) tier. Content exceeding a tier's limit is automatically extracted to the next tier down.
 - **`ADR-{NNN}.md` (via `/sk.adr`)**: Architecture Decision Records capturing context, options, and justification for significant tech choices.
 - **`PHR-{NNN}-{date}.md` (via `/sk.phr`)**: Prompt History Records to save highly effective AI prompts for future reuse.
 
@@ -221,23 +286,39 @@ Created by Developers or QA/Security agents executing the plan.
 
 ---
 
-## 🏗️ Architecture & Implementation Details
+---
 
-For developers actively working inside the framework or wanting a deep dive into its internals.
-
+## 🏗️ FAQ & Technical Details
 
 <details>
-<summary><strong>Execution Layer Structure</strong></summary>
+<summary><strong>❓ FAQ: Why all the files?</strong></summary>
 
-### Claude Code Native & Antigravity (Gemini) Support
-
-- **`.claude/`**: Lean commands using standard AI coding primitives (skills auto-loaded by context, post-command hooks, persona definitions).
-- **`GEMINI.md`**: Routes Antigravity into the same `.claude/` commands, agents, and skills to ensure **zero duplication**.
+SpecKit generates many artifacts (`intent.md`, `architecture.md`, `tasks.yaml`, etc.) to solve "LLM context drift." By breaking technical debt and business intent into atomic, small files, we ensure that every AI interaction is focused on the minimum required context, significantly increasing the reliability of the output.
 
 </details>
 
 <details>
-<summary><strong>Core Components & Memory Layer</strong></summary>
+<summary><strong>❓ FAQ: Do I need gstack?</strong></summary>
+
+No. SpecKit is platform-neutral. However, [gstack](https://github.com/garrytan/gstack) is highly recommended for frontend teams as it enables visual design mocking (`/design-shotgun`) and real browser UAT loops which SpecKit uses natively if detected.
+
+</details>
+
+<details>
+<summary><strong>❓ FAQ: How do I upgrade SpecKit?</strong></summary>
+
+Since SpecKit is added as a git subtree, upgrades are simple:
+```bash
+git subtree pull --prefix=.speckit https://github.com/ajorobert/SpecKit-SSD-SDLC master --squash
+bash .speckit/setup.sh
+```
+
+</details>
+
+---
+
+<details>
+<summary><strong>🏗️ Execution Layer & Memory Structure</strong></summary>
 
 - **Foundation**: Unified execution layer in `.claude/`.
 - **Memory Layer (`.specify/memory/`)**:
@@ -245,116 +326,37 @@ For developers actively working inside the framework or wanting a deep dive into
   - `architecture-decisions.md` (ADR Index)
   - `command-rules.md` / `gemini-command-rules.md`
   - `standards/` (tech stack, coding, API, data standards)
-- **Knowledge Base System (`specs/`)**: Tier 1 (System-level), Tier 2 (Domain-level), Tier 3 (Unit-level) containing only non-derivable context.
-- **Templates**: Available in `templates/artifacts/` for ADR, PHR, architecture, test-plans, intents, stories, units, etc.
+- **Knowledge Base System (`specs/`)**: Tier 1 (System-level), Tier 2 (Domain-level), Tier 3 (Units) containing only non-derivable context.
 
 </details>
 
 <details>
-<summary><strong>Governance & Quality Control</strong></summary>
+<summary><strong>📈 Adaptive Checkpoints & Quality Gates</strong></summary>
 
-### Adaptive Checkpoints
-
-Stories are classified differently upon `/sk.story` (which sets standard/validate) to govern agent execution speed:
-- `autopilot`: No contract changes/new entities. `/sk.ff` runs end-to-end.
-- `confirm`: New feature in existing bound. Pause pending approval after `/sk.plan`.
+### Checkpoint Modes
+Stories are classified by `sk.story` to govern execution speed:
+- `autopilot`: No contract changes. `/sk.ff` runs end-to-end.
+- `confirm`: New feature. Pause pending approval after `/sk.plan`.
 - `validate`: Breaking changes/new service. Pauses after `/sk.architecture` **and** `/sk.plan`.
 
-### Quality Gates (`/sk.verify`)
-
-Evaluates six sequential gates. A single `FAIL` blocks progression.
+### The 6 Quality Gates (`/sk.verify`)
 1. **Spec** - Acceptance criteria written, no missing dependencies.
 2. **Architecture** - Stories covered, entities added, cross-service ADRs defined.
-3. **Plan** - Contracts defined for new endpoints, checkpoint approvals cleared.
+3. **Plan** - Contracts defined, checkpoint approvals cleared.
 4. **Implementation** - All tasks checked off `[X]`, no standard violations.
-5. **Test** - Provider/consumer contract & E2E tests exist/passing, coverage met.
-6. **Security** - No CRITICAL findings (OWASP or STRIDE), secrets scan clean.
+5. **Test** - Contract & E2E tests passing.
+6. **Security** - No CRITICAL findings, secrets scan clean.
 
 </details>
 
 <details>
-<summary><strong>Team Session Model & Agent Personas</strong></summary>
+<summary><strong>👥 Agent Personas</strong></summary>
 
-### Session Workflow
-
-Runs locally per-developer and tracked in `.claude/session.yaml` (gitignored). Story statuses track linearly from `draft` → `done`. Branch-per-session is automatically committed and PR'd on session `end`.
-
-### 8 Agent Personas (`.claude/agents/`)
-
-- **`po`** - Defines spec intents, units, stories, and acceptance criteria.
-- **`architect`** - Oversees service design, data models, contracts, ADRs, knowledge bases.
-- **`lead`** - Implementation plans, task breakdowns, artifact consistency checks.
-- **`backend`** / **`frontend`** - Target implementation executors.
-- **`backend-qa`** / **`frontend-qa`** - Testing, provider/consumer contract tests, coverage validation.
-- **`security`** - Audit, STRIDE, secrets scanning, dependency validation.
-
-</details>
-
-<details>
-<summary><strong>Project Structure After Initialization</strong></summary>
-
-```text
-your-monorepo/
-├── .speckit/                   ← framework subtree (don't edit)
-├── .claude/                    ← deployed by setup.sh, commit this
-├── .specify/                   ← project knowledge
-│   ├── project-config.md       ← project identity (edit freely)
-│   └── memory/                 ← context generated by `/sk.init`
-├── specs/                      ← living specs (intents, units, stories)
-├── history/                    ← ADRs, PHRs
-├── CLAUDE.md                   ← framework entry point template 
-└── GEMINI.md                   ← framework entry point template
-```
-
-</details>
-
-<details>
-<summary><strong>Spec Hierarchy</strong></summary>
-
-```text
-Intent (e.g. CHK)
-└── Unit (e.g. CHK-PAY)
-    ├── architecture.md        ← unit-level, covers all stories
-    ├── data-model.md          ← unit-level
-    ├── knowledge-base.md      ← unit-level non-derivable context (tier 3)
-    ├── contracts/             ← unit-level API spec + tests
-    └── stories/
-        └── story-CHK-PAY-001.md   ← frontmatter: status, checkpoint_mode
-            ├── plan.md            ← story-level
-            └── tasks.yaml         ← story-level
-```
-
-</details>
-
-<details>
-<summary><strong>sk.init Memory Artifacts & Command Consumers</strong></summary>
-
-`/sk.init` runs an interactive interview and generates the following files under `.specify/memory/`. Each file has a `Loaded by:` header that controls which commands read it — no command loads all files at once.
-
-| File | What it contains | Loaded by |
-|------|-----------------|-----------|
-| `project-config.md` | Project name, description, stack, custom rules, overrides | Always (via CLAUDE.md / GEMINI.md) |
-| `constitution.md` | Non-negotiable constraints, tech philosophy, deployment context | `sk.verify` |
-| `system-context.md` | System overview, type, services, frontend surfaces, external dependencies | `sk.story`, `sk.impact`, `sk.ff` |
-| `service-registry.md` | Service names, responsibilities, tech stack, API type | `sk.plan`, `sk.architecture`, `sk.contracts`, `sk.impact` |
-| `standards/tech-stack.md` | Backend, databases, frontend, infrastructure, DDD/DDIA constraints | `sk.plan` |
-| `standards/api-standards.md` | URL structure, versioning, response envelope, error format, auth, pagination | `sk.contracts` |
-| `standards/coding-standards.md` | Formatter/linter, naming, error handling pattern, implementation rules | `sk.implement`, `sk.review` |
-| `standards/data-standards.md` | Naming conventions, required fields, migrations, soft delete, multi-tenancy, indexes | `sk.datamodel` |
-
-**Why is tech stack repeated across multiple files?**  
-Each file is scoped to the commands that need it. `sk.implement` doesn't need system context; `sk.story` doesn't need coding standards. Splitting keeps each command's context lean and focused. The cost — updating a few files on a stack change — is intentional friction, since stack changes require an ADR anyway.
-
-</details>
-
-<details>
-<summary><strong>Framework Updates</strong></summary>
-
-To receive framework updates:
-
-```bash
-git subtree pull --prefix=.speckit https://github.com/your-org/SpecKit-SSD-SDLC main --squash
-bash .speckit/setup.sh    # updates .claude/; prompts for CLAUDE/GEMINI replace
-```
+- **`po`** - Defines spec intents, units, stories.
+- **`architect`** - Oversees service design, data models, contracts, ADRs.
+- **`lead`** - Implementation plans, task breakdowns.
+- **`backend`** / **`frontend`** - Implementation executors.
+- **`backend-qa`** / **`frontend-qa`** - Testing, contract validation.
+- **`security`** - Audit, STRIDE, secrets scanning.
 
 </details>
