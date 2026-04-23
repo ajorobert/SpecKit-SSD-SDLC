@@ -3,7 +3,6 @@ name: sk.story
 description: "Invoke when: driving the complete story capture and clarification pipeline. Role: po (orchestrator). Invokes: sk.specify → loops sk.clarify (business) → loops sk.architect-probe (technical) → validation gate."
 subagent_type: SpecKit PO Agent
 inject_files:
-  - .claude/session.yaml
   - .specify/memory/system-context.md
   - .specify/memory/architecture-decisions.md
   - .specify/memory/domain-model.md

@@ -3,7 +3,6 @@ name: sk.implement
 description: "Invoke when: generating tasks and executing implementation for a story. Role: backend or frontend (required — determines agent). Reads: session.yaml, plan.md, architecture.md, contracts, coding-standards.md. Writes: tasks.yaml, src/**."
 subagent_type: SpecKit Backend Engineer Agent
 inject_files:
-  - .claude/session.yaml
   - .specify/memory/standards/coding-standards.md
   - .specify/memory/standards/observability-standards.md
   - .specify/memory/architecture-decisions.md

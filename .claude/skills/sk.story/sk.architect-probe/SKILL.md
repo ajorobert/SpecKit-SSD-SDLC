@@ -3,7 +3,6 @@ name: sk.architect-probe
 description: "Invoke when: extracting and clarifying non-functional requirements, security boundaries, and technical constraints from the PO. Role: architect. Reads: session.yaml, architecture-decisions.md, story-{ID}.md. Writes: story-{ID}.md."
 subagent_type: SpecKit Architect Agent
 inject_files:
-  - .claude/session.yaml
   - .specify/memory/architecture-decisions.md
 ---
 

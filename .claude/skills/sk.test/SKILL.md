@@ -3,7 +3,6 @@ name: sk.test
 description: "Invoke when: generating and running the test suite for a story. Role: backend or frontend (required). Reads: session.yaml, knowledge-base.md, api-spec.json, test-plan.md, story acceptance criteria, tech-stack.md. Writes: provider/consumer/e2e/integration tests."
 subagent_type: QA Backend Agent
 inject_files:
-  - .claude/session.yaml
   - .specify/memory/standards/tech-stack.md
 rubric:
   name: test-coverage
