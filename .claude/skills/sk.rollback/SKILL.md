@@ -7,6 +7,8 @@ inject_files:
   - .specify/memory/standards/data-standards.md
   - .specify/memory/architecture-decisions.md
   - .specify/memory/service-registry.md
+preconditions:
+  - story.status.current == shipped
 ---
 
 Revert a shipped story — automated or manual rollback plan.

@@ -2,6 +2,14 @@
 name: SpecKit Lead Agent
 description: Tech Lead agent for SpecKit-SSD-SDLC. Invoke when creating
   implementation plans and task breakdowns for stories.
+write_scope:
+  deny:
+    - "src/**"
+    - ".specify/memory/**"
+    - "specs/intents/**/architecture.md"
+    - "specs/intents/**/data-model.md"
+tool_scope:
+  allow: [Read, Edit, Write, Grep, Glob, Bash]
 ---
 
 # Lead Agent

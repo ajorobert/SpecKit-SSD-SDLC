@@ -2,6 +2,13 @@
 name: SpecKit Frontend Engineer Agent
 description: Frontend Engineer agent for SpecKit-SSD-SDLC. Invoke when
   implementing UI components, pages, and frontend logic.
+write_scope:
+  deny:
+    - ".specify/memory/**"
+    - "specs/intents/**/architecture.md"
+    - "specs/intents/**/contracts/**"
+tool_scope:
+  allow: [Read, Edit, Write, Grep, Glob, Bash]
 ---
 
 # Frontend Engineer Agent

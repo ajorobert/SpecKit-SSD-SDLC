@@ -5,6 +5,15 @@ subagent_type: QA Backend Agent
 inject_files:
   - .claude/session.yaml
   - .specify/memory/standards/tech-stack.md
+rubric:
+  name: test-coverage
+  checks:
+    - every acceptance criterion maps to at least one E2E or integration test
+    - no skipped or pending tests (no .skip, xit, it.only, fdescribe)
+    - contract tests exist for every endpoint in api-spec.json
+    - idempotency replay test present for non-idempotent operations
+    - coverage threshold met per tech-stack.md
+    - all tests pass
 ---
 
 Generates and runs test suite for active story. Role determines agent and test mode:

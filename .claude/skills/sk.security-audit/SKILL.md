@@ -5,6 +5,16 @@ subagent_type: Security Agent
 inject_files:
   - .claude/session.yaml
   - .specify/memory/architecture-decisions.md
+rubric:
+  name: security-coverage
+  checks:
+    - every OWASP Top 10 category has a documented verdict
+    - STRIDE categories (Spoofing, Tampering, Repudiation, Info-disclosure, DoS, Elevation) covered
+    - no hardcoded secrets or credentials in scope
+    - dependencies scanned for known CVEs
+    - auth boundaries explicitly verified
+    - every finding has severity (CRITICAL|HIGH|MEDIUM|LOW) and remediation
+    - no CRITICAL findings unresolved
 ---
 
 Security audit: OWASP Top 10 + STRIDE threat modeling.

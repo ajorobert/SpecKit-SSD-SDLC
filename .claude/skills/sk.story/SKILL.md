@@ -7,6 +7,15 @@ inject_files:
   - .specify/memory/system-context.md
   - .specify/memory/architecture-decisions.md
   - .specify/memory/domain-model.md
+rubric:
+  name: story-completeness
+  checks:
+    - every acceptance criterion is independently testable
+    - every acceptance criterion uses Given/When/Then or equivalent observable form
+    - user story follows "As a {role} I want {action} so that {benefit}"
+    - out-of-scope list is present and non-empty
+    - minimum 3 acceptance criteria
+    - no undefined external dependencies
 ---
 
 Orchestrator skill — Full Story Capture Pipeline.

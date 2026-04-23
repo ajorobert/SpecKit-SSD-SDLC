@@ -5,6 +5,10 @@ subagent_type: SpecKit Lead Agent
 inject_files:
   - .claude/session.yaml
   - .specify/memory/service-registry.md
+preconditions:
+  - story.verify-status == PASS
+  - story.test-status == pass
+  - story.security-status != BLOCKED
 ---
 
 Quality-gated release. Runs sk.verify before proceeding.

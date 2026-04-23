@@ -5,7 +5,12 @@
 set -euo pipefail
 
 INPUT=$(cat)
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+# Extract file_path — prefer jq, fall back to sed (jq may be absent on Windows bash)
+if command -v jq >/dev/null 2>&1; then
+  FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+else
+  FILE_PATH=$(echo "$INPUT" | sed -n 's/.*"file_path"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+fi
 
 if [[ -z "$FILE_PATH" ]]; then
   exit 0
@@ -47,6 +52,65 @@ if [[ "$FILE_PATH" == /* ]]; then
     echo "Blocked: \"$FILE_PATH\" is outside project root." >&2
     echo "Project root: $PROJECT_ROOT" >&2
     exit 2
+  fi
+fi
+
+# Per-agent write_scope enforcement — read active role from session.yaml,
+# load the matching agent file, and deny globs declared under write_scope.deny.
+SESSION_YAML="${PROJECT_ROOT}/.claude/session.yaml"
+if [[ -f "$SESSION_YAML" ]]; then
+  ROLE=$(grep -E '^role:' "$SESSION_YAML" \
+    | sed 's/^role:[[:space:]]*//' \
+    | sed 's/[[:space:]]*#.*//' \
+    | tr -d '"' \
+    | xargs 2>/dev/null || true)
+
+  if [[ -n "$ROLE" ]] && [[ "$ROLE" != "null" ]]; then
+    case "$ROLE" in
+      backend)  AGENT_FILE="backend-engineer.md"  ;;
+      frontend) AGENT_FILE="frontend-engineer.md" ;;
+      *)        AGENT_FILE="${ROLE}.md"           ;;
+    esac
+    AGENT_PATH="${PROJECT_ROOT}/.claude/agents/${AGENT_FILE}"
+
+    if [[ -f "$AGENT_PATH" ]]; then
+      DENY_GLOBS=$(awk '
+        /^---[[:space:]]*$/ { fm++; if (fm == 2) exit; next }
+        fm != 1 { next }
+        /^write_scope:[[:space:]]*$/ { in_ws=1; next }
+        in_ws && /^[a-zA-Z_]/ { in_ws=0 }
+        in_ws && /^[[:space:]]+deny:[[:space:]]*$/ { in_deny=1; next }
+        in_deny && /^[[:space:]]+[a-zA-Z_]/ { in_deny=0 }
+        in_deny && /^[[:space:]]+-[[:space:]]/ {
+          sub(/^[[:space:]]+-[[:space:]]*/, "")
+          gsub(/^["'\'']|["'\'']$/, "")
+          print
+        }
+      ' "$AGENT_PATH")
+
+      if [[ -n "$DENY_GLOBS" ]]; then
+        TARGET="$FILE_PATH"
+        if [[ "$TARGET" == /* ]]; then
+          RESOLVED_TARGET=$(realpath -m "$TARGET" 2>/dev/null || echo "$TARGET")
+          PROJECT_RESOLVED=$(realpath -m "$PROJECT_ROOT" 2>/dev/null || echo "$PROJECT_ROOT")
+          if [[ "$RESOLVED_TARGET" == "$PROJECT_RESOLVED"/* ]]; then
+            TARGET="${RESOLVED_TARGET#$PROJECT_RESOLVED/}"
+          fi
+        fi
+
+        shopt -s globstar nullglob extglob 2>/dev/null || true
+        while IFS= read -r GLOB; do
+          [[ -z "$GLOB" ]] && continue
+          # shellcheck disable=SC2053
+          if [[ "$TARGET" == $GLOB ]]; then
+            echo "Blocked: role \"${ROLE}\" may not write to \"${TARGET}\"" >&2
+            echo "  matched deny pattern: ${GLOB}" >&2
+            echo "  see: .claude/agents/${AGENT_FILE} (write_scope.deny)" >&2
+            exit 2
+          fi
+        done <<< "$DENY_GLOBS"
+      fi
+    fi
   fi
 fi
 

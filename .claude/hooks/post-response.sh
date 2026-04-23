@@ -6,6 +6,24 @@
 
 INPUT=$(cat)
 
+# jq is optional on Windows bash — define a tiny fallback for the two paths we use
+if ! command -v jq >/dev/null 2>&1; then
+  jq() {
+    # Only supports the narrow queries this hook uses.
+    local expr="$2"
+    case "$expr" in
+      '.stop_hook_active // false')
+        sed -n 's/.*"stop_hook_active"[[:space:]]*:[[:space:]]*\(true\|false\).*/\1/p' | head -1 | grep -q true && echo true || echo false
+        ;;
+      '.transcript_path // empty')
+        sed -n 's/.*"transcript_path"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'
+        ;;
+      *) echo ""
+         ;;
+    esac
+  }
+fi
+
 # Guard: if Claude is responding to hook output, do not recurse
 STOP_HOOK_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false' 2>/dev/null)
 if [[ "$STOP_HOOK_ACTIVE" == "true" ]]; then
@@ -59,12 +77,15 @@ LAST_TEXT=$(echo "$LAST_ASSISTANT_LINE" | jq -r '
   end
 ' 2>/dev/null || true)
 
-# Check for the structured completion marker emitted by the skill prompt
-if ! echo "$LAST_TEXT" | grep -q "^SK_RESULT: PASS"; then
+# Parse SK_RESULT verdict emitted by the skill prompt
+if echo "$LAST_TEXT" | grep -qE "^SK_RESULT:[[:space:]]*PASS"; then
+  VERDICT="PASS"
+elif echo "$LAST_TEXT" | grep -qE "^SK_RESULT:[[:space:]]*FAIL"; then
+  VERDICT="FAIL"
+else
   exit 0
 fi
 
-# Skill passed — update story status
 SESSION_YAML="${PROJECT_ROOT}/.claude/session.yaml"
 if [[ ! -f "$SESSION_YAML" ]]; then
   exit 0
@@ -94,6 +115,32 @@ if [[ ${#STORY_FILES[@]} -gt 1 ]]; then
 fi
 
 STORY_FILE="${STORY_FILES[0]}"
+
+# Persist per-skill frontmatter field regardless of verdict, so preconditions
+# in downstream skills (sk.ship, etc.) can see PASS/FAIL deterministically.
+upsert_field() {
+  local field="$1"
+  local value="$2"
+  if grep -qE "^${field}:" "$STORY_FILE" 2>/dev/null; then
+    sed -i "s|^${field}:.*$|${field}: ${value}|" "$STORY_FILE" 2>/dev/null || true
+  else
+    # Insert before the closing --- of frontmatter (second occurrence)
+    awk -v f="${field}: ${value}" '
+      /^---[[:space:]]*$/ { c++; if (c == 2) { print f } }
+      { print }
+    ' "$STORY_FILE" > "${STORY_FILE}.tmp" && mv "${STORY_FILE}.tmp" "$STORY_FILE"
+  fi
+}
+
+case "$SKILL_NAME" in
+  sk.test)   upsert_field "test-status"   "$(echo "$VERDICT" | tr '[:upper:]' '[:lower:]')" ;;
+  sk.verify) upsert_field "verify-status" "$VERDICT" ;;
+esac
+
+# Story status only advances on PASS
+if [[ "$VERDICT" != "PASS" ]]; then
+  exit 0
+fi
 
 if ! grep -qE '^status:' "$STORY_FILE" 2>/dev/null; then
   echo "post-response.sh: WARNING — no 'status:' field in frontmatter: ${STORY_FILE}" >&2

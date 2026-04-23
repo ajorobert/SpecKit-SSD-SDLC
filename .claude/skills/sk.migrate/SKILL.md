@@ -7,6 +7,8 @@ inject_files:
   - .specify/memory/standards/data-standards.md
   - .specify/memory/standards/coding-standards.md
   - .claude/skills/postgresql-patterns/SKILL.md
+preconditions:
+  - file_exists: specs/intents/*/units/*/data-model.md
 ---
 
 Database migration lifecycle using expand/contract pattern.
