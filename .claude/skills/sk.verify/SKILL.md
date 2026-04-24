@@ -3,14 +3,14 @@ name: sk.verify
 description: "Invoke when: running the final PASS/FAIL quality gate before sk.ship. Role: architect. Reads: story-{ID}.md, all unit artifacts, architecture-decisions.md, all standards files, governance quality-gates.md. Writes: story status (if PASS)."
 subagent_type: SpecKit Architect Agent
 inject_files:
-  - .specify/memory/architecture-decisions.md
+  - .claude/skills/governance/quality-gates.md
+  - .claude/skills/governance/SKILL.md
   - .specify/memory/standards/tech-stack.md
   - .specify/memory/standards/coding-standards.md
   - .specify/memory/standards/api-standards.md
   - .specify/memory/standards/data-standards.md
   - .specify/memory/standards/observability-standards.md
-  - .claude/skills/governance/SKILL.md
-  - .claude/skills/governance/quality-gates.md
+  - .specify/memory/architecture-decisions.md
 ---
 
 PASS/FAIL quality gate for active story. Run after sk.test passes, before sk.ship.

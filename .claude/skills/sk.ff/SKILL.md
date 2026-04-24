@@ -3,10 +3,10 @@ name: sk.ff
 description: "Invoke when: running the full Fast Forward pipeline from story capture to planning in one shot. Role: lead (orchestrator). Modes: sk.ff (feature) or sk.ff --bug (bug fix). Invokes: sk.story → sk.design (validate checkpoint only) → sk.plan in sequence."
 subagent_type: SpecKit Lead Agent
 inject_files:
-  - .specify/memory/system-context.md
-  - .specify/memory/standards/tech-stack.md
-  - .claude/skills/governance/SKILL.md
   - .claude/skills/governance/checkpoint-rules.md
+  - .claude/skills/governance/SKILL.md
+  - .specify/memory/standards/tech-stack.md
+  - .specify/memory/system-context.md
 ---
 
 Orchestrator skill — Fast Forward pipeline.

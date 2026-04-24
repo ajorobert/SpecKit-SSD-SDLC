@@ -3,8 +3,8 @@ name: sk.datamodel
 description: "Internal sub-skill of sk.design. Invoke via sk.design, not directly. Designs data entities, schema strategy, and access patterns for a unit. Role: architect. Reads: architecture.md, domain-model.md, data-standards.md. Writes: data-model.md, domain-model.md (updated)."
 subagent_type: SpecKit Architect Agent
 inject_files:
-  - .specify/memory/domain-model.md
   - .specify/memory/standards/data-standards.md
+  - .specify/memory/domain-model.md
   - .claude/skills/design-principles/SKILL.md
 ---
 
