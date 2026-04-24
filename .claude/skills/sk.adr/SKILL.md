@@ -3,7 +3,6 @@ name: sk.adr
 description: "Invoke when: creating an Architecture Decision Record for a cross-service or significant unit-level decision. Role: architect. Reads: session.yaml, architecture-decisions.md. Writes: history/adr/ADR-{NNN}.md, architecture-decisions.md (index)."
 subagent_type: SpecKit Architect Agent
 inject_files:
-  - .claude/session.yaml
   - .specify/memory/architecture-decisions.md
 ---
 

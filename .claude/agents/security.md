@@ -2,6 +2,15 @@
 name: Security Agent
 description: Security specialist. Invoked for security audits, OWASP review,
   auth pattern verification, dependency scanning, and secrets detection.
+write_scope:
+  deny:
+    - "src/**"
+    - ".specify/memory/**"
+    - "specs/intents/**/architecture.md"
+    - "specs/intents/**/data-model.md"
+    - "specs/intents/**/contracts/**"
+tool_scope:
+  allow: [Read, Edit, Write, Grep, Glob, Bash]
 ---
 
 # Security Agent

@@ -26,21 +26,28 @@ All unit artifacts (architecture.md, data-model.md, contracts/)
 All story artifacts (plan.md, tasks.yaml)
 .specify/memory/architecture-decisions.md
 .specify/memory/standards/ (all files)
-.claude/skills/governance/SKILL.md (quality-gates.md)
+.claude/skills/governance/quality-gates.md
+Rubric blocks from:
+  .claude/skills/sk.story/SKILL.md (rubric: story-completeness)
+  .claude/skills/sk.test/SKILL.md  (rubric: test-coverage)
+  .claude/skills/sk.security-audit/SKILL.md (rubric: security-coverage)
 
 ## Steps
 1. Read quality-gates.md — evaluate all applicable gates
-2. Spec Gate: always evaluate
+2. Spec Gate: always evaluate; also apply `story-completeness` rubric from sk.story
 3. Architecture Gate: evaluate if architecture.md exists
 4. Plan Gate: evaluate if plan.md exists
 5. Implementation Gate: evaluate if tasks.yaml complete
-6. Output structured report with PASS/FAIL per gate
-7. Overall PASS → story status set to done via post-skill hook
-   Overall FAIL → story status unchanged, list failures
+6. Test Gate: apply `test-coverage` rubric from sk.test
+7. Security Gate: apply `security-coverage` rubric from sk.security-audit
+8. Output structured report with PASS/FAIL per gate AND per rubric check
+9. Overall PASS → story status set to done and verify-status=PASS via Stop hook
+   Overall FAIL → status unchanged, verify-status=FAIL, list failures
 
 ## Output Artifacts
 Verification report (displayed, not written to file)
 story-{ID}.md status updated if overall PASS
+story-{ID}.md verify-status field set to PASS or FAIL (written by Stop hook)
 
 ## Quality Bar
 - Every gate item explicitly PASS, FAIL, or SKIP with reason

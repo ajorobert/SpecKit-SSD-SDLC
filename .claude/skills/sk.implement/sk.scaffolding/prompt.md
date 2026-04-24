@@ -39,16 +39,24 @@ Before any other steps, load the tech stack packs relevant to this task.
 - `file`, `upload` → `.claude/skills/file-storage-patterns/SKILL.md`
 List the packs loaded before continuing.
 
-## Context Loading (in order)
+## Context Loading — cacheable (load first, in order)
 1. specs/domains/{relevant-domain}/knowledge-base.md (if exists)
 2. specs/intents/{intent}/units/{unit}/knowledge-base.md (if exists)
-3. STORY_DIR/plan.md — tech approach, component breakdown
-4. STORY_DIR/tasks.yaml — the task list gives clear understanding of the scaffolding work needed.
-5. specs/intents/{intent}/units/{unit}/contracts/api-spec.json (if exists)
-6. specs/intents/{intent}/units/{unit}/contracts/README.md (if exists)
-7. specs/intents/{intent}/units/{unit}/architecture.md (if exists)
-8. specs/intents/{intent}/units/{unit}/data-model.md (if exists)
-9. .specify/memory/standards/coding-standards.md
+3. specs/intents/{intent}/units/{unit}/contracts/api-spec.json (if exists)
+4. specs/intents/{intent}/units/{unit}/contracts/README.md (if exists)
+5. specs/intents/{intent}/units/{unit}/architecture.md (if exists)
+6. specs/intents/{intent}/units/{unit}/data-model.md (if exists)
+7. .specify/memory/standards/coding-standards.md
+
+## Story context (tail — load LAST)
+Emit at end of user-input block, after all cacheable context:
+```
+<story id="{story-id}">
+  <story-md>…STORY_DIR/story-{ID}.md…</story-md>
+  <plan-md>…STORY_DIR/plan.md…</plan-md>
+  <tasks-yaml>…STORY_DIR/tasks.yaml…</tasks-yaml>
+</story>
+```
 
 ## Pre-generation Protocol
 Before writing any code in an existing module:

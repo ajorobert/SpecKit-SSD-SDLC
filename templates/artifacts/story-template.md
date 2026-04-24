@@ -14,6 +14,7 @@ checkpoint_status: null # null | approved
 architecture-ref: null  # relative path to unit architecture.md
 test-status: null       # null | pass | fail
 security-status: null   # null | CLEAR | CONDITIONAL | BLOCKED
+verify-status: null     # null | PASS | FAIL  (set by sk.verify via Stop hook)
 created: {date}
 updated: {date}
 branch: null

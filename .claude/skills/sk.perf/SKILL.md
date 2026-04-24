@@ -3,10 +3,7 @@ name: sk.perf
 description: "Invoke when: performance profiling and optimization — load test results or profiler output → diagnosis → tasks. Role: backend or frontend. Reads: session.yaml, profiler output, architecture.md. Writes: perf-findings.md, tasks.md."
 subagent_type: SpecKit Backend Engineer Agent
 inject_files:
-  - .claude/session.yaml
-  - .specify/memory/standards/coding-standards.md
   - .specify/memory/standards/observability-standards.md
-  - .specify/memory/architecture-decisions.md
 ---
 
 Performance profiling and optimization cycle.

@@ -6,6 +6,7 @@ Role: architect | Level: intent
 .specify/memory/system-context.md
 .specify/memory/service-registry.md
 .specify/memory/domain-model.md
+.claude/skills/governance/checkpoint-rules.md  — drives step 4 (recommended checkpoint_mode)
 
 ## Steps
 1. Collect from user: proposed intent/unit description

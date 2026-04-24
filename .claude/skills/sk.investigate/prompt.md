@@ -16,23 +16,26 @@ gstack: optional enhancement — if installed, invoke for additional debugging s
      Create from templates/artifacts/investigation-report-template.md
      Set session_count: 1, first session is INV-001
 
-## Context loading
-- STORY_DIR/story-{ID}.md
-  → extract acceptance criteria (the expected behavior)
+## Context loading (cacheable — load first)
 - specs/intents/{intent}/units/{unit}/contracts/api-spec.json
-  → expected endpoint contracts
-- STORY_DIR/plan.md
-  → intended implementation approach
+  → expected endpoint contracts (Tier B — stable across iterations)
+
+## Story context (tail — load LAST)
+Emit at end of user-input block, after all cacheable context:
+```
+<story id="{story-id}">
+  <story-md>…STORY_DIR/story-{ID}.md…</story-md>
+  <plan-md>…STORY_DIR/plan.md…</plan-md>
+</story>
+```
 
 ## Context surface
 Before invoking gstack /investigate, surface to agent:
 
 "Investigating story: {story-id} — {story title}
-Expected behavior per spec:
-{acceptance criteria list}
-Contract shape (relevant endpoints):
-{relevant api-spec.json endpoints}
-Intended implementation approach: {key points from plan.md}"
+Expected behavior: see <story-md> acceptance criteria
+Contract shape (relevant endpoints): {relevant api-spec.json endpoints}
+Intended approach: see <plan-md>"
 
 ## Invoke
 Claude performs the investigation natively using the context surface above.

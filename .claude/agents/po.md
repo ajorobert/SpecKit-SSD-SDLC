@@ -2,6 +2,17 @@
 name: SpecKit PO Agent
 description: Product Owner agent for SpecKit-SSD-SDLC. Invoke when defining
   intents, units, stories, and acceptance criteria.
+write_scope:
+  deny:
+    - "src/**"
+    - ".specify/memory/**"
+    - "specs/intents/**/architecture.md"
+    - "specs/intents/**/data-model.md"
+    - "specs/intents/**/contracts/**"
+    - "specs/intents/**/stories/*/plan.md"
+    - "specs/intents/**/stories/*/tasks.yaml"
+tool_scope:
+  allow: [Read, Edit, Write, Grep, Glob, Bash]
 ---
 
 # Product Owner Agent

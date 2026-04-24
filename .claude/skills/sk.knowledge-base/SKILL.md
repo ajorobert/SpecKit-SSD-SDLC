@@ -3,7 +3,6 @@ name: sk.knowledge-base
 description: "Invoke when: generating or updating non-derivable context at system, domain, or unit tier. Use --tier system|domain|unit. Role: architect. Reads: session.yaml, existing knowledge-base.md, ADRs. Writes: specs/knowledge-base.md or domain/unit equivalent."
 subagent_type: SpecKit Architect Agent
 inject_files:
-  - .claude/session.yaml
   - .specify/memory/system-context.md
 ---
 

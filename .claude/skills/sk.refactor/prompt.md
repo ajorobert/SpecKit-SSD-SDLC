@@ -27,10 +27,17 @@ Role = frontend (Admin SPA): always `.claude/skills/react-admin-patterns/SKILL.m
 
 List packs loaded before proceeding.
 
-## Context loading
-1. Read files in the target area before writing anything
-2. .specify/memory/standards/coding-standards.md
-3. .specify/memory/architecture-decisions.md — check no ADR blocks the change
+## Context loading (cacheable — load first)
+1. .specify/memory/standards/coding-standards.md (Tier A)
+2. .specify/memory/architecture-decisions.md — check no ADR blocks the change (Tier A)
+
+## Target context (tail — load LAST)
+Target-area source files are read via Read tool at execution time (results flow post-boundary naturally). Emit prior refactor-plan.md (if present) at end of user-input block, after all cacheable context:
+```
+<refactor scope="{scope_statement}">
+  <prior-plan>…refactor-plan.md (if present)…</prior-plan>
+</refactor>
+```
 
 ## Step 1 — Write refactor plan
 Write refactor-plan.md covering:

@@ -3,7 +3,6 @@ name: sk.clarify
 description: "Invoke when: resolving story business ambiguities. Role: po. Mode: PO business rules only. Reads: session.yaml, story-{ID}.md. Writes: story-{ID}.md (clarifications appended)."
 subagent_type: SpecKit PO Agent
 inject_files:
-  - .claude/session.yaml
 ---
 
 Resolves business ambiguities in the active story using a structured 5-question loop.

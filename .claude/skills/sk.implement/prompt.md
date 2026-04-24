@@ -21,6 +21,16 @@ This skill orchestrates two sub-skills in strict sequence. Each sub-skill runs w
 4. Read checkpoint_mode from session.yaml (default to validate)
 5. Check for review report: STORY_DIR/review-{story-id}.md. If it exists, note it down for Execution Mode Detection.
 
+## Story context pass-through (tail — when invoking sub-skills)
+When handing context to sub-skills (sk.tasks, sk.scaffolding, sk.codegen), place story/plan/review-notes in the tail after all cacheable context:
+```
+<story id="{story-id}">
+  <story-md>…STORY_DIR/story-{ID}.md…</story-md>
+  <plan-md>…STORY_DIR/plan.md…</plan-md>
+  <prior-review>…STORY_DIR/review-{story-id}.md (if REFINE mode)…</prior-review>
+</story>
+```
+
 ## Execution Mode Detection
 Evaluate in this order:
 

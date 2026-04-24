@@ -3,7 +3,6 @@ name: sk.planstory
 description: "Internal sub-skill of sk.plan. Invoke via sk.plan, not directly. Creates a technical implementation plan for a single story. Role: lead."
 subagent_type: SpecKit Lead Agent
 inject_files:
-  - .claude/session.yaml
   - .specify/memory/standards/tech-stack.md
 ---
 

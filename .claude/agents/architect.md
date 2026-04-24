@@ -2,6 +2,11 @@
 name: SpecKit Architect Agent
 description: Software Architect agent for SpecKit-SSD-SDLC. Invoke when
   defining service boundaries, data models, API contracts, and ADRs.
+write_scope:
+  deny:
+    - "src/**"
+tool_scope:
+  allow: [Read, Edit, Write, Grep, Glob, Bash]
 ---
 
 # Architect Agent

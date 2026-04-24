@@ -3,7 +3,6 @@ name: sk.codegen
 description: "Internal sub-skill of sk.implement. Invoke via sk.implement, not directly. Implements business logic inside stubs created by sk.scaffolding. Role: backend or frontend."
 subagent_type: SpecKit Backend Engineer Agent
 inject_files:
-  - .claude/session.yaml
   - .specify/memory/standards/coding-standards.md
   - .specify/memory/standards/observability-standards.md
   - .specify/memory/architecture-decisions.md
