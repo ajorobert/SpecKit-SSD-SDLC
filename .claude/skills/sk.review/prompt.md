@@ -34,12 +34,22 @@ List the packs loaded before continuing.
 1. Read session.yaml active_story_id
    NULL → STOP: run sk.session focus --story {id} first
 
-## Context loading
-- specs/intents/{intent}/units/{unit}/architecture.md — bounded context, module boundaries, owned entities
-- specs/intents/{intent}/units/{unit}/contracts/api-spec.json — endpoint signatures
-- .specify/memory/architecture-decisions.md — ADR constraints
-- .specify/memory/standards/coding-standards.md — implementation rules
-- .specify/memory/standards/observability-standards.md — logging/metrics/health requirements
+## Context loading (cacheable — load first)
+- specs/intents/{intent}/units/{unit}/architecture.md — bounded context, module boundaries, owned entities (Tier B)
+- specs/intents/{intent}/units/{unit}/contracts/api-spec.json — endpoint signatures (Tier B)
+- .specify/memory/architecture-decisions.md — ADR constraints (Tier A)
+- .specify/memory/standards/coding-standards.md — implementation rules (Tier A)
+- .specify/memory/standards/observability-standards.md — logging/metrics/health requirements (Tier A)
+
+## Story context (tail — load LAST)
+Emit at end of user-input block, after all cacheable context:
+```
+<story id="{story-id}">
+  <story-md>…STORY_DIR/story-{ID}.md…</story-md>
+  <plan-md>…STORY_DIR/plan.md (if present)…</plan-md>
+  <prior-review>…STORY_DIR/review-{story-id}.md (if present)…</prior-review>
+</story>
+```
 
 ## Context surface
 Before invoking gstack /review, surface to agent:

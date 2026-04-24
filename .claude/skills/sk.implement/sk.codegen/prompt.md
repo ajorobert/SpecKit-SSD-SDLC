@@ -37,15 +37,24 @@ Internal sub-skill — invoked by sk.implement. Do not invoke directly.
 - `file`, `upload` → `.claude/skills/file-storage-patterns/SKILL.md`
 List the packs loaded before continuing.
 
-## Context Loading (in order)
+## Context Loading — cacheable (load first, in order)
 1. specs/domains/{relevant-domain}/knowledge-base.md (if exists)
 2. specs/intents/{intent}/units/{unit}/knowledge-base.md (if exists)
-3. STORY_DIR/plan.md
-4. STORY_DIR/tasks.yaml
-5. specs/intents/{intent}/units/{unit}/contracts/api-spec.json (if exists)
-6. specs/intents/{intent}/units/{unit}/architecture.md (if exists)
-7. .specify/memory/standards/coding-standards.md
-8. .specify/memory/standards/observability-standards.md
+3. specs/intents/{intent}/units/{unit}/contracts/api-spec.json (if exists)
+4. specs/intents/{intent}/units/{unit}/architecture.md (if exists)
+5. .specify/memory/standards/coding-standards.md
+6. .specify/memory/standards/observability-standards.md
+
+## Story context (tail — load LAST)
+Emit at end of user-input block, after all cacheable context:
+```
+<story id="{story-id}">
+  <story-md>…STORY_DIR/story-{ID}.md…</story-md>
+  <plan-md>…STORY_DIR/plan.md…</plan-md>
+  <tasks-yaml>…STORY_DIR/tasks.yaml…</tasks-yaml>
+  <prior-review>…STORY_DIR/review-{story-id}.md (if REFINE mode)…</prior-review>
+</story>
+```
 
 ## Pre-flight for Generation
 1. Check for review report: STORY_DIR/review-{story-id}.md.
