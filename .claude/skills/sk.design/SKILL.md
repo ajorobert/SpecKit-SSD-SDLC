@@ -4,7 +4,6 @@ description: "Invoke when: running the full design pipeline for a unit in one sh
 subagent_type: SpecKit Architect Agent
 inject_files:
   - .claude/skills/governance/checkpoint-rules.md
-  - .claude/skills/governance/SKILL.md
   - .specify/memory/system-context.md
   - .specify/memory/architecture-decisions.md
   - .specify/memory/domain-model.md

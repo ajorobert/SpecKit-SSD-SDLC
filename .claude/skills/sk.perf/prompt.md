@@ -17,6 +17,9 @@ Declare at start: `[PERF MODE] Input: {load-test | profiler | both}. Role: {back
    Example: "p99 < 200ms under 500 concurrent users", "LCP < 2.5s on 3G"
    Record as: perf_target
 
+## Context loading
+1. `.specify/memory/standards/observability-standards.md` — logging/metric/trace conventions that any perf-related instrumentation must follow
+
 ## Capability pack selection
 Load packs matching role (≤4 packs):
 

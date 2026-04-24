@@ -4,7 +4,6 @@ description: "Invoke when: running the full Fast Forward pipeline from story cap
 subagent_type: SpecKit Lead Agent
 inject_files:
   - .claude/skills/governance/checkpoint-rules.md
-  - .claude/skills/governance/SKILL.md
   - .specify/memory/standards/tech-stack.md
   - .specify/memory/system-context.md
 ---

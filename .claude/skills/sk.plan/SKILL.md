@@ -4,7 +4,6 @@ description: "Invoke when: creating a technical implementation plan. Role: lead 
 subagent_type: SpecKit Lead Agent
 inject_files:
   - .claude/skills/governance/checkpoint-rules.md
-  - .claude/skills/governance/SKILL.md
   - .specify/memory/standards/tech-stack.md
 ---
 

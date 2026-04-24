@@ -26,7 +26,7 @@ All unit artifacts (architecture.md, data-model.md, contracts/)
 All story artifacts (plan.md, tasks.yaml)
 .specify/memory/architecture-decisions.md
 .specify/memory/standards/ (all files)
-.claude/skills/governance/SKILL.md (quality-gates.md)
+.claude/skills/governance/quality-gates.md
 Rubric blocks from:
   .claude/skills/sk.story/SKILL.md (rubric: story-completeness)
   .claude/skills/sk.test/SKILL.md  (rubric: test-coverage)

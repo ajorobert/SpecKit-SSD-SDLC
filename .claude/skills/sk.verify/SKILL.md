@@ -4,7 +4,6 @@ description: "Invoke when: running the final PASS/FAIL quality gate before sk.sh
 subagent_type: SpecKit Architect Agent
 inject_files:
   - .claude/skills/governance/quality-gates.md
-  - .claude/skills/governance/SKILL.md
   - .specify/memory/standards/tech-stack.md
   - .specify/memory/standards/coding-standards.md
   - .specify/memory/standards/api-standards.md
