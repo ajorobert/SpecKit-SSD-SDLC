@@ -23,15 +23,23 @@ Roles: po | architect | lead | backend | frontend | security
 ## Tech Stack Context Skills
 These are passive knowledge packs — never invoked directly. They are loaded via inject_files in the relevant sk.* skills based on the work being done.
 
+### Cross-Cutting
+| Skill folder | Load when |
+|---|---|
+| `observability-contracts` | Any observability work — defines resource attrs, runtime-config JSON shape, PII deny-list, Loki label allow-list, span naming. Loaded by every observability-{backend,frontend,infra} skill. |
+| `observability-infra` | OTel Collector config, Loki/Jaeger/Prometheus/GlitchTip deployment, Grafana dashboards, tail sampling, backend swap planning |
+
 ### Backend
 | Skill folder | Load when |
 |---|---|
 | `csharp-clean-arch` | Any C# .NET 10 backend implementation or review |
 | `design-code-review` | Backend code review (sk.review) |
+| `fastendpoints-patterns` | HTTP endpoint structure, versioning, validation, auth policies, Result→ProblemDetails, throttling, Swagger |
 | `bff-patterns` | BFF API layer design or implementation |
 | `messaging-patterns` | RabbitMQ, MassTransit, MediatR, Hangfire work |
 | `workflow-patterns` | Elsa v3 workflows, SLA timers, breach alerts |
 | `auth-patterns` | Firebase/Keycloak auth, session storage, authorization |
+| `observability-backend` | .NET service / BFF backend / Wolverine / Hangfire instrumentation (OTel, Serilog, Sentry .NET, dynamic sampler) |
 
 ### Data
 | Skill folder | Load when |
@@ -49,6 +57,7 @@ These are passive knowledge packs — never invoked directly. They are loaded vi
 | `react-component-patterns` | Component decomposition, TypeScript props, form handling |
 | `zustand-state-management` | Global/shared UI state |
 | `accessibility-standards` | Any frontend implementation or UAT |
+| `observability-frontend` | OTel JS, Sentry, PostHog, Clarity, BFF runtime-config, source maps |
 
 ### Frontend — Admin SPA
 | Skill folder | Load when |
@@ -58,11 +67,13 @@ These are passive knowledge packs — never invoked directly. They are loaded vi
 | `react-component-patterns` | Component patterns (same as portal) |
 | `zustand-state-management` | Global state (same as portal) |
 | `accessibility-standards` | Any frontend implementation or UAT |
+| `observability-frontend` | Same as portal — OTel JS, Sentry, PostHog, Clarity |
 
 ### Frontend — Mobile App
 | Skill folder | Load when |
 |---|---|
 | `react-native-patterns` | React Native + Expo managed workflow, NativeWind v5 |
+| `observability-frontend` | OTel RN, Sentry RN, cached runtime-config, source maps |
 
 ## Security Rules
 5. Never use `rm`, `rmdir`, `del`, or `unlink` — these commands are blocked by policy.

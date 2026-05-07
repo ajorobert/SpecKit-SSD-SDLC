@@ -360,3 +360,34 @@ Stories are classified by `sk.story` to govern execution speed:
 - **`security`** - Audit, STRIDE, secrets scanning.
 
 </details>
+
+<details>
+<summary><strong>📊 Prompt-Cache Optimization & Telemetry</strong></summary>
+
+SpecKit is tuned for Anthropic's prefix-based prompt cache (5-min TTL, up to 4 `cache_control` breakpoints). Skills layer injected files by volatility so common context stays in the cacheable prefix while story- and iteration-specific content goes in the tail.
+
+### Tier Model
+- **Tier A — Framework invariant**: governance + standards + system-context + ADRs + design-principles. Changes weekly.
+- **Tier B — Domain/unit invariant**: domain-model, service-registry, unit knowledge-base, architecture.md, api-spec.json, tech-stack packs. Stable across a dev's iteration loop.
+- **Tier C — Story invariant**: `story-{ID}.md` + `plan.md`. Stable across 3–10 dev iterations on the same story.
+- **Tier D — Iteration tail**: diff, test output, review notes, user input, session-derived scalars (`active_story_id`, `active_unit_id`, `role`).
+
+"Dynamic" is relative to the caller's loop: `story-{ID}.md` is Tier D for a PO hopping stories but Tier C for a dev grinding one story.
+
+### Canonical inject_files order (all sk.* skills)
+`governance rules → standards → system-context → ADRs → domain-model → service-registry → design-principles → tech-pack` → (cache boundary) → tail wrapper containing story/plan/review-notes/user input.
+
+`session.yaml` is **not** in any skill's `inject_files` (except `sk.session` itself). Skills `Read` it at runtime so its contents land in Tier D naturally.
+
+### Telemetry hook
+A `Stop` hook ([.claude/hooks/log-cache-metrics.sh](.claude/hooks/log-cache-metrics.sh)) appends one JSONL row per assistant turn to `.claude/cache-metrics.jsonl`. Captured fields: `timestamp, sessionId, model, skill_name, active_story_id, role, cache_read, cache_creation, input_tokens, output_tokens, gitBranch, cwd`. Zero token cost — pure local file I/O reading the transcript the harness already writes.
+
+### Reading the metrics
+```bash
+bash .claude/hooks/cache-metrics-report.sh                  # overall + by-skill + by-role hit rate
+bash .claude/hooks/cache-metrics-report.sh tail 20          # last 20 turns, raw
+bash .claude/hooks/cache-metrics-report.sh since 2026-04-24  # rows since date
+```
+Hit rate = `cache_read / (cache_read + cache_creation + input_tokens)`. Sustained low hit rate on consecutive same-role calls indicates a prefix-stability regression.
+
+</details>

@@ -78,3 +78,9 @@ approved and let a human run the cleanup.
 **Original path:** .claude/skills/governance/SKILL.md
 **Archived to:** .archive/2026-04-24/SKILL.md
 **Review:** [ ] approved for permanent delete
+
+## 2026-04-29 — .claude/skills/observability-patterns/SKILL.md
+**Reason:** Split into observability-{contracts,backend,frontend,infra} on 2026-04-29 — original was approaching 1000 lines, causing context bloat for backend-only and frontend-only agents. Replaced by four focused skills with observability-contracts holding the shared seams (resource attrs, runtime-config JSON shape, PII deny-list, Loki label allow-list, span naming, trace propagation rules).
+**Original path:** .claude/skills/observability-patterns/SKILL.md
+**Archived to:** .archive/2026-04-29/SKILL.md
+**Review:** [ ] approved for permanent delete
