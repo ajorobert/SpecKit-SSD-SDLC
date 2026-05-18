@@ -11,13 +11,13 @@ Load the tech stack packs relevant to this review before reading any code.
 3. Read applicable packs. **Load ≤6 packs total.**
 
 **Role = backend**
-- Always: `.claude/skills/csharp-clean-arch/SKILL.md`, `.claude/skills/design-code-review/SKILL.md`
+- Always: `.claude/skills/backend-feature-patterns/SKILL.md`, `.claude/skills/design-code-review/SKILL.md`
 - `bff` → `.claude/skills/bff-patterns/SKILL.md`
-- `messaging`, `events`, `queue`, `rabbitmq`, `mediatr`, `hangfire` → `.claude/skills/messaging-patterns/SKILL.md`
+- `messaging`, `events`, `queue`, `rabbitmq`, `hangfire`, `command`, `query`, `handler`, `publish`, `subscribe`, `outbox`, `saga`, `integration event`, `scheduled message`, `message bus` → `.claude/skills/wolverine-patterns/SKILL.md`
 - `workflow`, `elsa`, `sla`, `timer` → `.claude/skills/workflow-patterns/SKILL.md`
 - `auth`, `keycloak`, `firebase`, `session` → `.claude/skills/auth-patterns/SKILL.md`
 - `db`, `schema`, `migration`, `postgres` → `.claude/skills/postgresql-patterns/SKILL.md`
-- `cache`, `redis` → `.claude/skills/redis-patterns/SKILL.md`
+- `cache`, `caching`, `redis`, `hybrid cache`, `l1`, `l2`, `tag invalidation`, `distributed lock`, `rate limit`, `redlock`, `redis stream` → `.claude/skills/hybridcache-patterns/SKILL.md`
 - `search`, `elasticsearch` → `.claude/skills/elasticsearch-patterns/SKILL.md`
 - `file`, `upload` → `.claude/skills/file-storage-patterns/SKILL.md`
 

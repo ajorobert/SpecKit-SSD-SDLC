@@ -26,7 +26,7 @@ Every service and every frontend MUST emit these resource attributes via OTel SD
 | Attribute | Source | Example | Notes |
 |---|---|---|---|
 | `service.name` | env / config | `listings-api` / `customer-portal` | Bounded; becomes Loki `service` label |
-| `service.namespace` | bounded context | `marketplace` | Optional but encouraged |
+| `service.namespace` | bounded context | `directory` | Optional but encouraged |
 | `service.version` | build metadata | `2026.04.29-a3f2c1d` | Same string as GlitchTip release ID |
 | `service.instance.id` | hostname / pod | `listings-api-7d9c8-x4kp2` | High-cardinality — resource attr only, **never** a Loki label |
 | `deployment.environment` | env var | `prod` / `preprod` / `dev` | Becomes Loki `env` label |
@@ -191,7 +191,7 @@ The forbidden list lives verbatim as a banner comment at the top of `infra/obser
 * **Required for every consumer / job**:
   * `messaging.consumer.duration`, `messaging.consumer.errors`
   * `hangfire.job.duration`, `hangfire.job.failures`
-* **Custom business metrics**: prefix with bounded-context name — `marketplace.listings.activated.count`.
+* **Custom business metrics**: prefix with bounded-context name — `directory.listings.activated.count`.
 * **Cardinality budget**: max 100 unique label combinations per metric. User/tenant-scoped data goes to logs, not metrics.
 
 ## When to Use

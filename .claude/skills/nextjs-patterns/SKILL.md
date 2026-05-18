@@ -1,12 +1,12 @@
 ---
 name: nextjs-patterns
-description: "Load when: implementing or reviewing the customer portal (Next.js App Router, NextAuth v5, Strapi v2, Cloudflare R2, SSR, SEO, geo search UI)."
+description: "Load when: implementing or reviewing the customer portal (Next.js App Router, NextAuth v5, Strapi v5, Cloudflare R2, SSR, SEO, geo search UI)."
 ---
 
 # Next.js Patterns (App Router, Customer Portal)
 
 ## Purpose
-Production patterns for the customer-facing portal built with Next.js App Router, NextAuth v5, Strapi v2 CMS, and Cloudflare R2 image delivery. Covers server/client component decisions, SSR, SEO metadata, data fetching caching strategy, geo search UI integration, and CMS content routing.
+Production patterns for the customer-facing portal built with Next.js App Router, NextAuth v5, Strapi v5 CMS, and Cloudflare R2 image delivery. Covers server/client component decisions, SSR, SEO metadata, data fetching caching strategy, geo search UI integration, and CMS content routing.
 
 ## Core Rules
 
@@ -74,14 +74,14 @@ app/
 
 ### Authentication (NextAuth v5)
 * Auth config in `auth.ts` at the project root — exported `auth`, `signIn`, `signOut`, `handlers`.
-* Keycloak provider (v2) or Firebase provider (v1) configured in `auth.ts`.
+* Keycloak provider configured in `auth.ts`.
 * Protect routes in `middleware.ts` using the `auth` export — do not use `getServerSession` in individual pages.
 * Access session in Server Components: `const session = await auth()`.
 * Access session in Client Components: `useSession()` from `next-auth/react`.
 * Never expose access tokens to client components — only expose safe session fields.
 * On auth provider switch (v1→v2): update `auth.ts` provider config — no page-level changes needed.
 
-### Strapi v2 CMS Integration
+### Strapi v5 CMS Integration
 * Strapi runs as a separate service with its own PostgreSQL schema. Schema as JSON on git.
 * Fetch CMS content server-side only — never from Client Components.
 * Draft/published routing:
@@ -187,4 +187,4 @@ async function getListing(id: string) {
 ## When NOT to Use
 * Admin SPA (React + Vite + Tanstack Router — see `react-admin-patterns`)
 * Mobile app (Expo — see `react-native-patterns`)
-* Backend API implementation (see `csharp-clean-arch`, `bff-patterns`)
+* Backend API implementation (see `backend-feature-patterns`, `bff-patterns`)

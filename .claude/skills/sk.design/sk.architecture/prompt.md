@@ -12,9 +12,9 @@ Load tech stack packs relevant to this unit's architecture before designing.
 2. Read all stories in the unit → check `tags` arrays for domain keywords
 3. Read applicable packs. **Load ≤6 packs total.**
 
-- Always: `.claude/skills/csharp-clean-arch/SKILL.md`
+- Always: `.claude/skills/backend-feature-patterns/SKILL.md`
 - `bff` in any story tag → `.claude/skills/bff-patterns/SKILL.md`
-- `messaging`, `events`, `queue`, `rabbitmq`, `mediatr`, `hangfire` → `.claude/skills/messaging-patterns/SKILL.md`
+- `messaging`, `events`, `queue`, `rabbitmq`, `hangfire`, `command`, `query`, `handler`, `publish`, `subscribe`, `outbox`, `saga`, `integration event`, `scheduled message`, `message bus` → `.claude/skills/wolverine-patterns/SKILL.md`
 - `workflow`, `elsa`, `sla`, `timer` → `.claude/skills/workflow-patterns/SKILL.md`
 - `auth`, `keycloak`, `firebase` → `.claude/skills/auth-patterns/SKILL.md`
 

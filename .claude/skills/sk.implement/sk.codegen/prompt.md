@@ -11,13 +11,13 @@ Internal sub-skill — invoked by sk.implement. Do not invoke directly.
 4. Read applicable packs. **Load ≤6 packs total** — prioritise specialist packs when the limit is reached.
 
 **Role = backend**
-- Always: `.claude/skills/csharp-clean-arch/SKILL.md`
+- Always: `.claude/skills/backend-feature-patterns/SKILL.md`
 - `bff` → `.claude/skills/bff-patterns/SKILL.md`
-- `messaging`, `events`, `queue`, `rabbitmq`, `mediatr`, `hangfire` → `.claude/skills/messaging-patterns/SKILL.md`
+- `messaging`, `events`, `queue`, `rabbitmq`, `hangfire`, `command`, `query`, `handler`, `publish`, `subscribe`, `outbox`, `saga`, `integration event`, `scheduled message`, `message bus` → `.claude/skills/wolverine-patterns/SKILL.md`
 - `workflow`, `elsa`, `sla`, `timer`, `breach` → `.claude/skills/workflow-patterns/SKILL.md`
 - `auth`, `keycloak`, `firebase`, `session`, `token` → `.claude/skills/auth-patterns/SKILL.md`
 - `db`, `schema`, `migration`, `postgres`, `postgis` → `.claude/skills/postgresql-patterns/SKILL.md`
-- `cache`, `redis`, `rate-limit`, `lock` → `.claude/skills/redis-patterns/SKILL.md`
+- `cache`, `caching`, `redis`, `hybrid cache`, `l1`, `l2`, `tag invalidation`, `distributed lock`, `rate limit`, `redlock`, `redis stream` → `.claude/skills/hybridcache-patterns/SKILL.md`
 - `search`, `elasticsearch`, `geo` → `.claude/skills/elasticsearch-patterns/SKILL.md`
 - `file`, `upload`, `storage`, `image`, `virus` → `.claude/skills/file-storage-patterns/SKILL.md`
 

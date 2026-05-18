@@ -1,5 +1,9 @@
 <!-- SPECKIT-SSD-SDLC MANAGED -->
 
+> **[STACK NOTE]** This project uses .NET 10, Wolverine (not MassTransit), HybridCache (not raw Redis), FastEndpoints (not MVC), ErrorOr (not Ardalis.Result), Mapster, SeaweedFS, Tempo (not Jaeger), GlitchTip via Sentry SDK, Keycloak only (no Firebase), Strapi v5.
+
+> **[PLACEHOLDER CONVENTION]** Skill code examples use `YourContext.*` as the .NET bounded-context root namespace placeholder (e.g. `YourContext.Api`, `YourContext.Application`). At code-generation time, substitute with the actual context name from `.specify/memory/system-context.md`. Metric/log identifiers use `directory.*` (project label) or `your-service` (URL slugs).
+
 # SpecKit-SSD-SDLC
 
 ## Identity
@@ -32,20 +36,20 @@ These are passive knowledge packs — never invoked directly. They are loaded vi
 ### Backend
 | Skill folder | Load when |
 |---|---|
-| `csharp-clean-arch` | Any C# .NET 10 backend implementation or review |
+| `backend-feature-patterns` | Clean Arch layers, handler shape, ErrorOr, Mapster, FluentValidation, idempotency, comment markers |
 | `design-code-review` | Backend code review (sk.review) |
-| `fastendpoints-patterns` | HTTP endpoint structure, versioning, validation, auth policies, Result→ProblemDetails, throttling, Swagger |
+| `fastendpoints-patterns` | FastEndpoints v6, Scalar OpenAPI, ErrorOr→HTTP mapping, idempotency-key, throttling |
 | `bff-patterns` | BFF API layer design or implementation |
-| `messaging-patterns` | RabbitMQ, MassTransit, MediatR, Hangfire work |
+| `wolverine-patterns` | Wolverine in-process + brokered messaging, outbox, sagas, scheduled messages |
 | `workflow-patterns` | Elsa v3 workflows, SLA timers, breach alerts |
-| `auth-patterns` | Firebase/Keycloak auth, session storage, authorization |
+| `auth-patterns` | Keycloak auth, session storage, authorization |
 | `observability-backend` | .NET service / BFF backend / Wolverine / Hangfire instrumentation (OTel, Serilog, Sentry .NET, dynamic sampler) |
 
 ### Data
 | Skill folder | Load when |
 |---|---|
 | `postgresql-patterns` | Schema design, migrations, data modeling |
-| `redis-patterns` | Caching, session cache, rate limiting, distributed locks |
+| `hybridcache-patterns` | HybridCache L1+L2, tag invalidation, cross-instance cache coherence, escape hatches (locks, rate limit, streams) |
 | `elasticsearch-patterns` | Search index design, geo search, ES queries |
 | `file-storage-patterns` | File upload, image pipeline, virus scan, CDN delivery |
 

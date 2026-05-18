@@ -13,7 +13,7 @@ Load data-layer packs before designing the model.
 3. Read applicable packs. **Load ≤4 packs total.**
 
 - Always: `.claude/skills/postgresql-patterns/SKILL.md`
-- `cache`, `redis`, `session`, `rate-limit`, `lock` → `.claude/skills/redis-patterns/SKILL.md`
+- `cache`, `caching`, `redis`, `hybrid cache`, `l1`, `l2`, `tag invalidation`, `session`, `distributed lock`, `rate limit`, `redlock`, `redis stream` → `.claude/skills/hybridcache-patterns/SKILL.md`
 - `search`, `elasticsearch`, `geo`, `index` → `.claude/skills/elasticsearch-patterns/SKILL.md`
 - `file`, `upload`, `storage` → `.claude/skills/file-storage-patterns/SKILL.md`
 

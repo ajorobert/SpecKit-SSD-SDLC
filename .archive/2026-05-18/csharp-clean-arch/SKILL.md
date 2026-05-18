@@ -1,6 +1,6 @@
 ---
 name: csharp-clean-arch
-description: "Load when: implementing or reviewing C# .NET 10 backend code inside a single bounded context. Clean Architecture layers, DDD aggregates / value objects / domain events, CQRS marker interfaces, write-via-aggregate / read-via-shape repository split, EF Core writes + Dapper/Elasticsearch reads, Result<T> pattern, async correctness, xUnit testing. Cross-context boundaries and integration events live in bounded-context-patterns; HTTP endpoints in fastendpoints-patterns; outbox mechanics in messaging-patterns."
+description: "Load when: implementing or reviewing C# .NET 10 backend code inside a single bounded context. Clean Architecture layers, DDD aggregates / value objects / domain events, CQRS marker interfaces, write-via-aggregate / read-via-shape repository split, EF Core writes + Dapper/Elasticsearch reads, Result<T> pattern, async correctness, xUnit testing. HTTP endpoints in fastendpoints-patterns; outbox mechanics in wolverine-patterns. Project structure rules live in .specify/memory/system-context.md."
 ---
 
 # C# Clean Architecture (.NET 10) — Within One Bounded Context
@@ -9,22 +9,22 @@ description: "Load when: implementing or reviewing C# .NET 10 backend code insid
 Production patterns for a C# .NET 10 backend service implementing **one bounded context**. Enforces Clean Architecture layer separation, DDD aggregate discipline, CQRS at the Application layer, and DDIA-aligned access-pattern-driven data access — so AI-generated code across features stays consistent and reviewable.
 
 **Scope is intentionally narrow** — *inside* a single bounded context. Everything below assumes you are inside one `*.Domain` / `*.Application` / `*.Infrastructure` / `*.Api` set:
-* For service boundaries, integration events, and project structure across contexts → `bounded-context-patterns`.
+* Project structure rules live in `.specify/memory/system-context.md`.
 * For HTTP endpoints (FastEndpoints, ProblemDetails mapping, idempotency-key) → `fastendpoints-patterns`.
-* For outbox mechanics, message contracts, consumer topology → `messaging-patterns`.
+* For outbox mechanics, message contracts, consumer topology → `wolverine-patterns`.
 * For OTel/Serilog wiring and trace propagation → `observability-backend`.
 
 ## Core Rules
 
 ### Layer Boundaries (within this bounded context)
-* **Domain**: Aggregate roots, entities, value objects, domain events, repository **interfaces**, domain services. Zero infrastructure or framework dependencies. **Never reference EF Core, Wolverine, MediatR, or any library** — Domain compiles with only `Microsoft.NET.Sdk` references.
+* **Domain**: Aggregate roots, entities, value objects, domain events, repository **interfaces**, domain services. Zero infrastructure or framework dependencies. **Never reference EF Core, Wolverine, or any library** — Domain compiles with only `Microsoft.NET.Sdk` references.
 * **Application**: Use cases (commands/queries), application services, DTOs, FluentValidation validators, read-repository interfaces, integration-event interfaces. References Domain. No direct DB access — only through interfaces.
 * **Infrastructure**: EF Core `DbContext` and write repository implementations, Dapper read repository implementations, Elasticsearch search repository implementations, Redis decorators (Scrutor), Wolverine consumers and message handlers, Hangfire job classes, HTTP clients for external services, Elsa workflow activities. Implements interfaces declared in Domain/Application.
 * **API**: FastEndpoints — **see `fastendpoints-patterns`**. Application handlers return `Result<T>`; the API layer maps to HTTP. No MVC controllers in this stack.
 * **Dependency direction**: API → Application → Domain. Infrastructure → Application + Domain (implements their interfaces). Nothing in Application/Domain references Infrastructure or API.
 * **Namespace convention**: `{Context}.{Layer}.{Aggregate}` — e.g., `Listing.Application.Listings.Activate`.
 
-For cross-context boundaries, integration events, and project structure across services, see `bounded-context-patterns`.
+Project structure rules live in `.specify/memory/system-context.md`.
 
 ### Folder Structure (one bounded context)
 Aggregates organize as **folders** under `Domain/` and `Application/`; never as separate projects. One `*.Api` project per bounded context (also see `fastendpoints-patterns`).
@@ -82,16 +82,17 @@ The aggregate is the unit of consistency and the thing we protect from arbitrary
 
 ### Domain Events vs Integration Events
 * **Domain events** (live in `*.Domain/*/Events/`) are raised by aggregates and consumed *inside* the same bounded context — e.g., `ListingActivated` triggers a Listing Application handler that updates a read model. They use the local message dispatcher.
-* **Integration events** (live in `Shared.Contracts/`) cross bounded contexts — covered in `bounded-context-patterns`.
+* **Integration events** (live in `Shared.Contracts/`) cross bounded contexts. Project structure rules live in `.specify/memory/system-context.md`.
 * The **Infrastructure layer** is responsible for translating domain events to integration events when crossing context boundaries via the outbox. The aggregate raises a domain event; an Infrastructure handler decides whether (and how) to publish a corresponding integration event.
 
 ### Application Layer — CQRS
 
-> **Dispatcher note**: MediatR is the current dispatcher. The marker interfaces below are designed to survive a Wolverine swap — if the dispatcher changes, only the registration in `Program.cs` and the `IRequestHandler` base interface change; handler bodies do not.
+> **Dispatcher note**: Wolverine is the dispatcher. A Wolverine handler is a plain class with a `Handle`/`HandleAsync` method discovered by convention — see `wolverine-patterns` §2-3. The marker interfaces below are a transitional shape; the example block is owned by Phase 3 and is left as a pre-Wolverine reference until then.
 
 Every use case is either a **command** (changes state, returns `Result` or `Result<TId>`) or a **query** (reads data, returns `Result<TReadModel>`). They never share handlers, never share repositories, and never share the same data path.
 
 **Marker interfaces** (defined in Application):
+<!-- PHASE-3-FIX: example uses pre-Wolverine MediatR `IRequest`/`IRequestHandler` shape; rewrite when this skill is updated in Phase 3. -->
 ```csharp
 public interface ICommand               : IRequest<Result> { }
 public interface ICommand<TResponse>    : IRequest<Result<TResponse>> { }
@@ -108,7 +109,7 @@ public interface IQueryHandler<TQuery, TResponse>      : IRequestHandler<TQuery,
 **Write side (commands):**
 * Loads aggregate roots through `I{Aggregate}WriteRepository` — methods return rich domain entities, never DTOs.
 * Mutates aggregates by invoking domain methods (`listing.Activate()`), never by setting properties.
-* Persists through EF Core via Unit of Work; aggregate-raised domain events are written to the outbox in the same transaction (see `messaging-patterns` for outbox mechanics).
+* Persists through EF Core via Unit of Work; aggregate-raised domain events are written to the outbox in the same transaction (see `wolverine-patterns` for outbox mechanics).
 * Write repositories expose: `GetByIdAsync`, `AddAsync`, `UpdateAsync`. **Never list/search/projection methods** — those go on read or search repositories.
 
 **Read side (queries):**
@@ -116,12 +117,12 @@ public interface IQueryHandler<TQuery, TResponse>      : IRequestHandler<TQuery,
 
   | Interface | Backed by | Used for |
   |---|---|---|
-  | `I{Entity}ReadRepository` | Dapper over PostgreSQL, optionally Scrutor-decorated with Redis cache (see `redis-patterns`) | Single entity by ID, paged lists with deterministic filters, reporting projections, joins for read DTOs. Reads of the *current state* of a known entity. |
+  | `I{Entity}ReadRepository` | Dapper over PostgreSQL, optionally wrapped by `HybridCache.GetOrCreateAsync` at the query-handler call site (see `hybridcache-patterns`) | Single entity by ID, paged lists with deterministic filters, reporting projections, joins for read DTOs. Reads of the *current state* of a known entity. |
   | `I{Entity}SearchRepository` | `Elastic.Clients.Elasticsearch` against the search index (mandatory — never PostgreSQL for search) | Geo (radius/polygon/bounding box), full-text, faceted filtering, autocomplete, relevance-paginated results. Reads where the question is "find entities matching shape X." |
 
 * A query handler may inject **either or both**. Most handlers inject one. Aggregating handlers ("search results, then enrich each hit with detail") may inject both, but composition usually belongs in the BFF — see `bff-patterns`.
 * Each Infrastructure impl class targets **one** data store. `DapperListingReadRepository` does not touch Elasticsearch. `ElasticsearchListingSearchRepository` does not touch PostgreSQL.
-* **Caching is opt-in per read repo** via Scrutor decorator (`CachedListingReadRepository : IListingReadRepository` wrapping the Dapper impl). Never inline `IDistributedCache` in handlers — handlers stay ignorant of caching.
+* **Caching is opt-in per query handler** via `HybridCache.GetOrCreateAsync` wrapping the Dapper read (see `hybridcache-patterns` §4 and §7). Never inject raw Redis types (`IConnectionMultiplexer`, `IDatabase`) or legacy `IDistributedCache` into application code — `HybridCache` is the only cache API in handlers; raw Redis is confined to port adapters (see `hybridcache-patterns` §10).
 * Latest entity state with no caching may use EF Core `.AsNoTracking()` inside a `I{Entity}ReadRepository` impl, but this is the exception — Dapper is the default.
 * Read repositories return DTOs/records — never aggregate roots, never `IQueryable`.
 * Read models are decoupled from domain entities — they are reshaped for the consumer.
@@ -137,10 +138,10 @@ Handlers orchestrate; they do not contain domain logic.
 * **Command handler body** is at most: load aggregate → invoke aggregate method(s) → save → return `Result`. If a handler grows beyond ~20 lines, the missing logic likely belongs in the aggregate or a domain service.
 * **Query handler body** is at most: call read repo → map to `Result`.
 * No `if (listing.Status == ...)` branches in handlers — that's a domain invariant; move it inside the aggregate method.
-* No try/catch around domain calls — domain exceptions translate to `Result.Failure` via a MediatR pipeline behavior or a thin guard at the handler boundary.
+* No try/catch around domain calls — domain exceptions translate to `Result.Failure` via Wolverine middleware or a thin guard at the handler boundary.
 
 ### Validation Layering
-* **Input validation** (shape, format, ranges) → FluentValidation in Application, runs as a MediatR pipeline behavior before the handler. Examples: "title is non-empty and ≤ 200 chars", "price ≥ 0", "page ≥ 1".
+* **Input validation** (shape, format, ranges) → FluentValidation in Application, runs as Wolverine middleware before the handler. Examples: "title is non-empty and ≤ 200 chars", "price ≥ 0", "page ≥ 1".
 * **Business rules** (invariants, state transitions) → inside the aggregate. Examples: "cannot activate a listing without a verified owner", "cannot reduce price below cost".
 * **Never duplicate a business rule in a validator.** Never put input shape checks in the aggregate.
 * Validators run before the handler — failures produce `Result.Failure(ValidationError)` (mapped to 400 by `fastendpoints-patterns`). The handler assumes shape is already valid.
@@ -155,8 +156,8 @@ Handlers orchestrate; they do not contain domain logic.
 ### Data Access (DDIA-aligned)
 * **Write side is always through the aggregate via EF Core.** No bulk SQL writes, no Dapper writes, no raw SQL writes from handlers. The only path that mutates state is `repo.Update(aggregate)` after invoking aggregate methods.
 * **Read side picks the store by access shape** (see CQRS table above). Caching is opt-in via Scrutor decorator on `I{Entity}ReadRepository`.
-* **Outbox table is per bounded context**, in the same database as the write store, written in the same transaction as the aggregate. (Mechanics: `messaging-patterns`.)
-* **Migrations belong to Infrastructure** and run only against this context's schema. Never modify another context's schema — that's a contract break, handled via `bounded-context-patterns`.
+* **Outbox table is per bounded context**, in the same database as the write store, written in the same transaction as the aggregate. (Mechanics: `wolverine-patterns`.)
+* **Migrations belong to Infrastructure** and run only against this context's schema. Never modify another context's schema — that's a contract break. Project structure rules live in `.specify/memory/system-context.md`.
 * Always use `.AsNoTracking()` for any EF Core query in a query handler.
 * Apply EF Core global query filters for soft deletes (`IsDeleted`) and multi-tenancy (`TenantId`) — declared once in `DbContext.OnModelCreating`.
 * Repositories expose domain-semantic methods (`GetActiveListingsForAreaAsync`), not `IQueryable`.
@@ -380,8 +381,8 @@ builder.Services.AddOptions<DatabaseOptions>()
 
 ## When NOT to Use
 * HTTP endpoint structure, request binding, ProblemDetails mapping, idempotency-key — see `fastendpoints-patterns`
-* Cross-context boundaries, integration events, project-per-context structure — see `bounded-context-patterns`
-* Outbox publish mechanics, Wolverine consumer topology, Hangfire job conventions — see `messaging-patterns`
+* Cross-context boundaries, integration events, project-per-context structure — see `.specify/memory/system-context.md`
+* Outbox publish mechanics, Wolverine consumer topology, Hangfire job conventions — see `wolverine-patterns`
 * OTel/Serilog wiring, trace propagation, PII redaction implementation — see `observability-backend`
 * Elsa workflow activity definitions — see `workflow-patterns`
 * Frontend code (Next.js, React, React Native) — wrong stack

@@ -84,3 +84,27 @@ approved and let a human run the cleanup.
 **Original path:** .claude/skills/observability-patterns/SKILL.md
 **Archived to:** .archive/2026-04-29/SKILL.md
 **Review:** [ ] approved for permanent delete
+
+## 2026-05-17 — .claude/skills/observability-patterns/
+**Reason:** Empty folder remnant from 2026-04-29 split into observability-{contracts,backend,frontend,infra}. Phase 0 audit cleanup.
+**Original path:** .claude/skills/observability-patterns/
+**Archived to:** .archive/2026-05-17/observability-patterns
+**Review:** [ ] approved for permanent delete
+
+## 2026-05-18 — .claude/skills/messaging-patterns/
+**Reason:** Replaced by wolverine-patterns in Phase 1 — MassTransit/MediatR/Hangfire-scheduled assumptions removed.
+**Original path:** .claude/skills/messaging-patterns/
+**Archived to:** .archive/2026-05-18/messaging-patterns
+**Review:** [ ] approved for permanent delete
+
+## 2026-05-18 — .claude/skills/redis-patterns/
+**Reason:** Replaced by hybridcache-patterns in Phase 2 — StackExchange.Redis-as-primary-API and MassTransit references removed. Raw Redis kept as escape hatches inside the new skill.
+**Original path:** .claude/skills/redis-patterns/
+**Archived to:** .archive/2026-05-18/redis-patterns
+**Review:** [ ] approved for permanent delete
+
+## 2026-05-18 — .claude/skills/csharp-clean-arch/
+**Reason:** Renamed and rewritten as backend-feature-patterns in Phase 3 — absorbs CQRS handler shape, ErrorOr contract, Mapster, FluentValidation, comment markers. PHASE-3-FIX marker for marker-interface block resolved by deletion (project-specific concern, moved to system-context.md).
+**Original path:** .claude/skills/csharp-clean-arch/
+**Archived to:** .archive/2026-05-18/csharp-clean-arch
+**Review:** [ ] approved for permanent delete

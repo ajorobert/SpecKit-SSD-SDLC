@@ -114,6 +114,7 @@ builder.Services.AddAuthorization(options =>
 ```
 
 ### Controller Usage
+<!-- PHASE-4-FIX: example uses MVC `ControllerBase` + `[ApiController]` + `ISender` (MediatR); rewrite to FastEndpoints + `IMessageBus` per `fastendpoints-patterns` when this skill is updated in Phase 4. -->
 ```csharp
 [ApiController]
 [Route("api/v1/listings")]

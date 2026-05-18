@@ -1,6 +1,6 @@
 ---
 name: observability-backend
-description: "Load when: instrumenting C# .NET 10 services, BFF backend code, Wolverine consumers, or Hangfire jobs. OTel SDK + ASP.NET Core wiring, Serilog destructuring, Wolverine/MassTransit/Hangfire trace propagation, IOptionsMonitor<ObservabilityOptions> dynamic sampler + log level, PII redaction in-process, Sentry .NET. Read observability-contracts first."
+description: "Load when: instrumenting C# .NET 10 services, BFF backend code, Wolverine handlers, or Hangfire jobs. OTel SDK + ASP.NET Core wiring, Serilog destructuring, Wolverine/Hangfire trace propagation, IOptionsMonitor<ObservabilityOptions> dynamic sampler + log level, PII redaction in-process, Sentry .NET. Read observability-contracts first."
 ---
 
 # Observability — Backend (.NET)
@@ -54,7 +54,7 @@ Apply changes live via:
 * **PII deny-list** — destructuring policy reads `IOptionsMonitor.CurrentValue` per `TryDestructure` call.
 
 ### Trace Context Propagation Across the Two Manual Hops
-Auto-instrumentation handles HTTP, EF Core, MassTransit. The two hops you must wire manually:
+Auto-instrumentation handles HTTP and EF Core. The two hops you must wire manually:
 
 **Wolverine outbox** — outgoing middleware injects `traceparent` into envelope headers; incoming middleware extracts and starts a child span named `wolverine.handle <MessageType>`.
 
@@ -71,7 +71,7 @@ Auto-instrumentation handles HTTP, EF Core, MassTransit. The two hops you must w
 * Use `Meter` API only.
 * Auto-instrumentation provides RED for HTTP, runtime metrics, and process metrics.
 * For consumers/jobs, manually emit `messaging.consumer.duration`, `messaging.consumer.errors`, `hangfire.job.duration`, `hangfire.job.failures`.
-* Custom business metrics use the `Marketplace.*` (or your bounded-context) prefix.
+* Custom business metrics use the `YourContext.*` (or your bounded-context) prefix.
 * **Cardinality budget**: 100 unique label combinations per metric. User/tenant data goes to logs.
 
 ### PII Redaction (In-Process — Authoritative Layer)
@@ -103,7 +103,7 @@ builder.Services.AddOpenTelemetry()
     .ConfigureResource(r => r
         .AddService(
             serviceName: serviceName,
-            serviceNamespace: "marketplace",
+            serviceNamespace: "directory",
             serviceVersion: typeof(Program).Assembly.GetName().Version?.ToString())
         .AddAttributes(new Dictionary<string, object>
         {
@@ -116,7 +116,6 @@ builder.Services.AddOpenTelemetry()
         .AddHttpClientInstrumentation()
         .AddEntityFrameworkCoreInstrumentation()
         .AddNpgsql()
-        .AddSource("MassTransit")
         .AddSource("Wolverine")
         .AddSource("Hangfire")
         .AddProcessor<PiiRedactionSpanProcessor>()
@@ -126,7 +125,7 @@ builder.Services.AddOpenTelemetry()
         .AddHttpClientInstrumentation()
         .AddRuntimeInstrumentation()
         .AddProcessInstrumentation()
-        .AddMeter("Marketplace.*")
+        .AddMeter("YourContext.*")
         .AddOtlpExporter());
 
 // Serilog — level switch bound to IOptionsMonitor
@@ -311,8 +310,8 @@ public class ListingMetrics
     private readonly Counter<long> _activated;
     public ListingMetrics(IMeterFactory factory)
     {
-        var meter = factory.Create("Marketplace.Listings");
-        _activated = meter.CreateCounter<long>("marketplace.listings.activated.count");
+        var meter = factory.Create("YourContext.Listings");
+        _activated = meter.CreateCounter<long>("directory.listings.activated.count");
     }
 
     // GOOD — bounded labels (status, region)
@@ -338,7 +337,7 @@ What you cannot change at runtime in .NET OTel: the provider composition (instru
 
 ## When to Use
 * Wiring a new .NET service or BFF backend route handler for observability
-* Adding a Wolverine consumer, MassTransit consumer, or Hangfire job
+* Adding a Wolverine handler or Hangfire job
 * Reviewing a backend PR that adds logging, metrics, or error reporting
 * Investigating "missing trace" or "log not in Loki" from a service
 

@@ -10,11 +10,11 @@ Load packs before generating tests.
 2. Read story frontmatter → check `tags`
 
 **Role = backend**
-- Always: `.claude/skills/csharp-clean-arch/SKILL.md`
+- Always: `.claude/skills/backend-feature-patterns/SKILL.md`
 - `db`, `schema` → `.claude/skills/postgresql-patterns/SKILL.md`
 - `auth`, `keycloak` → `.claude/skills/auth-patterns/SKILL.md`
-- `messaging`, `events` → `.claude/skills/messaging-patterns/SKILL.md`
-- `cache`, `redis` → `.claude/skills/redis-patterns/SKILL.md`
+- `messaging`, `events`, `command`, `query`, `handler`, `publish`, `subscribe`, `outbox`, `saga`, `integration event`, `scheduled message`, `message bus` → `.claude/skills/wolverine-patterns/SKILL.md`
+- `cache`, `caching`, `redis`, `hybrid cache`, `l1`, `l2`, `tag invalidation`, `distributed lock`, `rate limit`, `redlock`, `redis stream` → `.claude/skills/hybridcache-patterns/SKILL.md`
 
 **Role = frontend**
 - Always: `.claude/skills/accessibility-standards/SKILL.md`

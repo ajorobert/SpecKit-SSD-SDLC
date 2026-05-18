@@ -17,9 +17,9 @@ Declare at start: `[REFACTOR MODE] No new behaviour. Scope: {user-supplied scope
 ## Capability pack selection
 Load packs matching role and scope (≤4 packs):
 
-Role = backend: always `.claude/skills/csharp-clean-arch/SKILL.md`
+Role = backend: always `.claude/skills/backend-feature-patterns/SKILL.md`
 - db/migration scope → `.claude/skills/postgresql-patterns/SKILL.md`
-- messaging scope → `.claude/skills/messaging-patterns/SKILL.md`
+- messaging scope (commands, queries, handlers, events, publish, subscribe, outbox, sagas, scheduled messages, message bus) → `.claude/skills/wolverine-patterns/SKILL.md`
 - auth scope → `.claude/skills/auth-patterns/SKILL.md`
 
 Role = frontend (Customer Portal): always `.claude/skills/react-component-patterns/SKILL.md`, `.claude/skills/frontend-design-system/SKILL.md`

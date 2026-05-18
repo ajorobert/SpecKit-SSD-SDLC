@@ -158,7 +158,7 @@ export const useAppStore = create<AppStore>()(...(set, get, api) => ({
 * `StateCreator` type annotation is required on each slice when using middleware — TypeScript inference breaks without it.
 
 ## When to Use
-* Global auth session claims (after Keycloak/Firebase token validation)
+* Global auth session claims (after Keycloak token validation)
 * User preferences (theme, locale, saved search filters)
 * Offline action queue for mobile
 * App-wide notification/toast queue

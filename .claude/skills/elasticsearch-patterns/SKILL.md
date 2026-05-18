@@ -12,16 +12,16 @@ Production patterns for Elasticsearch used as the search layer for the directory
 
 ### Role in CQRS — Mandatory Search Read Model
 
-Elasticsearch is the **only** read store for search-shaped queries in this system. See `csharp-clean-arch` (CQRS section) and `postgresql-patterns` (CQRS Data Access Split).
+Elasticsearch is the **only** read store for search-shaped queries in this system. See `backend-feature-patterns` (CQRS section) and `postgresql-patterns` (CQRS Data Access Split).
 
 **Mandatory routing:**
 * Any query that is geo-shaped (radius, polygon, bounding box), full-text, faceted, autocomplete, or paginated-by-relevance → must route through an `IQueryHandler<...>` that uses an `I{Entity}SearchRepository` backed by `Elasticsearch.Clients.Elasticsearch`.
 * Search query handlers must **never** fall back to PostgreSQL for the search itself. If Elasticsearch is unavailable, the handler returns `Result.Failure(new ServiceUnavailableError(...))` — it does not silently degrade to a slower PostgreSQL `LIKE` or PostGIS scan.
-* Single-entity-by-ID lookups, transactional reads, and reporting queries do **not** use Elasticsearch — those go to Redis cache or Dapper over PostgreSQL per `csharp-clean-arch`.
-* See `csharp-clean-arch` (Read side) for the companion `I{Entity}ReadRepository` used for non-search reads — query handlers may inject either or both, but each Infrastructure impl class targets a single data store family (no class spans both ES and PostgreSQL).
+* Single-entity-by-ID lookups, transactional reads, and reporting queries do **not** use Elasticsearch — those go to Redis cache or Dapper over PostgreSQL per `backend-feature-patterns`.
+* See `backend-feature-patterns` (Read side) for the companion `I{Entity}ReadRepository` used for non-search reads — query handlers may inject either or both, but each Infrastructure impl class targets a single data store family (no class spans both ES and PostgreSQL).
 
 **Write side:**
-* Nothing writes to Elasticsearch from a CQRS command handler. Indexing happens exclusively in MassTransit consumers that subscribe to integration events published by the owning service via the transactional outbox (see `messaging-patterns`).
+* Nothing writes to Elasticsearch from a CQRS command handler. Indexing happens exclusively in Wolverine handlers that subscribe to integration events published by the owning service via the transactional outbox (see `wolverine-patterns`).
 * The owning service's PostgreSQL is the source of truth; Elasticsearch is a derived projection. A full reindex must always be reproducible from PostgreSQL alone.
 
 ### Index Design
@@ -91,8 +91,8 @@ Elasticsearch is the **only** read store for search-shaped queries in this syste
 
 ### Synchronisation Strategy
 * Source of truth: PostgreSQL. Elasticsearch is a derived read model — never write directly to ES from clients.
-* Sync pattern: MassTransit consumer subscribes to integration events published by the owning service **via the transactional outbox** (see `messaging-patterns` — Transactional Outbox). The owning service's command handler commits aggregate state and the outbox row in one PostgreSQL transaction; the relay publishes; the indexer consumer (`ListingActivated`, `ListingUpdated`, `ListingDeleted`) updates the ES index. There is no direct Publish from the command handler — the outbox is the single bridge between the write side and ES.
-* Indexer consumers must be idempotent (see `messaging-patterns` — Delivery Guarantee & Idempotency). At-least-once delivery means the same event may arrive twice; rely on `IndexAsync` with the document ID acting as a natural dedup key, or check the version field on the document.
+* Sync pattern: Wolverine handler subscribes to integration events published by the owning service **via the transactional outbox** (see `wolverine-patterns` §4). The owning service's command handler commits aggregate state and the outbox row in one PostgreSQL transaction; the relay publishes; the indexer handler (`ListingActivated`, `ListingUpdated`, `ListingDeleted`) updates the ES index. There is no direct publish from the command handler — the outbox is the single bridge between the write side and ES.
+* Indexer consumers must be idempotent (see `wolverine-patterns` — Delivery Guarantee & Idempotency). At-least-once delivery means the same event may arrive twice; rely on `IndexAsync` with the document ID acting as a natural dedup key, or check the version field on the document.
 * On consumer failure: dead-letter queue + Hangfire retry job for reindexing.
 * Full reindex: zero-downtime using alias swap — write to new index, then swap alias atomically.
 * Consistency model: **eventual**. Document this explicitly in the unit knowledge base. Search results may lag domain state by seconds.
@@ -157,6 +157,7 @@ if (!response.IsValidResponse)
 ```
 
 ### Bulk indexing on domain event
+<!-- PHASE-4-FIX: example uses pre-Wolverine `IConsumer<T>` / `ConsumeContext<T>` shape; rewrite to a Wolverine `Handle(T msg, …)` method when this skill is updated in Phase 4. -->
 ```csharp
 public class ListingIndexConsumer(ElasticsearchClient esClient, ILogger<ListingIndexConsumer> logger)
     : IConsumer<ListingActivated>
