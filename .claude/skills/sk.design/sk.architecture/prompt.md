@@ -15,8 +15,10 @@ Load tech stack packs relevant to this unit's architecture before designing.
 - Always: `.claude/skills/backend-feature-patterns/SKILL.md`
 - `bff` in any story tag → `.claude/skills/bff-patterns/SKILL.md`
 - `messaging`, `events`, `queue`, `rabbitmq`, `hangfire`, `command`, `query`, `handler`, `publish`, `subscribe`, `outbox`, `saga`, `integration event`, `scheduled message`, `message bus` → `.claude/skills/wolverine-patterns/SKILL.md`
-- `workflow`, `elsa`, `sla`, `timer` → `.claude/skills/workflow-patterns/SKILL.md`
-- `auth`, `keycloak`, `firebase` → `.claude/skills/auth-patterns/SKILL.md`
+- `workflow`, `elsa`, `activity`, `signal`, `bookmark`, `human in the loop`, `hangfire`, `job`, `scheduled`, `recurring`, `cron`, `background`, `batch`, `dashboard`, `sla`, `timer`, `breach` → `.claude/skills/workflow-and-jobs-patterns/SKILL.md`
+- `auth`, `authentication`, `authorization`, `jwt`, `bearer`, `keycloak`, `oidc`, `role`, `policy`, `claim`, `mfa`, `otp`, `m2m`, `user context`, `idempotency` → `.claude/skills/keycloak-patterns/SKILL.md`
+- `adapter`, `integration adapter`, `external service adapter`, `vendor api`, `external integration`, `DelegatingHandler`, `chain order`, `M2M handler`, `typed httpclient`, `polly`, `resilience pipeline`, `resilience handler`, `port adapter split` → `.claude/skills/integration-adapter-patterns/SKILL.md`
+- `feature flag`, `feature toggle`, `feature gate`, `rollout`, `gradual release`, `percentage rollout`, `a/b test`, `variant`, `gating`, `IFeatureManager`, `IFeatureManagerSnapshot`, `IVariantFeatureManager`, `sunset`, `flag cleanup` → `.claude/skills/feature-management-patterns/SKILL.md`
 
 List the packs loaded before continuing.
 

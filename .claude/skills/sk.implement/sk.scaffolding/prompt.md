@@ -16,18 +16,20 @@ Before any other steps, load the tech stack packs relevant to this task.
 - Always: `.claude/skills/backend-feature-patterns/SKILL.md`
 - `bff` → `.claude/skills/bff-patterns/SKILL.md`
 - `messaging`, `events`, `queue`, `rabbitmq`, `hangfire`, `command`, `query`, `handler`, `publish`, `subscribe`, `outbox`, `saga`, `integration event`, `scheduled message`, `message bus` → `.claude/skills/wolverine-patterns/SKILL.md`
-- `workflow`, `elsa`, `sla`, `timer`, `breach` → `.claude/skills/workflow-patterns/SKILL.md`
-- `auth`, `keycloak`, `firebase`, `session`, `token` → `.claude/skills/auth-patterns/SKILL.md`
-- `db`, `schema`, `migration`, `postgres`, `postgis` → `.claude/skills/postgresql-patterns/SKILL.md`
+- `workflow`, `elsa`, `activity`, `signal`, `bookmark`, `human in the loop`, `hangfire`, `job`, `scheduled`, `recurring`, `cron`, `background`, `batch`, `dashboard`, `sla`, `timer`, `breach` → `.claude/skills/workflow-and-jobs-patterns/SKILL.md`
+- `auth`, `authentication`, `authorization`, `jwt`, `bearer`, `keycloak`, `oidc`, `role`, `policy`, `claim`, `mfa`, `otp`, `m2m`, `user context`, `idempotency` → `.claude/skills/keycloak-patterns/SKILL.md`
+- `persist`, `persistence`, `database`, `db`, `postgres`, `postgresql`, `ef core`, `dapper`, `migration`, `schema`, `jsonb`, `postgis`, `geo`, `transaction`, `repository`, `read model`, `projection`, `rls`, `tenant isolation`, `concurrency`, `xmin` → `.claude/skills/persistence-patterns/SKILL.md`
 - `cache`, `caching`, `redis`, `hybrid cache`, `l1`, `l2`, `tag invalidation`, `distributed lock`, `rate limit`, `redlock`, `redis stream` → `.claude/skills/hybridcache-patterns/SKILL.md`
 - `search`, `elasticsearch`, `geo` → `.claude/skills/elasticsearch-patterns/SKILL.md`
-- `file`, `upload`, `storage`, `image`, `virus` → `.claude/skills/file-storage-patterns/SKILL.md`
+- `file`, `upload`, `attachment`, `image`, `blob`, `storage`, `seaweedfs`, `s3`, `presigned`, `virus`, `scan`, `clamav`, `imagesharp`, `resize`, `thumbnail`, `quarantine`, `exif`, `signed url`, `bucket` → `.claude/skills/file-pipeline-patterns/SKILL.md`
+- `adapter`, `integration adapter`, `external service adapter`, `vendor api`, `external integration`, `DelegatingHandler`, `chain order`, `M2M handler`, `typed httpclient`, `polly`, `resilience pipeline`, `resilience handler`, `port adapter split` → `.claude/skills/integration-adapter-patterns/SKILL.md`
+- `feature flag`, `feature toggle`, `feature gate`, `rollout`, `gradual release`, `percentage rollout`, `a/b test`, `variant`, `gating`, `IFeatureManager`, `IFeatureManagerSnapshot`, `IVariantFeatureManager`, `sunset`, `flag cleanup` → `.claude/skills/feature-management-patterns/SKILL.md`
 
 **Role = frontend — Customer Portal (Next.js)**
 - Always: `.claude/skills/nextjs-patterns/SKILL.md`, `.claude/skills/frontend-design-system/SKILL.md`, `.claude/skills/react-component-patterns/SKILL.md`, `.claude/skills/accessibility-standards/SKILL.md`
 - `auth` → `.claude/skills/auth-patterns/SKILL.md`
 - `state`, `zustand` → `.claude/skills/zustand-state-management/SKILL.md`
-- `file`, `upload` → `.claude/skills/file-storage-patterns/SKILL.md`
+- `file`, `upload` → `.claude/skills/file-pipeline-patterns/SKILL.md`
 
 **Role = frontend — Admin SPA**
 - Always: `.claude/skills/react-admin-patterns/SKILL.md`, `.claude/skills/frontend-design-system/SKILL.md`, `.claude/skills/react-component-patterns/SKILL.md`, `.claude/skills/accessibility-standards/SKILL.md`
@@ -36,7 +38,7 @@ Before any other steps, load the tech stack packs relevant to this task.
 **Role = frontend — Mobile**
 - Always: `.claude/skills/react-native-patterns/SKILL.md`
 - `auth` → `.claude/skills/auth-patterns/SKILL.md`
-- `file`, `upload` → `.claude/skills/file-storage-patterns/SKILL.md`
+- `file`, `upload` → `.claude/skills/file-pipeline-patterns/SKILL.md`
 List the packs loaded before continuing.
 
 ## Context Loading — cacheable (load first, in order)

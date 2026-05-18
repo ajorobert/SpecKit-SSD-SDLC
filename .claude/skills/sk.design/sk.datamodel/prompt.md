@@ -12,10 +12,10 @@ Load data-layer packs before designing the model.
 2. Read unit stories → check `tags` for data-domain keywords
 3. Read applicable packs. **Load ≤4 packs total.**
 
-- Always: `.claude/skills/postgresql-patterns/SKILL.md`
+- Always: `.claude/skills/persistence-patterns/SKILL.md`
 - `cache`, `caching`, `redis`, `hybrid cache`, `l1`, `l2`, `tag invalidation`, `session`, `distributed lock`, `rate limit`, `redlock`, `redis stream` → `.claude/skills/hybridcache-patterns/SKILL.md`
 - `search`, `elasticsearch`, `geo`, `index` → `.claude/skills/elasticsearch-patterns/SKILL.md`
-- `file`, `upload`, `storage` → `.claude/skills/file-storage-patterns/SKILL.md`
+- `file`, `upload`, `attachment`, `image`, `blob`, `storage`, `seaweedfs`, `s3`, `presigned`, `virus`, `scan`, `clamav`, `imagesharp`, `resize`, `thumbnail`, `quarantine`, `exif`, `signed url`, `bucket` → `.claude/skills/file-pipeline-patterns/SKILL.md`
 
 List the packs loaded before continuing.
 

@@ -145,7 +145,7 @@ services.AddDbContext<AppDbContext>((sp, opts) =>
     opts.UseNpgsql(connStr).AddInterceptors(sp.GetRequiredService<TenantConnectionInterceptor>()));
 ```
 
-* `IUserContext` is populated from the JWT claim by middleware (see `auth-patterns`). The interceptor is the **only** place application code sets `app.tenant_id` — never call `SET LOCAL` from a handler.
+* `IUserContext` is populated from the JWT claim by middleware (see `keycloak-patterns` §2 and §4). The interceptor is the **only** place application code sets `app.tenant_id` — never call `SET LOCAL` from a handler.
 * Use `set_config(..., false)` (session scope) — Npgsql's connection multiplexer keeps the connection bound to the request scope, so this is safe. If you switch to a transaction-pooled topology (PgBouncer transaction mode), change to `set_config(..., true)` (LOCAL scope) and ensure every query runs inside an explicit transaction.
 * The same interceptor must be applied to the Dapper read path's connection factory — otherwise the read side bypasses RLS entirely, defeating the defence-in-depth goal.
 * Replica connections (read-only) need the same interceptor — replicas enforce RLS independently.

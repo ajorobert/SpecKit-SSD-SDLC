@@ -108,3 +108,33 @@ approved and let a human run the cleanup.
 **Original path:** .claude/skills/csharp-clean-arch/
 **Archived to:** .archive/2026-05-18/csharp-clean-arch
 **Review:** [ ] approved for permanent delete
+
+## 2026-05-18 — .claude/skills/auth-patterns/
+**Reason:** Renamed and rewritten as keycloak-patterns in Phase 4a — single dominant lib (Keycloak) follows lib-naming rule. PHASE-4-FIX MVC controller block resolved with FastEndpoints + ABAC handler example. PHASE-3-FIX MediatR examples (if any remained) resolved by Wolverine handler shape.
+**Original path:** .claude/skills/auth-patterns/
+**Archived to:** .archive/2026-05-18/auth-patterns
+**Review:** [ ] approved for permanent delete
+
+## 2026-05-18 — .claude/skills/postgresql-patterns/
+**Reason:** Renamed and rewritten as persistence-patterns in Phase 4b — concept-named per multi-lib bundle rule (EF + Dapper co-equal). PostgreSQL-specific patterns (JSONB, PostGIS, RLS) retained. Stale redis-patterns cross-ref at :215 resolved by retargeting to hybridcache-patterns §4.
+**Original path:** .claude/skills/postgresql-patterns/
+**Archived to:** .archive/2026-05-18/postgresql-patterns
+**Review:** [ ] approved for permanent delete
+
+## 2026-05-18 — .claude/skills/file-storage-patterns/
+**Reason:** Renamed and rewritten as file-pipeline-patterns in Phase 4d — concept-named per multi-lib bundle rule (SeaweedFS + ImageSharp + nClam co-equal). PHASE-4-FIX markers on VirusScanConsumer (Phase 0) and UploadsController (Phase 3.1) resolved by Wolverine saga + FastEndpoints presigned endpoint. Port interfaces (IFileStorageService, IImageProcessor, IVirusScanService) established per ports-and-adapters policy.
+**Original path:** .claude/skills/file-storage-patterns/
+**Archived to:** .archive/2026-05-18/file-storage-patterns
+**Review:** [ ] approved for permanent delete
+
+## 2026-05-18 — .claude/skills/workflow-patterns/
+**Reason:** Renamed and rewritten as workflow-and-jobs-patterns in Phase 4e — concept-named per multi-lib bundle rule (Elsa v3 + Hangfire co-equal). Added Hangfire content (was missing as standalone skill). Three-way decision rule with Wolverine sagas formalized. Resolves placeholder cross-refs from file-pipeline-patterns §13 (orphan cleanup) and elasticsearch-patterns §9 (reindex runner).
+**Original path:** .claude/skills/workflow-patterns/
+**Archived to:** .archive/2026-05-18/workflow-patterns
+**Review:** [ ] approved for permanent delete
+
+## 2026-05-18 — .claude/skills/polly-resilience-patterns/
+**Reason:** Reframed and renamed as integration-adapter-patterns in Phase 4f-fix — lib-named scope was too broad (would have fired on every feature using an adapter via its port). Concept-named bundle correctly scopes to adapter-authoring tasks only. Polly content preserved as one section of the broader authoring guidance.
+**Original path:** .claude/skills/polly-resilience-patterns/
+**Archived to:** .archive/2026-05-18/polly-resilience-patterns
+**Review:** [ ] approved for permanent delete

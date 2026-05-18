@@ -76,7 +76,7 @@ FluentValidation runs as Wolverine middleware via `.UseFluentValidation()` on th
 
 ## 3. Query handler shape
 
-Queries do not bind to a transaction. Read through Dapper or a read repository (cross-ref persistence-patterns §reads).
+Queries do not bind to a transaction. Read through Dapper or a read repository (cross-ref persistence-patterns §4).
 
 ```csharp
 namespace YourContext.Application.Listings.GetDetail;

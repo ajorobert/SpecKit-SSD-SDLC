@@ -87,4 +87,4 @@ Loaded by sk.implement/sk.review Step 0 based on active surface and story tags. 
 | `accessibility-standards` | Portal and Admin surfaces — always |
 | `auth-patterns` | `auth` tag |
 | `zustand-state-management` | `state`, `zustand` tags |
-| `file-storage-patterns` | `file`, `upload` tags |
+| `file-pipeline-patterns` | `file`, `upload` tags |

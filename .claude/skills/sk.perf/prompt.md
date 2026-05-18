@@ -24,7 +24,7 @@ Declare at start: `[PERF MODE] Input: {load-test | profiler | both}. Role: {back
 Load packs matching role (≤4 packs):
 
 Role = backend: always `.claude/skills/backend-feature-patterns/SKILL.md`
-- DB bottleneck signals → `.claude/skills/postgresql-patterns/SKILL.md`
+- DB bottleneck signals (persistence, database, postgres, ef core, dapper, indexing, jsonb, postgis, concurrency) → `.claude/skills/persistence-patterns/SKILL.md`
 - Cache opportunity signals (cache, caching, hybrid cache, L1/L2, tag invalidation, distributed lock, rate limit, redlock, redis stream) → `.claude/skills/hybridcache-patterns/SKILL.md`
 - Search bottleneck signals → `.claude/skills/elasticsearch-patterns/SKILL.md`
 

@@ -7,7 +7,7 @@ when_to_load:
   - Files touched: any *Endpoint.cs, *Endpoint*.cs, Program.cs (only if reviewing endpoint discovery)
 co_loads_with:
   - backend-feature-patterns (handler the endpoint dispatches to)
-  - auth-patterns (authorization policy + IUserContext)
+  - keycloak-patterns (authorization policy + IUserContext)
   - wolverine-patterns (IMessageBus injection)
 ---
 
@@ -61,7 +61,7 @@ public sealed class ActivateListingEndpoint(IMessageBus bus) : Endpoint<Request,
     {
         // ENDPOINT: POST /api/v1/listings/{ListingId}/activate
         Post("/api/v1/listings/{ListingId}/activate");
-        // AUTH: Policy CanActivateListing — see auth-patterns
+        // AUTH: Policy CanActivateListing — see keycloak-patterns §5
         Policies("CanActivateListing");
         Throttle(hitLimit: 30, durationSeconds: 60);
         MaxRequestBodySize(256 * 1024);
@@ -269,7 +269,7 @@ Decision rule: in-memory throttle for *abuse prevention*; `IRateLimiter` for *fa
 
 ## 10. Request size, allowed verbs, CORS
 
-- **Body size** — every endpoint accepting a body declares `MaxRequestBodySize(bytes)` inside `Configure()`. Defaults are too generous. Sensitive endpoints (login, OTP, password reset) cap at 10 KB; standard JSON write at 256 KB; bulk write at 1 MB (consider messaging instead). File upload sizes are per-endpoint and paired with virus scan (see `file-storage-patterns`).
+- **Body size** — every endpoint accepting a body declares `MaxRequestBodySize(bytes)` inside `Configure()`. Defaults are too generous. Sensitive endpoints (login, OTP, password reset) cap at 10 KB; standard JSON write at 256 KB; bulk write at 1 MB (consider messaging instead). File upload sizes are per-endpoint and paired with virus scan (see `file-pipeline-patterns` §6 for the presigned-upload endpoint shape).
 - **Verb restriction** — explicit in `Configure()` via `Post(...)`, `Put(...)` etc. No catch-all verbs.
 - **CORS** — registered as a FastEndpoints policy in the host composition; endpoints opt in by policy name.
 
@@ -296,5 +296,5 @@ The complete cross-skill comment-marker index lives in `backend-feature-patterns
 
 - `backend-feature-patterns` §3, §5, §8 — handler shape, ErrorOr contract, idempotency handler-side.
 - `wolverine-patterns` §3 — `IMessageBus.InvokeAsync` semantics.
-- `auth-patterns` — policy registry, `IUserContext`, JWT validation.
+- `keycloak-patterns` — policy registry, `IUserContext`, JWT validation.
 - `hybridcache-patterns` §10 — `IRateLimiter` adapter, idempotency-key storage.

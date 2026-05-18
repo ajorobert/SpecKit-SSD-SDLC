@@ -345,4 +345,4 @@ What you cannot change at runtime in .NET OTel: the provider composition (instru
 * Frontend instrumentation — see `observability-frontend`
 * OTel Collector / Loki / Jaeger / Prometheus / GlitchTip deployment — see `observability-infra`
 * Defining new contracts (resource attrs, JSON shape, deny-list) — see `observability-contracts`, requires ADR
-* Audit logging for security events — covered by `auth-patterns`
+* Audit logging for security events — covered by `keycloak-patterns` §10

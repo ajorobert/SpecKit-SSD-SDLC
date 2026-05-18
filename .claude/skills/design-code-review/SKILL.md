@@ -136,4 +136,4 @@ public interface IListingRepository
 ## When NOT to Use
 * Frontend code review (see `react-component-patterns`, `nextjs-patterns`)
 * Infrastructure scripts or Terraform/Bicep review
-* Database migration review (see `postgresql-patterns`)
+* Database migration review (see `persistence-patterns` §6)

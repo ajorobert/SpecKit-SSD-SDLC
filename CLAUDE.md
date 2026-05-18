@@ -41,17 +41,19 @@ These are passive knowledge packs — never invoked directly. They are loaded vi
 | `fastendpoints-patterns` | FastEndpoints v6, Scalar OpenAPI, ErrorOr→HTTP mapping, idempotency-key, throttling |
 | `bff-patterns` | BFF API layer design or implementation |
 | `wolverine-patterns` | Wolverine in-process + brokered messaging, outbox, sagas, scheduled messages |
-| `workflow-patterns` | Elsa v3 workflows, SLA timers, breach alerts |
-| `auth-patterns` | Keycloak auth, session storage, authorization |
+| `workflow-and-jobs-patterns` | Elsa v3 long-running workflows + Hangfire background jobs, decision rule with Wolverine sagas, OTel propagation, dashboard auth |
+| `keycloak-patterns` | Keycloak JWT validation, IUserContext, RBAC policies, ABAC handlers, M2M, claim mapping |
+| `integration-adapter-patterns` | External integration adapter authoring: port-and-adapter split, typed HttpClient, DelegatingHandler chain, Polly v8 resilience, idempotency-aware retry |
+| `feature-management-patterns` | Microsoft.FeatureManagement, IFeatureManagerSnapshot, built-in + custom filters, variant features, flag naming, sunset discipline |
 | `observability-backend` | .NET service / BFF backend / Wolverine / Hangfire instrumentation (OTel, Serilog, Sentry .NET, dynamic sampler) |
 
 ### Data
 | Skill folder | Load when |
 |---|---|
-| `postgresql-patterns` | Schema design, migrations, data modeling |
+| `persistence-patterns` | EF Core write + Dapper read, migrations, JSONB, PostGIS, RLS + TenantInterceptor, transaction + outbox binding |
 | `hybridcache-patterns` | HybridCache L1+L2, tag invalidation, cross-instance cache coherence, escape hatches (locks, rate limit, streams) |
-| `elasticsearch-patterns` | Search index design, geo search, ES queries |
-| `file-storage-patterns` | File upload, image pipeline, virus scan, CDN delivery |
+| `elasticsearch-patterns` | Elastic.Clients.Elasticsearch 8.x, geo search, Wolverine-driven indexing, alias-based reindex, tenant-isolated queries |
+| `file-pipeline-patterns` | SeaweedFS storage + ImageSharp processing + nClam scanning, Wolverine upload state-machine saga, presigned uploads, ABAC for file access |
 
 ### Frontend — Customer Portal
 | Skill folder | Load when |

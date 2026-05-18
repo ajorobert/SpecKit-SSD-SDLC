@@ -73,8 +73,10 @@ You do not need to load them yourself — they will be in context when you start
 | `backend-feature-patterns` | sk.design (architecture phase), sk.verify (backend) |
 | `bff-patterns` | sk.design (architecture phase) when unit is a BFF service |
 | `wolverine-patterns` | sk.design (architecture phase) when story has messaging tags |
-| `workflow-patterns` | sk.design (architecture phase) when story has workflow tags |
-| `auth-patterns` | sk.design (architecture phase) when story has auth tags |
-| `postgresql-patterns` | sk.design (datamodel phase, always) |
+| `workflow-and-jobs-patterns` | sk.design (architecture phase) when story has workflow tags |
+| `keycloak-patterns` | sk.design (architecture phase) when story has auth tags |
+| `persistence-patterns` | sk.design (datamodel phase, always) |
 | `hybridcache-patterns` | sk.design (datamodel phase) when story has cache tags |
 | `elasticsearch-patterns` | sk.design (datamodel phase) when story has search tags |
+| `integration-adapter-patterns` | sk.design (architecture phase) when story has adapter / external-integration tags |
+| `feature-management-patterns` | sk.design (architecture phase) when story has feature-flag / rollout tags |
