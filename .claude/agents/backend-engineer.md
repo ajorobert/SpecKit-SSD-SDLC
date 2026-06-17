@@ -73,13 +73,15 @@ Loaded by sk.implement/sk.review Step 0 based on story tags. You do not need to 
 
 | Pack | When loaded |
 |---|---|
-| `csharp-clean-arch` | Always (all backend stories) |
+| `backend-feature-patterns` | Always (all backend stories) |
 | `design-code-review` | sk.review — always |
 | `bff-patterns` | `bff` tag |
-| `messaging-patterns` | `messaging`, `events`, `queue` tags |
-| `workflow-patterns` | `workflow`, `elsa`, `sla` tags |
-| `auth-patterns` | `auth`, `keycloak`, `firebase` tags |
-| `postgresql-patterns` | `db`, `schema`, `migration` tags |
-| `redis-patterns` | `cache`, `redis` tags |
+| `wolverine-patterns` | `messaging`, `events`, `queue` tags |
+| `workflow-and-jobs-patterns` | `workflow`, `elsa`, `sla`, `hangfire`, `job`, `cron` tags |
+| `keycloak-patterns` | `auth`, `keycloak` tags |
+| `persistence-patterns` | `db`, `schema`, `migration` tags |
+| `hybridcache-patterns` | `cache`, `redis` tags |
 | `elasticsearch-patterns` | `search`, `elasticsearch` tags |
-| `file-storage-patterns` | `file`, `upload` tags |
+| `file-pipeline-patterns` | `file`, `upload` tags |
+| `integration-adapter-patterns` | `adapter`, `integration adapter`, `polly`, `DelegatingHandler`, `vendor api` tags |
+| `feature-management-patterns` | `feature flag`, `rollout`, `gating`, `variant`, `sunset` tags |

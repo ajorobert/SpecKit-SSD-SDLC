@@ -57,7 +57,7 @@ Client
       executes
 ```
 * The service owns full auth responsibility.
-* See `auth-patterns` for JWT setup, RBAC policies, and ABAC handlers.
+* See `keycloak-patterns` §3 for JWT setup, §5 for RBAC policies, and §6 for ABAC handlers.
 * Rate limiting applied at service level (or at infrastructure gateway if present).
 
 ### Flow B — Via BFF (client → BFF → services with M2M)
@@ -203,5 +203,5 @@ var listing = await _listingClient.GetAsync(listingId, ct);
 
 ## When NOT to Use
 * Service-to-service internal calls (always M2M, no BFF involved)
-* Deciding how auth works inside a service (see `auth-patterns`)
+* Deciding how auth works inside a service (see `keycloak-patterns`)
 * Infrastructure gateway configuration (Traefik, YARP, nginx)

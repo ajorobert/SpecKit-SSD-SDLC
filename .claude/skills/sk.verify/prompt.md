@@ -13,7 +13,7 @@ Load all packs applicable to this story for comprehensive gate evaluation.
 2. Read story frontmatter → check `tags` array
 3. Read ALL applicable packs for the story's role and domain. **Load ≤6 packs total.**
 
-Backend story: always `.claude/skills/csharp-clean-arch/SKILL.md`
+Backend story: always `.claude/skills/backend-feature-patterns/SKILL.md`
 Frontend story: always `.claude/skills/frontend-design-system/SKILL.md`, `.claude/skills/accessibility-standards/SKILL.md`
 
 Then conditional packs per the CLAUDE.md Tech Stack Context Skills table matching the story tags.

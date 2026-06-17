@@ -1,5 +1,9 @@
 <!-- SPECKIT-SSD-SDLC MANAGED -->
 
+> **[STACK NOTE]** This project uses .NET 10, Wolverine (not MassTransit), HybridCache (not raw Redis), FastEndpoints (not MVC), ErrorOr (not Ardalis.Result), Mapster, SeaweedFS, Tempo (not Jaeger), GlitchTip via Sentry SDK, Keycloak only (no Firebase), Strapi v5.
+
+> **[PLACEHOLDER CONVENTION]** Skill code examples use `YourContext.*` as the .NET bounded-context root namespace placeholder (e.g. `YourContext.Api`, `YourContext.Application`). At code-generation time, substitute with the actual context name from `.specify/memory/system-context.md`. Metric/log identifiers use `directory.*` (project label) or `your-service` (URL slugs).
+
 # SpecKit-SSD-SDLC
 
 ## Identity
@@ -23,23 +27,33 @@ Roles: po | architect | lead | backend | frontend | security
 ## Tech Stack Context Skills
 These are passive knowledge packs — never invoked directly. They are loaded via inject_files in the relevant sk.* skills based on the work being done.
 
+### Cross-Cutting
+| Skill folder | Load when |
+|---|---|
+| `observability-contracts` | Any observability work — defines resource attrs, runtime-config JSON shape, PII deny-list, Loki label allow-list, span naming. Loaded by every observability-{backend,frontend,infra} skill. |
+| `observability-infra` | OTel Collector config, Loki/Jaeger/Prometheus/GlitchTip deployment, Grafana dashboards, tail sampling, backend swap planning |
+
 ### Backend
 | Skill folder | Load when |
 |---|---|
-| `csharp-clean-arch` | Any C# .NET 10 backend implementation or review |
+| `backend-feature-patterns` | Clean Arch layers, handler shape, ErrorOr, Mapster, FluentValidation, idempotency, comment markers |
 | `design-code-review` | Backend code review (sk.review) |
+| `fastendpoints-patterns` | FastEndpoints v6, Scalar OpenAPI, ErrorOr→HTTP mapping, idempotency-key, throttling |
 | `bff-patterns` | BFF API layer design or implementation |
-| `messaging-patterns` | RabbitMQ, MassTransit, MediatR, Hangfire work |
-| `workflow-patterns` | Elsa v3 workflows, SLA timers, breach alerts |
-| `auth-patterns` | Firebase/Keycloak auth, session storage, authorization |
+| `wolverine-patterns` | Wolverine in-process + brokered messaging, outbox, sagas, scheduled messages |
+| `workflow-and-jobs-patterns` | Elsa v3 long-running workflows + Hangfire background jobs, decision rule with Wolverine sagas, OTel propagation, dashboard auth |
+| `keycloak-patterns` | Keycloak JWT validation, IUserContext, RBAC policies, ABAC handlers, M2M, claim mapping |
+| `integration-adapter-patterns` | External integration adapter authoring: port-and-adapter split, typed HttpClient, DelegatingHandler chain, Polly v8 resilience, idempotency-aware retry |
+| `feature-management-patterns` | Microsoft.FeatureManagement, IFeatureManagerSnapshot, built-in + custom filters, variant features, flag naming, sunset discipline |
+| `observability-backend` | .NET service / BFF backend / Wolverine / Hangfire instrumentation (OTel, Serilog, Sentry .NET, dynamic sampler) |
 
 ### Data
 | Skill folder | Load when |
 |---|---|
-| `postgresql-patterns` | Schema design, migrations, data modeling |
-| `redis-patterns` | Caching, session cache, rate limiting, distributed locks |
-| `elasticsearch-patterns` | Search index design, geo search, ES queries |
-| `file-storage-patterns` | File upload, image pipeline, virus scan, CDN delivery |
+| `persistence-patterns` | EF Core write + Dapper read, migrations, JSONB, PostGIS, RLS + TenantInterceptor, transaction + outbox binding |
+| `hybridcache-patterns` | HybridCache L1+L2, tag invalidation, cross-instance cache coherence, escape hatches (locks, rate limit, streams) |
+| `elasticsearch-patterns` | Elastic.Clients.Elasticsearch 8.x, geo search, Wolverine-driven indexing, alias-based reindex, tenant-isolated queries |
+| `file-pipeline-patterns` | SeaweedFS storage + ImageSharp processing + nClam scanning, Wolverine upload state-machine saga, presigned uploads, ABAC for file access |
 
 ### Frontend — Customer Portal
 | Skill folder | Load when |
@@ -49,6 +63,7 @@ These are passive knowledge packs — never invoked directly. They are loaded vi
 | `react-component-patterns` | Component decomposition, TypeScript props, form handling |
 | `zustand-state-management` | Global/shared UI state |
 | `accessibility-standards` | Any frontend implementation or UAT |
+| `observability-frontend` | OTel JS, Sentry, PostHog, Clarity, BFF runtime-config, source maps |
 
 ### Frontend — Admin SPA
 | Skill folder | Load when |
@@ -58,11 +73,13 @@ These are passive knowledge packs — never invoked directly. They are loaded vi
 | `react-component-patterns` | Component patterns (same as portal) |
 | `zustand-state-management` | Global state (same as portal) |
 | `accessibility-standards` | Any frontend implementation or UAT |
+| `observability-frontend` | Same as portal — OTel JS, Sentry, PostHog, Clarity |
 
 ### Frontend — Mobile App
 | Skill folder | Load when |
 |---|---|
 | `react-native-patterns` | React Native + Expo managed workflow, NativeWind v5 |
+| `observability-frontend` | OTel RN, Sentry RN, cached runtime-config, source maps |
 
 ## Security Rules
 5. Never use `rm`, `rmdir`, `del`, or `unlink` — these commands are blocked by policy.

@@ -11,7 +11,42 @@
       "Edit(/.claude/skills/sk.ff/**)",
       "Edit(/.claude/**)",
       "Edit(/.claude/skills/sk.design/**)",
-      "Edit(/.claude/skills/governance/**)"
+      "Edit(/.claude/skills/governance/**)",
+      "Edit(/.claude/skills/observability-contracts/**)",
+      "Edit(/.claude/skills/observability-backend/**)",
+      "Edit(/.claude/skills/observability-frontend/**)",
+      "Edit(/.claude/skills/observability-infra/**)",
+      "Bash(bash .claude/hooks/archive-file.sh \".claude/skills/observability-patterns/SKILL.md\" \"Split into observability-{contracts,backend,frontend,infra} on 2026-04-29 — original was approaching 1000 lines, causing context bloat for backend-only and frontend-only agents. Replaced by four focused skills with observability-contracts holding the shared seams \\(resource attrs, runtime-config JSON shape, PII deny-list, Loki label allow-list, span naming, trace propagation rules\\).\")",
+      "Edit(/.claude/skills/fastendpoints-patterns/**)",
+      "Read(/.claude/**)",
+      "Bash(bash .claude/hooks/archive-file.sh .claude/skills/observability-patterns/ \"Empty folder remnant from 2026-04-29 split into observability-{contracts,backend,frontend,infra}. Phase 0 audit cleanup.\")",
+      "Edit(/.claude/skills/nextjs-patterns/**)",
+      "Edit(/.claude/skills/zustand-state-management/**)",
+      "Edit(/.claude/skills/wolverine-patterns/**)",
+      "Bash(bash .claude/hooks/archive-file.sh .claude/skills/messaging-patterns/ \"Replaced by wolverine-patterns in Phase 1 — MassTransit/MediatR/Hangfire-scheduled assumptions removed.\")",
+      "Edit(/.claude/skills/elasticsearch-patterns/**)",
+      "Edit(/.claude/skills/sk.review/**)",
+      "Edit(/.claude/skills/sk.refactor/**)",
+      "Edit(/.claude/skills/sk.implement/**)",
+      "Edit(/.claude/skills/sk.test/**)",
+      "Bash(xargs grep -l \"messaging-patterns\")",
+      "Bash(xargs grep -l \"wolverine-patterns/SKILL.md\")",
+      "Edit(/.claude/skills/hybridcache-patterns/**)",
+      "Bash(bash .claude/hooks/archive-file.sh .claude/skills/redis-patterns/ \"Replaced by hybridcache-patterns in Phase 2 — StackExchange.Redis-as-primary-API and MassTransit references removed. Raw Redis kept as escape hatches inside the new skill.\")",
+      "Edit(/.claude/skills/sk.perf/**)",
+      "Edit(/.claude/skills/backend-feature-patterns/**)",
+      "Bash(bash .claude/hooks/archive-file.sh .claude/skills/csharp-clean-arch/ \"Renamed and rewritten as backend-feature-patterns in Phase 3 — absorbs CQRS handler shape, ErrorOr contract, Mapster, FluentValidation, comment markers. PHASE-3-FIX marker for marker-interface block resolved by deletion \\(project-specific concern, moved to system-context.md\\).\")",
+      "Edit(/.claude/skills/design-code-review/**)",
+      "Edit(/.claude/skills/sk.verify/**)",
+      "Edit(/.claude/skills/keycloak-patterns/**)",
+      "Bash(bash .claude/hooks/archive-file.sh .claude/skills/auth-patterns/ \"Renamed and rewritten as keycloak-patterns in Phase 4a — single dominant lib \\(Keycloak\\) follows lib-naming rule. PHASE-4-FIX MVC controller block resolved with FastEndpoints + ABAC handler example. PHASE-3-FIX MediatR examples \\(if any remained\\) resolved by Wolverine handler shape.\")",
+      "Edit(/.claude/skills/bff-patterns/**)",
+      "Edit(/.claude/skills/persistence-patterns/**)",
+      "Edit(/.claude/skills/sk.migrate/**)",
+      "Edit(/.claude/skills/file-pipeline-patterns/**)",
+      "Edit(/.claude/skills/workflow-and-jobs-patterns/**)",
+      "Edit(/.claude/skills/feature-management-patterns/**)",
+      "Edit(/.claude/skills/integration-adapter-patterns/**)"
     ],
     "deny": [
       "Bash(rm *)",
@@ -23,7 +58,10 @@
       "Bash(* | rm *)",
       "Bash(* && rm *)"
     ],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "acceptEdits",
+    "additionalDirectories": [
+      "d:\\work\\SDD Reference\\repo\\SpecKit-SSD-SDLC\\.claude\\skills"
+    ]
   },
   "hooks": {
     "PostToolUse": [

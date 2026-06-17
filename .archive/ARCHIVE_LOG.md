@@ -78,3 +78,63 @@ approved and let a human run the cleanup.
 **Original path:** .claude/skills/governance/SKILL.md
 **Archived to:** .archive/2026-04-24/SKILL.md
 **Review:** [ ] approved for permanent delete
+
+## 2026-04-29 — .claude/skills/observability-patterns/SKILL.md
+**Reason:** Split into observability-{contracts,backend,frontend,infra} on 2026-04-29 — original was approaching 1000 lines, causing context bloat for backend-only and frontend-only agents. Replaced by four focused skills with observability-contracts holding the shared seams (resource attrs, runtime-config JSON shape, PII deny-list, Loki label allow-list, span naming, trace propagation rules).
+**Original path:** .claude/skills/observability-patterns/SKILL.md
+**Archived to:** .archive/2026-04-29/SKILL.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-05-17 — .claude/skills/observability-patterns/
+**Reason:** Empty folder remnant from 2026-04-29 split into observability-{contracts,backend,frontend,infra}. Phase 0 audit cleanup.
+**Original path:** .claude/skills/observability-patterns/
+**Archived to:** .archive/2026-05-17/observability-patterns
+**Review:** [ ] approved for permanent delete
+
+## 2026-05-18 — .claude/skills/messaging-patterns/
+**Reason:** Replaced by wolverine-patterns in Phase 1 — MassTransit/MediatR/Hangfire-scheduled assumptions removed.
+**Original path:** .claude/skills/messaging-patterns/
+**Archived to:** .archive/2026-05-18/messaging-patterns
+**Review:** [ ] approved for permanent delete
+
+## 2026-05-18 — .claude/skills/redis-patterns/
+**Reason:** Replaced by hybridcache-patterns in Phase 2 — StackExchange.Redis-as-primary-API and MassTransit references removed. Raw Redis kept as escape hatches inside the new skill.
+**Original path:** .claude/skills/redis-patterns/
+**Archived to:** .archive/2026-05-18/redis-patterns
+**Review:** [ ] approved for permanent delete
+
+## 2026-05-18 — .claude/skills/csharp-clean-arch/
+**Reason:** Renamed and rewritten as backend-feature-patterns in Phase 3 — absorbs CQRS handler shape, ErrorOr contract, Mapster, FluentValidation, comment markers. PHASE-3-FIX marker for marker-interface block resolved by deletion (project-specific concern, moved to system-context.md).
+**Original path:** .claude/skills/csharp-clean-arch/
+**Archived to:** .archive/2026-05-18/csharp-clean-arch
+**Review:** [ ] approved for permanent delete
+
+## 2026-05-18 — .claude/skills/auth-patterns/
+**Reason:** Renamed and rewritten as keycloak-patterns in Phase 4a — single dominant lib (Keycloak) follows lib-naming rule. PHASE-4-FIX MVC controller block resolved with FastEndpoints + ABAC handler example. PHASE-3-FIX MediatR examples (if any remained) resolved by Wolverine handler shape.
+**Original path:** .claude/skills/auth-patterns/
+**Archived to:** .archive/2026-05-18/auth-patterns
+**Review:** [ ] approved for permanent delete
+
+## 2026-05-18 — .claude/skills/postgresql-patterns/
+**Reason:** Renamed and rewritten as persistence-patterns in Phase 4b — concept-named per multi-lib bundle rule (EF + Dapper co-equal). PostgreSQL-specific patterns (JSONB, PostGIS, RLS) retained. Stale redis-patterns cross-ref at :215 resolved by retargeting to hybridcache-patterns §4.
+**Original path:** .claude/skills/postgresql-patterns/
+**Archived to:** .archive/2026-05-18/postgresql-patterns
+**Review:** [ ] approved for permanent delete
+
+## 2026-05-18 — .claude/skills/file-storage-patterns/
+**Reason:** Renamed and rewritten as file-pipeline-patterns in Phase 4d — concept-named per multi-lib bundle rule (SeaweedFS + ImageSharp + nClam co-equal). PHASE-4-FIX markers on VirusScanConsumer (Phase 0) and UploadsController (Phase 3.1) resolved by Wolverine saga + FastEndpoints presigned endpoint. Port interfaces (IFileStorageService, IImageProcessor, IVirusScanService) established per ports-and-adapters policy.
+**Original path:** .claude/skills/file-storage-patterns/
+**Archived to:** .archive/2026-05-18/file-storage-patterns
+**Review:** [ ] approved for permanent delete
+
+## 2026-05-18 — .claude/skills/workflow-patterns/
+**Reason:** Renamed and rewritten as workflow-and-jobs-patterns in Phase 4e — concept-named per multi-lib bundle rule (Elsa v3 + Hangfire co-equal). Added Hangfire content (was missing as standalone skill). Three-way decision rule with Wolverine sagas formalized. Resolves placeholder cross-refs from file-pipeline-patterns §13 (orphan cleanup) and elasticsearch-patterns §9 (reindex runner).
+**Original path:** .claude/skills/workflow-patterns/
+**Archived to:** .archive/2026-05-18/workflow-patterns
+**Review:** [ ] approved for permanent delete
+
+## 2026-05-18 — .claude/skills/polly-resilience-patterns/
+**Reason:** Reframed and renamed as integration-adapter-patterns in Phase 4f-fix — lib-named scope was too broad (would have fired on every feature using an adapter via its port). Concept-named bundle correctly scopes to adapter-authoring tasks only. Polly content preserved as one section of the broader authoring guidance.
+**Original path:** .claude/skills/polly-resilience-patterns/
+**Archived to:** .archive/2026-05-18/polly-resilience-patterns
+**Review:** [ ] approved for permanent delete

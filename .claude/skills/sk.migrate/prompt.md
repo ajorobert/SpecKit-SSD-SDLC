@@ -22,7 +22,7 @@ Declare mode at start of execution.
 1. specs/intents/{intent}/units/{unit}/data-model.md — canonical entity definitions
 2. specs/intents/{intent}/units/{unit}/architecture.md (if exists)
 3. .specify/memory/standards/data-standards.md
-4. .claude/skills/postgresql-patterns/SKILL.md
+4. .claude/skills/persistence-patterns/SKILL.md
 
 ## [EXPAND] steps
 1. Identify new entities, columns, indexes, constraints from data-model.md diff

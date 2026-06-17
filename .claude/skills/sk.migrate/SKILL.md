@@ -4,7 +4,7 @@ description: "Invoke when: database migration lifecycle — expand/contract, rol
 subagent_type: SpecKit Backend Engineer Agent
 inject_files:
   - .specify/memory/standards/data-standards.md
-  - .claude/skills/postgresql-patterns/SKILL.md
+  - .claude/skills/persistence-patterns/SKILL.md
 preconditions:
   - file_exists: specs/intents/*/units/*/data-model.md
 ---

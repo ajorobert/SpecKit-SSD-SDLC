@@ -29,7 +29,7 @@ PendingUpload  → (presigned URL issued, awaiting client PUT)
 * All state transitions go through methods on `FileAsset` (`MarkUploaded`, `MarkScanCleared`, `MarkScanInfected`, `PromoteToPublic`, `SoftDelete`). External code never sets state fields directly.
 * MIME-type allow-list and size limits are aggregate invariants enforced in `FileAsset.RequestUpload(...)` — see the presign example below. Controllers and consumers never duplicate these checks.
 
-**Domain events** (raised by `FileAsset`, published as integration events via the transactional outbox — see `messaging-patterns`):
+**Domain events** (raised by `FileAsset`, published as integration events via the transactional outbox — see `wolverine-patterns`):
 
 | Event | Raised when | Subscribers (typical) |
 |---|---|---|
@@ -41,7 +41,7 @@ PendingUpload  → (presigned URL issued, awaiting client PUT)
 | `FilePromotedToPublic` | Entity that owns the file is published | CDN URL exposure |
 | `FileArchived` | Soft-delete applied | Hangfire schedule for physical purge |
 
-**Orchestration choice for the upload → scan → process pipeline:** use a **MassTransit state-machine saga** (see `messaging-patterns`), not Elsa. Rationale: the flow is a fixed technical pipeline with no SLA breach alerts, no human steps, and no business-configurable branching — exactly the shape sagas were designed for. Reserve Elsa (`workflow-patterns`) for SLA-driven business workflows (e.g. "listing must be approved within 48h"). The saga state machine owns: `Pending → Scanning → Processing → Ready` with compensating transitions to `Infected` / `Failed`, persisted via the EF Core saga repository.
+**Orchestration choice for the upload → scan → process pipeline:** use a **Wolverine saga** (see `wolverine-patterns` §7), not Elsa. Rationale: the flow is a fixed technical pipeline with no SLA breach alerts, no human steps, and no business-configurable branching — exactly the shape sagas were designed for. Reserve Elsa (`workflow-patterns`) for SLA-driven business workflows (e.g. "listing must be approved within 48h"). The saga state machine owns: `Pending → Scanning → Processing → Ready` with compensating transitions to `Infected` / `Failed`, persisted via the EF Core saga repository.
 
 ### Storage Topology
 * **Block storage** (S3-compatible API): primary store for all files. Two buckets per environment:
@@ -53,10 +53,10 @@ PendingUpload  → (presigned URL issued, awaiting client PUT)
 
 ### Event Publishing — Always via the Transactional Outbox
 
-Every domain event raised by `FileAsset` (`FileUploaded`, `FileScanCleared`, `FileScanInfected`, `FileRejected`, `ImageProcessingCompleted`, `FilePromotedToPublic`, `FileArchived`) is published as a MassTransit integration event through the **transactional outbox** — see `messaging-patterns` (Transactional Outbox section). Hard rules:
+Every domain event raised by `FileAsset` (`FileUploaded`, `FileScanCleared`, `FileScanInfected`, `FileRejected`, `ImageProcessingCompleted`, `FilePromotedToPublic`, `FileArchived`) is published as a Wolverine integration event through the **transactional outbox** — see `wolverine-patterns` §4. Hard rules:
 
-* The command handler / consumer that mutates the `FileAsset` aggregate writes state and the outbox row in a single database transaction (`AddEntityFrameworkOutbox<FileAssetDbContext>`). Never call `IPublishEndpoint.Publish` outside the outbox-managed unit of work.
-* The virus scan consumer and image pipeline consumer below are themselves MassTransit consumers — when they update `FileAsset` state and publish a follow-on event, the same outbox guarantee applies. Any direct `Publish` call in their `Consume` method is a bug: the file's state and the downstream event must commit atomically or not at all.
+* The command handler / Wolverine handler that mutates the `FileAsset` aggregate writes state and the outbox row in a single database transaction (Wolverine durable outbox, configured in `WolverineOptions`). Never publish directly outside the outbox-managed unit of work.
+* The virus scan handler and image pipeline handler below are themselves Wolverine handlers — when they update `FileAsset` state and publish a follow-on event, the same outbox guarantee applies. Any direct publish call inside the handler is a bug: the file's state and the downstream event must commit atomically or not at all.
 * This eliminates the dual-write problem between block storage and the database: the bucket move (quarantine → private) is done first; the state update + outbox row is committed second; the event is relayed third. If the relay never runs, retry by replaying outbox rows — the operation is naturally idempotent because storage moves are key-addressed.
 
 ### Upload Flow (Client-Initiated Direct Upload)
@@ -82,7 +82,7 @@ Every domain event raised by `FileAsset` (`FileUploaded`, `FileScanCleared`, `Fi
 
 ### Virus Scanning
 * Every uploaded file is scanned before it leaves the quarantine bucket.
-* Scan trigger: MassTransit consumer on `FileUploaded` event.
+* Scan trigger: Wolverine handler on `FileUploaded` event.
 * Integration: ClamAV (self-hosted) or cloud AV service via HTTP. Wrap in circuit breaker (Polly).
 * On **clean**: move file from quarantine to private bucket → publish `FileScanCleared` event.
 * On **infected**: delete file from quarantine → publish `FileScanInfected` event → notify owner → log at ERROR with `fileId`, `ownerId`, `threatName`.
@@ -91,7 +91,7 @@ Every domain event raised by `FileAsset` (`FileUploaded`, `FileScanCleared`, `Fi
 * Never promote a file to private or public bucket without a confirmed clean scan result recorded in the database.
 
 ### Image Processing Pipeline
-* Trigger: MassTransit consumer on `FileScanCleared` for image MIME types.
+* Trigger: Wolverine handler on `FileScanCleared` for image MIME types.
 * Processing steps (in order):
   1. **HEIC → JPEG conversion** (if applicable).
   2. **Strip EXIF metadata** (removes GPS location, device info — privacy requirement).
@@ -136,10 +136,11 @@ Example: `prod/listings/usr_abc/lst_xyz/fid_123/medium.webp`
 
 ## Patterns / Examples
 
-### Presign upload — thin controller, MediatR command, write-side handler
+### Presign upload — thin endpoint, Wolverine command, write-side handler
 
 The controller owns no orchestration. The command handler owns aggregate construction, persistence, and presigned URL generation through an injected port.
 
+<!-- PHASE-4-FIX: example uses MVC `ControllerBase` + `[ApiController]` + `ISender` (MediatR); rewrite to FastEndpoints + `IMessageBus` per `fastendpoints-patterns` when this skill is updated in Phase 4. -->
 ```csharp
 // API layer — controller does only validation + dispatch
 [ApiController]
@@ -208,6 +209,7 @@ Notes:
 
 ### Virus scan consumer
 ```csharp
+// PHASE-4-FIX: example violates outbox rule — rewrite to outbox-publish pattern when migrating to Wolverine.
 public class VirusScanConsumer(IStorageService storage, IVirusScanService scanner,
     IFileRepository fileRepo, IPublishEndpoint publish, ILogger<VirusScanConsumer> logger)
     : IConsumer<FileUploaded>

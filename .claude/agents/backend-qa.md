@@ -58,5 +58,6 @@ tests/unit/{unit}/
 ## Capability Packs
 sk.test Step 0 loads applicable packs based on story tags. You do not need to load them.
 
-`csharp-clean-arch` (always), `postgresql-patterns` (`db` tag), `auth-patterns` (`auth` tag),
-`messaging-patterns` (`messaging` tag), `redis-patterns` (`cache` tag)
+`backend-feature-patterns` (always), `persistence-patterns` (`db` tag), `keycloak-patterns` (`auth` tag),
+`wolverine-patterns` (`messaging` tag), `hybridcache-patterns` (`cache` tag),
+`integration-adapter-patterns` (`adapter` tag), `feature-management-patterns` (`feature flag` tag)

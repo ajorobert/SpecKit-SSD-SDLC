@@ -17,10 +17,12 @@ Declare at start: `[REFACTOR MODE] No new behaviour. Scope: {user-supplied scope
 ## Capability pack selection
 Load packs matching role and scope (≤4 packs):
 
-Role = backend: always `.claude/skills/csharp-clean-arch/SKILL.md`
-- db/migration scope → `.claude/skills/postgresql-patterns/SKILL.md`
-- messaging scope → `.claude/skills/messaging-patterns/SKILL.md`
-- auth scope → `.claude/skills/auth-patterns/SKILL.md`
+Role = backend: always `.claude/skills/backend-feature-patterns/SKILL.md`
+- db/migration scope (persistence, database, postgres, ef core, dapper, migration, schema, jsonb, postgis, rls, repository, read model) → `.claude/skills/persistence-patterns/SKILL.md`
+- messaging scope (commands, queries, handlers, events, publish, subscribe, outbox, sagas, scheduled messages, message bus) → `.claude/skills/wolverine-patterns/SKILL.md`
+- auth scope (authentication, authorization, jwt, keycloak, oidc, roles, policies, claims, m2m, user context) → `.claude/skills/keycloak-patterns/SKILL.md`
+- adapter scope (port-and-adapter split, typed HttpClient, resilience, DelegatingHandler chain, idempotency-aware retry) → `.claude/skills/integration-adapter-patterns/SKILL.md`
+- feature-flag scope (rollouts, variant features, gating, sunset cleanup) → `.claude/skills/feature-management-patterns/SKILL.md`
 
 Role = frontend (Customer Portal): always `.claude/skills/react-component-patterns/SKILL.md`, `.claude/skills/frontend-design-system/SKILL.md`
 Role = frontend (Admin SPA): always `.claude/skills/react-admin-patterns/SKILL.md`, `.claude/skills/react-component-patterns/SKILL.md`

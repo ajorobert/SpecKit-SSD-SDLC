@@ -20,11 +20,11 @@ Production patterns for Elsa v3 embedded workflows in .NET 10 services. Covers w
 ### Workflow Design
 * Model workflows as explicit state machines — every state and every transition named in business terms.
 * Keep workflows thin: activities orchestrate calls to domain services; business logic lives in domain/application layer, not inside activities.
-* **Activities dispatch domain operations through MediatR** — they never call repositories, `DbContext`, or domain methods directly. An activity that needs to mutate state injects `ISender` and sends the appropriate `ICommand` / `ICommand<T>` (see `csharp-clean-arch` and `messaging-patterns`). An activity that needs to read state sends an `IQuery<T>`. This keeps the CQRS boundary intact: a workflow is just another caller of the application layer, not a parallel pathway around it. Validation, authorization, transactions, outbox publishing, and pipeline behaviours all run automatically because the call goes through the same MediatR pipeline as an HTTP request.
-* Activities **never** call EF Core, Dapper, MassTransit `IPublishEndpoint`, or Redis directly — those are infrastructure details owned by command/query handlers. If a domain operation does not yet have a MediatR handler, create one rather than reaching past it from inside the activity.
+* **Activities dispatch domain operations through Wolverine** — they never call repositories, `DbContext`, or domain methods directly. An activity that needs to mutate state injects `IMessageBus` and invokes the appropriate command via `InvokeAsync` (see `backend-feature-patterns` §3 and `wolverine-patterns` §2). An activity that needs to read state invokes a query the same way. This keeps the CQRS boundary intact: a workflow is just another caller of the application layer, not a parallel pathway around it. Validation, authorization, transactions, outbox publishing, and middleware all run automatically because the call goes through the same Wolverine pipeline as an HTTP request.
+* Activities **never** call EF Core, Dapper, the message broker, or Redis directly — those are infrastructure details owned by command/query handlers. If a domain operation does not yet have a Wolverine handler, create one rather than reaching past it from inside the activity.
 * Workflows are long-running and durable — do not assume in-memory state survives. Persist all correlation data in workflow variables.
 * Correlation: every workflow instance correlates to a business entity ID (`listingId`, `bookingId`). Use `CorrelateWithAsync` to prevent duplicate instances.
-* Workflow triggers: HTTP endpoint, MassTransit message, timer. Prefer message-based triggers for reliability.
+* Workflow triggers: HTTP endpoint, Wolverine message, timer. Prefer message-based triggers for reliability.
 
 ### Activity Authoring
 * Custom activities inherit from `Activity` or `CodeActivity` for simple logic, `Composite` for sub-workflows.
@@ -160,7 +160,7 @@ public class TriggerSlaBreachAlert(INotificationService notificationService, ILo
 * Any long-running process that must survive service restarts
 
 ## When NOT to Use
-* Simple fire-and-forget side effects → use MassTransit consumers or Hangfire
+* Simple fire-and-forget side effects → use Wolverine handlers or Hangfire
 * Short-lived, synchronous request/response processes → direct application service
-* Saga orchestration without SLA/timer requirements → MassTransit StateMachine (simpler)
+* Saga orchestration without SLA/timer requirements → Wolverine saga (simpler) — see `wolverine-patterns` §7
 * Infrastructure automation or CI/CD pipelines
