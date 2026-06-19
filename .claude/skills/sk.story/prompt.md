@@ -53,6 +53,10 @@ Invoke sub-skill: `sk.story/sk.specify` (or `--bug` if in bug mode).
     tags lean to `state` / `bff`.
   - Backend pass → actor = system/service; acceptance criteria about API contracts, data,
     persistence; `role: backend`; tags lean to `db` / `auth` / `messaging`.
+  - **Filename**: write each split story as `story-{Layer}-{ID}.md` where `{Layer}` is the
+    capitalized layer (`Frontend` / `Backend`) — e.g. `story-Frontend-AUTH-LOGIN-001.md`,
+    `story-Backend-AUTH-LOGIN-002.md`. The `id` frontmatter stays `{INTENT-CODE}-{UNIT-CODE}-{NNN}`
+    (the layer prefix is filename-only).
   After both are written, set each story's `sibling_story` to the other's ID.
 - **[JIRA MODE, --single]**: run sk.specify once; write Frontend and Backend sub-sections.
 - Wait for specify phase to complete and write `story-{ID}.md`.
