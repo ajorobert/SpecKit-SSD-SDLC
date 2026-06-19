@@ -35,6 +35,7 @@ SpecKit is added as a **git subtree** so you can stay in sync with our upstream 
 ```bash
 git subtree add --prefix=.speckit https://github.com/ajorobert/SpecKit-SSD-SDLC master --squash
 bash .speckit/setup.sh
+/reload-skills
 /sk.init    # Runs interactive interview to build your .specify/memory files
 ```
 
