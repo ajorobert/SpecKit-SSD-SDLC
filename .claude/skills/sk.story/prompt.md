@@ -14,6 +14,9 @@ Evaluate in this order:
 **FULL PIPELINE**
 - `sk.story` (no flag) → [FEATURE MODE]
 - `sk.story --bug` → [BUG MODE]
+- `sk.story --jira <KEY>` → [JIRA MODE] — read the Jira task `<KEY>` and generate **two sibling stories** (frontend + backend) from it.
+  - Add `--single` to instead produce one story with Frontend/Backend sub-sections.
+  - Example: `sk.story --jira AUTH-102`
 
 ## Pre-flight
 1. Read `session.yaml`
@@ -21,10 +24,43 @@ Evaluate in this order:
 
 ## Orchestration
 
+### Phase 0 — Jira Ingest ([JIRA MODE] only)
+Skip this phase entirely unless invoked with `--jira <KEY>`.
+1. **Fetch the Jira task** `<KEY>`:
+   - Preferred: Atlassian MCP (Rovo) — call `getJiraIssue` for `<KEY>`.
+   - Fallback: if the Atlassian MCP is not connected, call the Jira REST API via curl:
+     `GET {JIRA_BASE_URL}/rest/api/3/issue/<KEY>` using Basic auth from env
+     (`$JIRA_EMAIL` + `$JIRA_API_TOKEN`). If neither is available, STOP and ask the
+     user to reconnect the Atlassian MCP or provide REST credentials.
+2. **Extract** from the issue: summary, description, acceptance criteria, components/labels, issue type.
+3. **Map** Jira fields → story seeds (actor / action / value / acceptance criteria).
+4. **Set the split plan**:
+   - Default → emit **TWO** stories: one `frontend`, one `backend`.
+   - `--single` → emit ONE story with `## Frontend` and `## Backend` sub-sections.
+5. Carry these onto every generated story's frontmatter:
+   ```yaml
+   jira_id: <KEY>
+   source: jira
+   layer: frontend        # or backend (per pass)
+   sibling_story: <other story id>   # cross-link (two-story mode only)
+   ```
+
 ### Phase 1 — Story Capture
-Invoke sub-skill: `sk.story/sk.specify` (or `--bug` if in bug mode)
-- Wait for specify phase to complete and write `story-{ID}.md`
-- Read back `active_story_id` from `session.yaml`
+Invoke sub-skill: `sk.story/sk.specify` (or `--bug` if in bug mode).
+- **[JIRA MODE, default]**: run sk.specify **once per layer** (frontend, then backend),
+  seeding each pass with the Jira-derived seeds plus a layer lens:
+  - Frontend pass → actor = end user; acceptance criteria about UI/UX; `role: frontend`;
+    tags lean to `state` / `bff`.
+  - Backend pass → actor = system/service; acceptance criteria about API contracts, data,
+    persistence; `role: backend`; tags lean to `db` / `auth` / `messaging`.
+  After both are written, set each story's `sibling_story` to the other's ID.
+- **[JIRA MODE, --single]**: run sk.specify once; write Frontend and Backend sub-sections.
+- Wait for specify phase to complete and write `story-{ID}.md`.
+- Read back `active_story_id` from `session.yaml` (the last story written; track all generated IDs).
+
+> **[JIRA MODE, two-story]**: Phases 2–6 below run **once per generated story** (frontend
+> and backend). Assess, clarify, and validate each story independently; a gap in one does not
+> block the other. The Completion Report then summarizes both.
 
 ### Phase 2 — Business Completeness Assessment
 Run a structural coverage check on the generated `story-{ID}.md`.
@@ -111,4 +147,18 @@ Checklist Summary:
 - Missing: {Z} (listed if any)
 
 Next step: /sk.design (or /sk.ff if continuing the pipeline)
+```
+
+**[JIRA MODE, two-story]** — report both stories and their link:
+```
+sk.story complete (from Jira {KEY}).
+Frontend story: {fe-id} — {title}   Status: ready
+Backend  story: {be-id} — {title}   Status: ready
+Linked via jira_id: {KEY} (sibling_story cross-references set).
+
+Checklist Summary (per story):
+- {fe-id}: Business {X}/{Total}, Technical {Y}/{Total}
+- {be-id}: Business {X}/{Total}, Technical {Y}/{Total}
+
+Next step: /sk.design for each story (or /sk.ff to continue the pipeline)
 ```
