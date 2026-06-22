@@ -9,7 +9,12 @@ Role: any
    NOT null → report active session, suggest sk.session end first
 2. Ask the user (via interactive chat or `ask_question` tool) the following configuration questions:
    - **Role** — which role for this session? (po, architect, lead, backend, frontend, backend-qa, frontend-qa, security)
-   - **Base branch** — which branch to create the new one from? (e.g. main, frederic_dev2)
+   - **Base branch** — which branch to create the new one from? Present these options:
+     1. Use the `dev` branch as the base branch **(default)**
+     2. Use the current branch `{current_branch_name}` as the base branch
+     3. Other — let the user specify a custom branch name
+     - Resolve `{current_branch_name}` by reading the active git branch (`git branch --show-current`) before asking.
+     - If the user makes no selection (or just confirms/skips), default to `dev`.
    - **Feature name** — what is the feature called? (used in the branch name)
    - **Story Id** — story identifier for branch tracking (e.g. story-001)
    - **Jira Id** — linked Jira ticket identifier (e.g. AUTH-102)
