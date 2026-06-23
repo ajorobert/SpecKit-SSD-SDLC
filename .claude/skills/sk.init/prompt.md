@@ -28,11 +28,70 @@ Ask the following questions in a natural conversation (not a form). Gather enoug
 
 **3. Tech Stack**
 - Backend: language, framework, version?
-- Frontend: framework, version?
+- **Frontend surfaces** — NEW PROJECT only. Do NOT run this block in UPDATE mode. In UPDATE mode, show the current tech-stack.md value and ask only "What would you like to change?"
+  For each frontend surface identified in step 2:
+  1. Ask: "What is the primary use case for this surface?" (e.g. marketing site, customer portal, admin dashboard, mobile app, prototype/personal tool)
+  2. Based on their answer, recommend a framework using this decision guide:
+
+  | Use Case | Recommended Framework | Key Reason |
+  |---|---|---|
+  | SEO-critical marketing site or content portal (React preference) | **Next.js (App Router)** | SSR + SSG + ISR, built-in SEO metadata API |
+  | SEO-critical marketing site or content portal (Vue preference) | **Nuxt 3** | SSR + SSG with Vue syntax, file-based routing |
+  | Customer portal with auth, forms, dynamic pages (React) | **Next.js (App Router) + NextAuth v5** | SSR + server actions + auth integration |
+  | Customer portal with auth, forms, dynamic pages (Vue) | **Nuxt 3 + nuxt-auth-utils** | SSR + Vue composition API + auth module |
+  | Admin dashboard / internal tool / data tables (React) | **React + Vite + TanStack Router** | SPA simplicity, no SSR overhead, fast dev |
+  | Admin dashboard / internal tool / data tables (Vue) | **Vue 3 + Vite + Vue Router** | Lightweight SPA, easy learning curve |
+  | Enterprise app — large team, strict conventions, strong typing | **Angular 17+ (standalone components)** | Opinionated full framework: DI, routing, forms, state built-in |
+  | Simple personal tool or prototype | **Next.js (minimal)** or **Vanilla JS** | Low ceremony; Next.js if you want structure |
+  | iOS + Android mobile app | **React Native + Expo** | Managed workflow, cross-platform |
+  | Embedded widget or micro-frontend | **Vanilla JS + Web Components** | Minimal footprint, framework-agnostic |
+
+  3. Say: "Based on your use case, I recommend **[X]** because [one-sentence reason]. Would you like to go with that, or do you have a different preference?"
+  4. Once the framework is confirmed, immediately ask: **"Do you want to write the code in TypeScript or plain JavaScript?"**
+     Use this to guide the answer:
+
+     | Framework chosen | Recommendation | Reason |
+     |---|---|---|
+     | Angular 17+ | **TypeScript (strict)** — effectively mandatory | Angular's DI, decorators, and tooling are built for TS; plain JS is unsupported in practice |
+     | Next.js (App Router) | **TypeScript (strict)** — strongly recommended | App Router types (PageProps, generateMetadata, Server Actions) require TS for correctness |
+     | Nuxt 3 | **TypeScript (strict)** — strongly recommended | auto-imports and composables are fully typed; JS loses most of Nuxt's DX benefits |
+     | React + Vite | **TypeScript** — recommended, JS acceptable | TS catches prop mismatches early; plain JS is fine for small/prototype projects |
+     | Vue 3 + Vite | **TypeScript** — recommended, JS acceptable | Composition API with `<script setup lang="ts">` is the modern default |
+     | Vanilla JS | **Plain JS** — default; JSDoc optional | No build step required; JSDoc + VS Code gives lightweight type hints if desired |
+
+     If TypeScript is chosen: ask "Strict mode or standard?"
+     — Default recommendation: **strict** for all frameworks above.
+     — Record as `TypeScript (strict)` or `TypeScript (standard)` or `JavaScript` in tech-stack.md.
+
+  5. Record the chosen framework **and version**, and the language choice in tech-stack.md — never leave either as "TBD".
+
 - Mobile (if any): platform, framework?
 - Databases: which DB for what purpose?
 - Infrastructure: cloud provider, container runtime, CI/CD?
 - Any third-party services or APIs?
+
+**3b. UI & Design Direction** (NEW PROJECT only. Only ask when a frontend surface was identified in step 2. Skip entirely for backend-only projects.)
+
+Capture only project-wide **invariants** here — the high-level direction every surface inherits. The detailed, per-surface decisions (component library, full design-aesthetic catalogue, type-specific style combinations) are made at design time by `/sk.design`, which reads the catalogue in `.claude/skills/frontend-design-system/design-styles.md`. Keep this section short.
+
+- **Figma / Design file:**
+  Ask: "Do you have a Figma file, design mockup, or style guide?"
+  - **Yes** → record the URL/path in `project-config.md` under `## Design References`, and whether it needs a login. `/sk.design` and `/sk.implement` read this to extract colours, spacing, and component shapes.
+  - **No** → record `Design References: None`.
+
+- **Primary brand colour:**
+  Ask: "What is your primary brand colour?" (hex, name, or "not decided")
+  - Record under `## Design References` in `project-config.md`. If given, note it maps to `--primary` in the token system; if "not decided", it defaults to the component library's theme.
+
+- **Dark mode:**
+  Ask: "Does this project need dark mode?" (yes / no / not decided)
+  - `required` → `frontend-design-system` enforces the `.dark` class strategy. `light-only` → skip dark token variants. `not decided` → flagged by `sk.verify` until resolved. Record in `project-config.md`.
+
+- **Overall visual direction (one line, optional):**
+  Ask: "In a sentence, what overall visual direction do you want?" (e.g. "clean and minimal", "bold and playful", "dark and technical", or "let the design phase decide").
+  Record verbatim in `project-config.md` under a `Design Direction` field. This is a seed, not the final aesthetic — `/sk.design` expands it per surface against the design-styles catalogue and records the concrete style there.
+
+  Do NOT present the full design-style catalogue or component-library options here — that happens in `/sk.design`.
 
 **4. Auth and Integrations**
 - How does authentication work? (e.g. JWT, OAuth2, session cookies, API keys)
@@ -223,13 +282,19 @@ Next: run /sk.session start to set your role, then /sk.specify to begin your fir
 
 Read the existing files silently to understand current state.
 
+**Design Direction Detection (UPDATE mode — frontend projects only):**
+The concrete design aesthetic is owned by `/sk.design` (recorded per surface in its design artifacts); `project-config.md` holds only the high-level `Design Direction` seed.
+- **`Design Direction` present in project-config.md** → record internally; do NOT re-ask.
+- **Absent** → if the session involves frontend work, prompt once: "No design direction is recorded. Want to add a one-line direction now? (y/n)" If yes → ask the one-line question from the NEW PROJECT section 3b. If no → skip; `/sk.design` will establish it.
+- **Key rule (consistency):** When adding UI to an existing project, agents MUST follow the established aesthetic — read the design style recorded by `/sk.design` for that surface (and the `Design Direction` seed in `project-config.md`). They must NOT introduce a different visual style unless the user explicitly asks to change it.
+
 ### Step 2 — Present Menu
 
 ```
 Project: [name from project-config.md]
 
 What would you like to update?
-  [1] project-config     — identity + custom rules + overrides
+  [1] project-config     — identity + custom rules + overrides (includes Design Direction)
   [2] system-context     — system overview, services, external dependencies
   [3] tech-stack         — backend, databases, frontend, infrastructure
   [4] coding-standards   — formatter, implementation rules, error handling
