@@ -160,7 +160,7 @@ Invoke skill: `sk.codegen`
 After every target project's pipeline completes, display one block, listing each project:
 ```
 sk.implement complete.
-Story: {active_story_id}
+Unit: {active_intent_id}/{active_unit_id}
 Projects implemented (in order):
   {ProjectName} ({type}) — phases run: {sk.tasks / sk.scaffolding / sk.codegen}; tracking:
     04-implementation/{ProjectName}/{implementation,progress,validation}.md

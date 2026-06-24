@@ -61,7 +61,7 @@ results. These docs are the human-readable record; the actual tests live in the 
 ### If project type = backend / library
 1. Read `02-design/api-contract.md` (+ api-spec.json) — inventory endpoints and error codes.
 2. [REFINE MODE] if tests exist, [CREATE MODE] if not.
-3. **unit tests** → validate business rules from `requirement.md`. Document in `05-test/{ProjectName}/unit-test.md`.
+3. **unit tests** → validate business rules from the story files' Requirements. Document in `05-test/{ProjectName}/unit-test.md`.
 4. **integration tests** → validate integration behavior + regression risks. Code:
    `tests/integration/{story-id}/{scenario}.integration.test.{ext}`. Document in `integration-test.md`.
 5. **contract tests** → provider contract per endpoint:

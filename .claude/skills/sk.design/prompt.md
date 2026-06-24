@@ -14,7 +14,7 @@ isolated context — state is passed via the file system (session.yaml + spec ar
 
 ## Pre-flight
 1. Read session.yaml — resolve the active story via `.specify/memory/standards/story-lifecycle.md` §3
-   (`unit_dir` / `active_story_id`). No active story: STOP — run sk.session/sk.story first.
+   (`unit_dir`, or `active_intent_id`+`active_unit_id`). No active unit: STOP — run sk.intent/sk.unit first.
 2. Read `UNIT_DIR/stories/` (per-layer story files with their acceptance criteria) — confirm the
    story is captured. Missing: STOP — run sk.story first.
    (Backward compat: a legacy `story-{ID}.md` or unit-brief.md is read in place if present.)
@@ -258,7 +258,7 @@ Auto-generate a story-level routing index.
 2. Read the actual directory structure (the impacted projects' `code-root`s) to identify where modules and files live.
 3. Generate or overwrite `UNIT_DIR/02-design/guide.yaml`. Use `templates/artifacts/guide-template.yaml` as reference. It must contain the non-obvious cross-cutting constraints in the `also-check:` field.
 4. If missing, create/update the system-level guide entry in `specs/guide.yaml`.
-5. Log: "Guide updated — {active_story_id}".
+5. Log: "Guide updated — {active_unit_id}".
    (Legacy fallback: write the unit-level `specs/intents/{intent}/units/{unit}/guide.yaml` instead.)
 
 ### Phase 6 — Frontend UI Design
@@ -314,7 +314,7 @@ If a frontend signal IS found:
   After the gate, update the story guide entry so ui-model.md is indexed:
   - Add ui-model.md to `UNIT_DIR/02-design/guide.yaml` artifact list and record any cross-cutting
     frontend constraint in its `also-check:` field.
-  - Log: "Guide updated with ui-model — {active_story_id}".
+  - Log: "Guide updated with ui-model — {active_unit_id}".
 
 ## Checkpoint Pause Protocol
 When a review gate pause is required:
@@ -327,7 +327,7 @@ When a review gate pause is required:
 After all phases complete, display:
 ```
 sk.design complete.
-Story: {active_story_id} — {story title}
+Unit: {active_intent_id}/{active_unit_id}
 Impacted projects: {list from 02-design/projects/}
 Mode: {FRESH | RESUME | REFRESH | TARGETED}
 

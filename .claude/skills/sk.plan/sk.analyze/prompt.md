@@ -11,7 +11,7 @@ and spec drift before implementation.
 CRITICAL, HIGH, or MEDIUM findings must be resolved before implementation may proceed.
 
 ## Pre-flight (per story-lifecycle.md §3)
-1. Resolve `UNIT_DIR` from session.yaml `unit_dir`/`active_story_id`.
+1. Resolve `UNIT_DIR` from session.yaml `unit_dir` (or `active_intent_id`+`active_unit_id`).
    NULL → STOP: run sk.session/sk.story first.
    (Legacy fallback: UNIT_DIR = specs/intents/{intent}/units/{unit}/.)
 
