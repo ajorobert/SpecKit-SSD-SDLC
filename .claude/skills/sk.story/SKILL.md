@@ -3,6 +3,7 @@ name: sk.story
 description: "Invoke when: driving the complete story capture and clarification pipeline. Role: po (orchestrator). Invokes: sk.specify → loops sk.clarify (business) → loops sk.architect-probe (technical) → validation gate."
 subagent_type: SpecKit PO Agent
 inject_files:
+  - .specify/memory/standards/story-lifecycle.md
   - .specify/memory/system-context.md
   - .specify/memory/architecture-decisions.md
   - .specify/memory/domain-model.md
@@ -15,6 +16,7 @@ rubric:
     - out-of-scope list is present and non-empty
     - minimum 3 acceptance criteria
     - no undefined external dependencies
+    - 01-story/ folder written with story.md, requirement.md, acceptance-criteria.md (+ jira.md if linked)
 ---
 
 Orchestrator skill — Full Story Capture Pipeline.

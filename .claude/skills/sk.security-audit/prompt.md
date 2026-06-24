@@ -2,29 +2,32 @@
 Security audit of implementation for active story.
 Role: security | Level: story
 
-## Input Artifacts
-specs/intents/{intent}/units/{unit}/knowledge-base.md
-  (external constraints + invariants inform audit scope)
+## Pre-flight & Input Artifacts
+Resolve the active story via `.specify/memory/standards/story-lifecycle.md` §3 (`story_dir`).
+No active story → STOP: run sk.session/sk.story first.
 
-src/{service}/** (implementation files for active unit)
-specs/intents/{intent}/units/{unit}/contracts/api-spec.json
-.specify/memory/architecture-decisions.md
-story-{ID}.md (audit scope)
+- `STORY_DIR/01-story/` (story.md, requirement.md) — audit scope + security NFRs
+- `STORY_DIR/02-design/api-contract.md` (+ api-spec.json) — attack surface
+- `STORY_DIR/04-implementation/{ProjectName}/implementation.md` — files changed (scopes the scan)
+- impacted projects' `code-root` from `.specify/memory/projects/index.md` → `src/**` to scan
+- `.specify/memory/architecture-decisions.md` — auth ADR + security decisions
+  (Backward compat: legacy `specs/intents/**` artifacts read in place if present.)
+
+## Output Artifacts (per story-lifecycle.md §2)
+Write four files under `STORY_DIR/07-security-audit/` (create if absent, update in place per §7):
+`owasp-report.md`, `stride-review.md`, `dependency-scan.md`, `security-signoff.md`.
 
 ## Steps
-1. Determine audit scope from active story and unit
-3. Evaluate each OWASP Top 10 category against implementation
-4. Check auth boundaries against architecture-decisions.md auth ADR
-5. Scan for secrets and hardcoded credentials
-6. Review dependency list for known CVEs
-7. Check API inputs for validation coverage
-8. Review logging for sensitive data exposure
-9. Write audit report using security-audit-template.md
+1. Determine audit scope from the active story and impacted projects.
+2. **`owasp-report.md`** — evaluate each OWASP Top 10 category against the implementation
+   (PASS/FAIL/NA + evidence + severity). Check auth boundaries against the auth ADR; check API
+   input validation; review logging for sensitive-data exposure.
+3. **`stride-review.md`** — STRIDE threat model (table below).
+4. **`dependency-scan.md`** — scan dependencies: vulnerable packages, outdated libraries, and
+   container image vulnerabilities. List the tool(s) used and every finding with severity + fix.
+5. **`security-signoff.md`** — final approval record before release (verdict + sign-off).
 
-## Output Artifacts
-specs/intents/{intent}/units/{unit}/stories/{story-id}/security-audit.md
-
-## Step 10 — STRIDE threat modeling
+### STRIDE threat modeling (`stride-review.md`)
 For each service/component in scope, evaluate:
 
 | Threat | Evaluation focus |
@@ -36,18 +39,26 @@ For each service/component in scope, evaluate:
 | **D**enial of Service | Can the service be made unavailable? Rate limiting and resource limits in place? |
 | **E**levation of Privilege | Can a user gain permissions beyond what is authorized? Privilege escalation vectors? |
 
-Record each: PASS / FAIL / NA with evidence.
-Severity: CRITICAL | HIGH | MEDIUM | LOW (same scale as OWASP findings).
-Append STRIDE table to security-audit.md after OWASP table.
-STRIDE CRITICAL findings block story progression (same rule as OWASP CRITICAL).
+Record each: PASS / FAIL / NA with evidence. Severity: CRITICAL | HIGH | MEDIUM | LOW (same
+scale as OWASP). STRIDE CRITICAL findings block story progression (same rule as OWASP CRITICAL).
+
+### Sign-off (`security-signoff.md`)
+```
+# {STORY-ID} — Security Sign-off
+Overall Verdict: CLEAR | CONDITIONAL | BLOCKED
+OWASP: {n PASS / n FAIL / n NA}   STRIDE: {…}   Dependencies: {n findings}
+Unresolved CRITICAL: {count}   HIGH: {count}
+Approval before release: GRANTED | WITHHELD
+Approver / Date: {…}
+```
 
 ## Quality Bar
-- All OWASP Top 10 items documented as PASS/FAIL/NA
-- STRIDE table present with all 6 threat categories evaluated
-- Every CRITICAL and HIGH finding (OWASP + STRIDE) has file + line reference
+- `owasp-report.md`: all OWASP Top 10 items documented as PASS/FAIL/NA
+- `stride-review.md`: all 6 threat categories evaluated
+- `dependency-scan.md`: vulnerable packages, outdated libs, container vulns covered; tool named
+- Every CRITICAL and HIGH finding (OWASP + STRIDE + dependency) has a file/package reference
 - Remediation guidance specific not generic
-- Dependencies section lists tool used for scan
-- Overall verdict: CLEAR | CONDITIONAL | BLOCKED
-  BLOCKED → story cannot proceed to review (any CRITICAL finding — OWASP or STRIDE)
+- `security-signoff.md` present with the overall verdict: CLEAR | CONDITIONAL | BLOCKED
+  BLOCKED → story cannot proceed to release (any unresolved CRITICAL — OWASP, STRIDE, or dependency)
   CONDITIONAL → HIGH findings acknowledged, proceed with tracking
   CLEAR → no critical or high findings

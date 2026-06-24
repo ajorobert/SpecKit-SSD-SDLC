@@ -13,12 +13,28 @@ isolated context — state is passed via the file system (session.yaml + spec ar
 - `sk.design "<change description>"` — REFRESH mode: update affected artifacts, record decision
 
 ## Pre-flight
-1. Read session.yaml — verify active_unit_id and active_intent_id are set
-   Either missing: STOP — run sk.session first to set the active unit
-2. Read unit-brief.md — confirm it exists and is populated
-   Missing: STOP — run sk.specify first to create the unit brief
-3. Read checkpoint_mode from session.yaml (set by sk.specify)
-   If missing: default to validate
+1. Read session.yaml — resolve the active story via `.specify/memory/standards/story-lifecycle.md` §3
+   (`story_dir` / `active_story_id`). No active story: STOP — run sk.session/sk.story first.
+2. Read `STORY_DIR/01-story/` (story.md, requirement.md, acceptance-criteria.md) — confirm the
+   story is captured. Missing: STOP — run sk.story first.
+   (Backward compat: a legacy `story-{ID}.md` or unit-brief.md is read in place if present.)
+3. Read checkpoint_mode from session.yaml. If missing: default to validate.
+4. Read `.specify/memory/projects/index.md` — the project router. This drives per-project impact
+   analysis in Phase 0b. If absent: log and treat the whole repo as a single implicit project.
+
+## Output Contract (per story-lifecycle.md §2)
+All design artifacts for this story are written under `STORY_DIR/02-design/`:
+- `architecture.md` — solution architecture, components, patterns, boundaries
+- `impact-analysis.md` — blast radius across services/projects, risks, sequencing
+- `api-contract.md` — endpoint/event/command contracts (human-readable; api-spec.json may
+  accompany it for tooling)
+- `database-design.md` — entities, schema, indexes, migrations
+- `projects/{ProjectName}.md` — one per impacted project (see Phase 0b)
+
+When sub-skills (sk.architecture, sk.datamodel, sk.contracts) run, they write into this
+`02-design/` folder rather than the legacy `specs/intents/{intent}/units/{unit}/` paths.
+Map their outputs: architecture → architecture.md; data-model → database-design.md;
+contracts → api-contract.md (+ api-spec.json). Apply the idempotency rules in §7.
 
 ## Mode Detection
 Evaluate in this order — first match wins:
@@ -31,17 +47,17 @@ Evaluate in this order — first match wins:
   → see REFRESH workflow below
 
 **RESUME** — no flag, no description, some artifacts exist but pipeline is incomplete
-  Incomplete means: architecture.md exists but data-model.md or contracts/ are missing
+  Incomplete means: 02-design/architecture.md exists but database-design.md or api-spec.json are missing
   → start from first missing artifact, skip completed phases
 
 **FRESH** — no flag, no description, architecture.md does not exist
   → run phase need detection, then run all needed phases
 
 ## Phase Need Detection (FRESH and RESUME modes only)
-Read all stories in the unit. Determine which phases are needed:
+Read `STORY_DIR/01-story/` (requirements + acceptance criteria). Determine which phases are needed:
 
 - Phase 1 (architecture): always needed in FRESH mode
-- Phase 2 (data model): needed if stories mention entities, tables, schema, data,
+- Phase 2 (data model): needed if the story mentions entities, tables, schema, data,
   storage, persistence, cache, search, or file upload
   If not needed: log "Phase 2 skipped — no data persistence signals in stories"
 - Phase 3 (contracts): needed if unit exposes or consumes APIs, events, or commands
@@ -88,6 +104,43 @@ In TARGETED and REFRESH modes: gates apply only to phases that actually run.
 
 ## Orchestration
 
+### Phase 0b — Impact Analysis & Project Targeting
+Condition: always runs (FRESH, RESUME, REFRESH). Produces `02-design/impact-analysis.md` and the
+per-project design files — the inputs `sk.plan`/`sk.implement` use to scope work by project.
+
+1. Read `.specify/memory/projects/index.md`. For each project row, judge whether this story
+   touches it (from `01-story/` requirements + the architecture being designed).
+2. Write `STORY_DIR/02-design/impact-analysis.md`:
+   ```
+   # {STORY-ID} — Impact Analysis
+
+   ## Impacted Projects
+   {ProjectName} ({type}) — {one-line why}
+
+   ## Cross-Project Sequencing
+   {which project must land first; shared contracts/libraries}
+
+   ## Risks
+   {migration risk, breaking contract changes, blast radius}
+   ```
+3. For **each impacted project**, write `STORY_DIR/02-design/projects/{ProjectName}.md`:
+   ```
+   # {ProjectName} — Design Impact ({STORY-ID})
+
+   ## Impacted Components
+   {modules/files/layers affected — reference code-root from index.md}
+
+   ## Required Changes
+   {concrete changes this project must make}
+
+   ## Integration Points
+   {APIs consumed/exposed, events, shared contracts, other projects}
+
+   ## Risks
+   {project-specific risks and mitigations}
+   ```
+   `{ProjectName}` MUST match a `project` name in the index. Apply §7 idempotency.
+
 ### Phase 1 — Architecture
 Condition: run if FRESH, or RESUME with architecture.md missing, or TARGETED --architecture,
            or REFRESH with architecture in affected phases
@@ -118,8 +171,8 @@ If gate is active, display:
 sk.design | Gate 1 — Architecture Review  [checkpoint_mode: validate]
 
 Review the following before continuing:
-  specs/intents/{intent}/units/{unit}/architecture.md
-  specs/intents/{intent}/units/{unit}/knowledge-base.md  (if updated)
+  STORY_DIR/02-design/architecture.md
+  STORY_DIR/02-design/knowledge-base.md  (if updated)
 
 Check for:
   - Bounded context is correct and scoped to this unit only
@@ -135,12 +188,12 @@ Type 'cancel' to stop — artifacts created so far will be preserved.
 If gate is skipped: log "Gate 1 skipped (checkpoint_mode: {mode})" and proceed automatically.
 
 ### Phase 2 — Data Model
-Condition: run if needed per phase need detection, or RESUME with data-model.md missing,
+Condition: run if needed per phase need detection, or RESUME with database-design.md missing,
            or TARGETED --datamodel, or REFRESH with datamodel in affected phases
 Invoke skill: sk.datamodel
 - Context injected: session.yaml, domain-model.md, data-standards.md, design-principles/SKILL.md
-- Reads from disk: architecture.md
-- Waits for: data-model.md written and domain-model.md updated
+- Reads from disk: 02-design/architecture.md
+- Waits for: 02-design/database-design.md written and domain-model.md updated
 
 REVIEW GATE 2 — confirm and validate modes only (skip for autopilot)
 If gate is active, display:
@@ -148,7 +201,7 @@ If gate is active, display:
 sk.design | Gate 2 — Data Model Review  [checkpoint_mode: {mode}]
 
 Review the following before continuing:
-  specs/intents/{intent}/units/{unit}/data-model.md
+  STORY_DIR/02-design/database-design.md
   .specify/memory/domain-model.md  (if updated)
 
 Check for:
@@ -165,13 +218,13 @@ Type 'cancel' to stop — artifacts created so far will be preserved.
 If gate is skipped: log "Gate 2 skipped (checkpoint_mode: autopilot)" and proceed automatically.
 
 ### Phase 3 — API Contracts
-Condition: run if needed per phase need detection, or RESUME with contracts/ missing,
+Condition: run if needed per phase need detection, or RESUME with api-spec.json missing,
            or TARGETED --contracts, or REFRESH with contracts in affected phases
 Invoke skill: sk.contracts
 - Context injected: session.yaml, service-registry.md, api-standards.md,
   tech-stack.md, design-principles/SKILL.md
-- Reads from disk: architecture.md and data-model.md
-- Waits for: api-spec.json, test-plan.md, provider tests written,
+- Reads from disk: 02-design/architecture.md and 02-design/database-design.md
+- Waits for: 02-design/api-spec.json + api-contract.md, test-plan.md, provider tests written,
   service-registry.md updated
 
 ### Phase 4 — Knowledge Base Assessment
@@ -200,20 +253,21 @@ Evaluate whether this design run produced non-derivable content worth capturing:
 ### Phase 5 — Guide Update
 Condition: always runs after any phase completes (all modes).
 
-Auto-generate a unit-level routing index.
-1. Read `unit-brief.md`, `architecture.md`, `data-model.md`, and contracts to understand unit components.
-2. Read the actual directory structure (`src/**`) to identify where modules and files live.
-3. Generate or overwrite `specs/intents/{intent}/units/{unit}/guide.yaml`. Use `templates/artifacts/guide-template.yaml` as reference. It must contain the non-obvious cross-cutting constraints in the `also-check:` field.
-4. If missing, create/update the domain-level guide entry for this unit in `specs/domains/{domain}/guide.yaml`.
-5. If missing, create/update the system-level guide entry for this domain in `specs/guide.yaml`.
-6. Log: "Guide updated — {unit-id}".
+Auto-generate a story-level routing index.
+1. Read `01-story/`, `02-design/architecture.md`, `02-design/database-design.md`, and contracts to understand the components.
+2. Read the actual directory structure (the impacted projects' `code-root`s) to identify where modules and files live.
+3. Generate or overwrite `STORY_DIR/02-design/guide.yaml`. Use `templates/artifacts/guide-template.yaml` as reference. It must contain the non-obvious cross-cutting constraints in the `also-check:` field.
+4. If missing, create/update the system-level guide entry in `specs/guide.yaml`.
+5. Log: "Guide updated — {active_story_id}".
+   (Legacy fallback: write the unit-level `specs/intents/{intent}/units/{unit}/guide.yaml` instead.)
 
 ### Phase 6 — Frontend UI Design
-Condition: run ONLY if the unit has a frontend surface. This phase is self-contained — it does its own
+Condition: run ONLY if the story has a frontend surface. This phase is self-contained — it does its own
 review, its own KB assessment, and registers its own artifact in the guide. It never alters the behaviour
-of Phases 1–5; for a pure backend unit it skips cleanly and the pipeline output is unchanged.
+of Phases 1–5; for a pure backend story it skips cleanly and the pipeline output is unchanged.
 
-**Frontend signal detection** — check unit-brief.md, all stories, and session.yaml for any of:
+**Frontend signal detection** — check `01-story/`, the impacted projects (`projects/index.md` types
+`frontend`/`mobile`), and session.yaml for any of:
   - role = frontend in session.yaml
   - story `tags` or prose mention: page, screen, route, component, UI, frontend, portal, admin, mobile
   - tech mention: Next.js, React, Tailwind, shadcn, Vite, Tanstack, React Native, Expo
@@ -225,8 +279,8 @@ If NO frontend signal is found:
 If a frontend signal IS found:
   Invoke skill: sk.ui-design
   - Context injected: coding-standards.md, domain-model.md, design-principles/SKILL.md
-  - Reads from disk: architecture.md, contracts/api-spec.json, contracts/test-plan.md,
-    data-model.md (if present), unit-brief.md, stories
+  - Reads from disk: 02-design/architecture.md, 02-design/api-spec.json, 02-design/test-plan.md,
+    02-design/database-design.md (if present), 01-story/
   - Waits for: ui-model.md written and frontend engineering review passed
 
   AUTOPILOT FRONTEND REVIEW HARD STOP — autopilot mode only
@@ -242,7 +296,7 @@ If a frontend signal IS found:
   sk.design | Gate 3 — Frontend UI Review  [checkpoint_mode: {mode}]
 
   Review the following before completing design:
-    specs/intents/{intent}/units/{unit}/ui-model.md
+    STORY_DIR/02-design/ui-model.md
 
   Check for:
     - Every story has a frontend surface (route/component) or is marked backend-only
@@ -257,10 +311,10 @@ If a frontend signal IS found:
   - 'approved': continue.
   If the gate is skipped: log "Gate 3 skipped (checkpoint_mode: autopilot)" and proceed.
 
-  After the gate, update the unit guide entry so ui-model.md is indexed:
-  - Add ui-model.md to the unit `specs/intents/{intent}/units/{unit}/guide.yaml` artifact list and
-    record any cross-cutting frontend constraint in its `also-check:` field.
-  - Log: "Guide updated with ui-model — {unit-id}".
+  After the gate, update the story guide entry so ui-model.md is indexed:
+  - Add ui-model.md to `STORY_DIR/02-design/guide.yaml` artifact list and record any cross-cutting
+    frontend constraint in its `also-check:` field.
+  - Log: "Guide updated with ui-model — {active_story_id}".
 
 ## Checkpoint Pause Protocol
 When a review gate pause is required:
@@ -273,15 +327,15 @@ When a review gate pause is required:
 After all phases complete, display:
 ```
 sk.design complete.
-Unit: {unit-id} — {unit name}
-Intent: {intent-id}
+Story: {active_story_id} — {story title}
+Impacted projects: {list from 02-design/projects/}
 Mode: {FRESH | RESUME | REFRESH | TARGETED}
 
 Phases run:
   {list only phases that actually ran, with the sub-skill invoked}
 
 Artifacts written:
-  {list only artifacts actually written in this run}
+  {list only artifacts actually written under 02-design/ in this run}
 
 Phases skipped:
   {list skipped phases with reason: not needed | already complete | not targeted}
@@ -289,7 +343,7 @@ Phases skipped:
 Knowledge base: {updated | skipped — {reason}}
 Guide: {updated | no changes}
 
-Next step: /sk.plan
+Next step: /sk.plan --role {role} --project {ProjectName}
 ```
 
 ## Quality Bar

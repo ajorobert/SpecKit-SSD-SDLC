@@ -8,8 +8,11 @@ Role: architect | Level: story
 ## Pre-flight
 1. Read session.yaml active_story_id
    NULL → STOP: run sk.session focus --story {id} first
-2. Load story-{ID}.md from:
-   specs/intents/{intent}/units/{unit}/stories/{story-id}/story-{ID}.md
+2. Load the story (per story-lifecycle.md §3): resolve `STORY_DIR` from `story_dir`, read
+   `STORY_DIR/01-story/story.md` (+ `requirement.md`, `acceptance-criteria.md`). Technical
+   constraints/NFRs are written back into these files. Legacy fallback (no story_dir):
+   `specs/intents/{intent}/units/{unit}/stories/{story-id}/story-{ID}.md`.
+   (Throughout this skill, "story-{ID}.md" refers to these `01-story/` files in lifecycle mode.)
 3. Load `.specify/memory/architecture-decisions.md`
 
 ## Architecture scan

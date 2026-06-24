@@ -1,6 +1,6 @@
 ---
 name: sk.investigate
-description: "Invoke when: debugging a story, finding root causes, or classifying bugs as implementation bugs vs spec/contract mismatches. Role: backend or frontend (required). Reads: story-{ID}.md, api-spec.json, plan.md. Writes: investigation-report.md, knowledge-base.md (candidate invariants)."
+description: "Invoke when: debugging a story, finding root causes, or classifying bugs as implementation bugs vs spec/contract mismatches. Role: backend or frontend (required). Reads: 01-story/, 02-design/api-spec.json, 03-plan/{Project}/plan.md. Writes: 04-implementation/{Project}/investigation-report.md, 02-design/knowledge-base.md (candidate invariants)."
 subagent_type: SpecKit Backend Engineer Agent
 inject_files:
 ---

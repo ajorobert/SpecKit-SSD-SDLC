@@ -14,11 +14,12 @@ specs/domains/{domain}/knowledge-base.md (if exists — REFINE MODE)
 history/adr/ (ADRs tagged to this domain)
 specs/intents/ (scan for units belonging to this domain)
 
-### If --tier unit
-specs/intents/{intent}/units/{unit}/knowledge-base.md
-  (if exists — REFINE MODE)
-specs/intents/{intent}/units/{unit}/architecture.md
-history/adr/ (ADRs tagged to this unit)
+### If --tier unit (story-scoped in the lifecycle model)
+STORY_DIR/02-design/knowledge-base.md
+  (resolve STORY_DIR per story-lifecycle.md §3; if exists — REFINE MODE)
+STORY_DIR/02-design/architecture.md
+history/adr/ (ADRs tagged to this story)
+(Legacy fallback: specs/intents/{intent}/units/{unit}/{knowledge-base,architecture}.md)
 
 ## Steps
 
@@ -65,12 +66,13 @@ history/adr/ (ADRs tagged to this unit)
    - How should future engineers safely extend this?
 6. Write or update knowledge-base.md
    Use unit-knowledge-base-template.md
-   Location: specs/intents/{intent}/units/{unit}/knowledge-base.md
+   Location: STORY_DIR/02-design/knowledge-base.md
+   (legacy fallback: specs/intents/{intent}/units/{unit}/knowledge-base.md)
 
 ## Output Artifacts
 specs/knowledge-base.md (tier system)
 specs/domains/{domain}/knowledge-base.md (tier domain)
-specs/intents/{intent}/units/{unit}/knowledge-base.md (tier unit)
+STORY_DIR/02-design/knowledge-base.md (tier unit/story; legacy: specs/intents/**/knowledge-base.md)
 
 ## Quality Bar
 - Zero content derivable from reading code

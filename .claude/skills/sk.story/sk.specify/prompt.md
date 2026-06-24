@@ -13,12 +13,16 @@ session.yaml (active_intent_id, active_unit_id)
 
 ## Steps
 
-### Step 1 — Resolve Intent
+> **Lifecycle mode (default):** when session.yaml has `story_dir`, Steps 1–2 are **skipped** —
+> there is no intent/unit layer; the story is captured directly into `STORY_DIR/01-story/`
+> (Step 5). Steps 1–2 run **only** in legacy mode (no story_dir).
+
+### Step 1 — Resolve Intent  *(legacy mode only)*
 Read active_intent_id from session.yaml.
 NULL → ask user for intent title and code (e.g. CHK)
 Create specs/intents/{NNN}-{name}/intent.md if new.
 
-### Step 2 — Resolve Unit
+### Step 2 — Resolve Unit  *(legacy mode only)*
 Read active_unit_id from session.yaml.
 NULL → ask user for unit title and code (e.g. PAY)
 Create specs/intents/{intent}/units/{unit}/unit-brief.md if new.
@@ -76,9 +80,17 @@ Ask explicitly: what is explicitly out of scope.
 - Note: out of scope defaults to "no new features introduced by this fix"
 
 ### Step 5 — Write Story
-Write story to:
-  specs/intents/{intent}/units/{unit}/stories/story-{ID}.md
-  using story-template.md, ID format: {INTENT}-{UNIT}-{NNN}
+**Lifecycle-aware output** (per `.specify/memory/standards/story-lifecycle.md`): resolve
+`STORY_DIR` from session.yaml `story_dir`/`active_story_id` (§3). Write the captured story into the
+canonical phase-1 folder:
+  STORY_DIR/01-story/story.md           (narrative: actor/goal/benefit/out-of-scope + frontmatter)
+  STORY_DIR/01-story/requirement.md     (functional + non-functional + constraints)
+  STORY_DIR/01-story/acceptance-criteria.md  (Given/When/Then scenarios)
+Use story-template.md for the frontmatter/section shape. The orchestrator (sk.story) reconciles
+these in its Phase 7; writing them here makes standalone `--specify` produce the new structure too.
+
+**Legacy fallback** — only when session has no `story_dir` (un-migrated repo): write
+  specs/intents/{intent}/units/{unit}/stories/story-{ID}.md  (ID format {INTENT}-{UNIT}-{NNN}).
 
 In [BUG MODE]: set `story_type: bug` in frontmatter and populate:
   - `expected_behavior`
@@ -111,9 +123,9 @@ Bug stories default to checkpoint_mode: standard unless the fix touches
 a service boundary or data model (→ confirm).
 
 ## Output Artifacts
-specs/intents/{intent}/intent.md (if new)
-specs/intents/{intent}/units/{unit}/unit-brief.md (if new)
-specs/intents/{intent}/units/{unit}/stories/story-{ID}.md
+Lifecycle (default): STORY_DIR/01-story/{story,requirement,acceptance-criteria}.md
+Legacy fallback (no story_dir): specs/intents/{intent}/intent.md, units/{unit}/unit-brief.md,
+  units/{unit}/stories/story-{ID}.md
 
 ## Quality Bar
 

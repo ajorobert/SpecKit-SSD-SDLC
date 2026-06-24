@@ -89,10 +89,31 @@ These are passive knowledge packs — never invoked directly. They are loaded vi
 7. Never edit or write files outside the project root directory. All file paths must resolve within the project root.
 8. The `.archive/` folder is human-review territory — never delete files from it.
 
+## Story Lifecycle (enterprise SDLC structure)
+Canonical reference: `.specify/memory/standards/story-lifecycle.md` — every lifecycle skill
+(sk.story, sk.design, sk.plan, sk.implement, sk.test, sk.uat, sk.security-audit, sk.session,
+sk.init) loads it and resolves all artifact paths through it. Do not hardcode lifecycle paths.
+
+Each story owns one folder with seven numbered phase folders:
+```
+specs/STORY-{ID}-{feature-name}/
+  01-story/  02-design/  03-plan/{Project}/  04-implementation/{Project}/
+  05-test/{Project}/  06-uat/  07-security-audit/
+```
+Flow: Story → Design → Plan → Implementation → Test → UAT → Security Audit → release readiness.
+03/04/05 are project-scoped (one subfolder per participating project). Project memory lives in
+`.specify/memory/projects/` — `index.md` (router: `project | type | code-root`) + per-project
+`{ProjectName}/{project,tech-stack,coding-standards}.md`. Shared, cross-project standards live in
+`.specify/memory/standards/` (api/data/observability + story-lifecycle).
+
+**Backward compatibility:** the legacy `specs/intents/{intent}/units/{unit}/stories/...` layout
+still resolves for read; lifecycle skills migrate it non-destructively (copy, never delete) per
+story-lifecycle.md §6.
+
 ## Knowledge Bases (non-derivable context)
 Tier 1 — system:  specs/knowledge-base.md
 Tier 2 — domain:  specs/domains/{domain}/knowledge-base.md
-Tier 3 — unit:    specs/intents/{intent}/units/{unit}/knowledge-base.md
+Tier 3 — unit:    specs/intents/{intent}/units/{unit}/knowledge-base.md  (legacy; new stories carry KB notes in their STORY folder)
 
 Read tier 1 before any work.
 Read relevant tier 2 when working within a domain.

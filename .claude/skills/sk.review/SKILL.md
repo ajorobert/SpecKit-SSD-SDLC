@@ -1,6 +1,6 @@
 ---
 name: sk.review
-description: "Invoke when: performing spec-aware code review after implementation. Role: backend or frontend (required). Reads: architecture.md, api-spec.json, architecture-decisions.md, coding-standards.md. Writes: review-{story-id}.md."
+description: "Invoke when: performing spec-aware code review after implementation. Role: backend or frontend (required), project-scoped. Reads: 02-design/architecture.md, 02-design/api-spec.json, architecture-decisions.md, coding-standards.md. Writes: 04-implementation/{Project}/review.md."
 subagent_type: SpecKit Backend Engineer Agent
 inject_files:
   - .specify/memory/standards/coding-standards.md

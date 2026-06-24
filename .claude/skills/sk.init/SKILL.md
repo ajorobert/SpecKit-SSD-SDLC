@@ -1,6 +1,6 @@
 ---
 name: sk.init
-description: "Invoke when: initializing a new project or updating an existing project's SpecKit memory layer. Role: any. Reads: .specify/project-config.md (UPDATE mode). Writes: project-config.md, system-context.md, service-registry.md, constitution.md, all standards files."
+description: "Invoke when: initializing a new project or updating an existing project's SpecKit memory layer. Role: any. Reads: .specify/project-config.md (UPDATE mode). Writes: project-config.md, system-context.md, service-registry.md, constitution.md, all standards files, projects/index.md + per-project memory folders."
 inject_files: []
 ---
 

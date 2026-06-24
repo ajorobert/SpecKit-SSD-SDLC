@@ -10,17 +10,18 @@ Role: backend | Level: unit
 Declare mode at start of execution.
 
 ## Pre-flight
-1. Read session.yaml active_unit
-   NULL → STOP: run sk.session focus --unit {unit} first
-2. Verify data-model.md exists: specs/intents/{intent}/units/{unit}/data-model.md
-   MISSING → STOP: run sk.design first (sk.design orchestrates architecture + data-model + contracts)
-3. List existing migration files in src/{service}/Migrations/ or equivalent path
+1. Resolve `STORY_DIR` per story-lifecycle.md §3 (`story_dir`).
+   NULL → STOP: run sk.session focus --story {id} first
+2. Verify the data model exists: STORY_DIR/02-design/database-design.md
+   MISSING → STOP: run sk.design first (sk.design orchestrates architecture + data model + contracts)
+   (Legacy fallback: specs/intents/{intent}/units/{unit}/data-model.md)
+3. List existing migration files in the impacted project's `code-root`/Migrations/ or equivalent path
 4. In [CONTRACT] mode: verify corresponding expand migration is present and deployed
    UNVERIFIED → warn user; require explicit confirmation before generating contract migration
 
 ## Context loading
-1. specs/intents/{intent}/units/{unit}/data-model.md — canonical entity definitions
-2. specs/intents/{intent}/units/{unit}/architecture.md (if exists)
+1. STORY_DIR/02-design/database-design.md — canonical entity definitions (legacy: data-model.md)
+2. STORY_DIR/02-design/architecture.md (if exists)
 3. .specify/memory/standards/data-standards.md
 4. .claude/skills/persistence-patterns/SKILL.md
 
@@ -57,9 +58,9 @@ After any migration file, generate a migration test:
 Write tests to src/{service}/Tests/Migrations/{migration-name}Tests.cs (or equivalent)
 
 ## Output Artifacts
-src/{service}/Migrations/{timestamp}_{story-id}_{name}.{ext}
-src/{service}/Tests/Migrations/{name}Tests.{ext}
-specs/intents/{intent}/units/{unit}/stories/{story-id}/rollback-plan.md
+{code-root}/Migrations/{timestamp}_{story-id}_{name}.{ext}
+{code-root}/Tests/Migrations/{name}Tests.{ext}
+STORY_DIR/rollback-plan.md (legacy fallback: .../stories/{story-id}/rollback-plan.md)
 
 ## Quality Bar
 - Expand migrations: zero DROP or destructive ALTER statements

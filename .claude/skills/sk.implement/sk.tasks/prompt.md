@@ -4,16 +4,22 @@ Role: lead | Level: story
 
 Internal sub-skill — invoked by sk.implement orchestrator. Do not invoke directly.
 
+## Path Resolution (per story-lifecycle.md §3–§4)
+Resolve `STORY_DIR` from session.yaml `story_dir`; the orchestrator passes the target
+`{ProjectName}`. Read the project plan from `03-plan/{ProjectName}/`, write the executable task
+list into `04-implementation/{ProjectName}/`. Legacy fallback (no story_dir): the unit story path.
+
 ## Input Artifacts
-specs/intents/{intent}/units/{unit}/stories/{story-id}/plan.md (required)
-story-{ID}.md frontmatter (checkpoint_status)
+STORY_DIR/03-plan/{ProjectName}/plan.md (required) + tasks.md
+STORY_DIR/01-story/story.md frontmatter (checkpoint_status)
+(Legacy fallback: specs/intents/{intent}/units/{unit}/stories/{story-id}/plan.md)
 
 ## Steps
-1. Verify plan.md exists — if missing: STOP, run sk.plan first
+1. Verify `03-plan/{ProjectName}/plan.md` exists — if missing: STOP, run sk.plan --project {ProjectName} first
 2. Verify checkpoint gate:
    confirm or validate mode → checkpoint_status must = approved
    not approved → STOP, instruct user to approve plan first
-3. [REFINE MODE] if tasks.yaml exists, [CREATE MODE] if not
+3. [REFINE MODE] if `04-implementation/{ProjectName}/tasks.yaml` exists, [CREATE MODE] if not
 4. New service detection:
    If no existing src/{service}/ code — this is the first story for a new service.
    Add to Phase 1 (setup) tasks:
@@ -27,7 +33,9 @@ story-{ID}.md frontmatter (checkpoint_status)
      - Write test tasks before implementation tasks (TDD order)
    - phase: crosscut    — logging, error handling, documentation
 6. Write tasks to:
-   specs/intents/{intent}/units/{unit}/stories/{story-id}/tasks.yaml
+   STORY_DIR/04-implementation/{ProjectName}/tasks.yaml
+   (and reflect the same task list as checkboxes in 04-implementation/{ProjectName}/progress.md)
+   Legacy fallback: specs/intents/{intent}/units/{unit}/stories/{story-id}/tasks.yaml
 
 ## Output Format
 ```yaml
@@ -57,7 +65,8 @@ phases:
 ```
 
 ## Output Artifacts
-specs/intents/{intent}/units/{unit}/stories/{story-id}/tasks.yaml
+STORY_DIR/04-implementation/{ProjectName}/tasks.yaml (+ progress.md checkboxes)
+(Legacy fallback: specs/intents/{intent}/units/{unit}/stories/{story-id}/tasks.yaml)
 
 ## Quality Bar
 - Test tasks before implementation tasks within each phase (TDD order)

@@ -1,6 +1,6 @@
 ---
 name: sk.rollback
-description: "Invoke when: reverting a shipped story — automated or manual rollback plan. Role: lead. Reads: session.yaml, story-{ID}.md, plan.md, migrations/. Writes: rollback-plan.md. Hard block: requires shipped story."
+description: "Invoke when: reverting a shipped story — automated or manual rollback plan. Role: lead. Reads: session.yaml, 01-story/story.md, 03-plan/{Project}/plan.md, migrations/. Writes: STORY_DIR/rollback-plan.md. Hard block: requires shipped story."
 subagent_type: SpecKit Lead Agent
 inject_files:
   - .specify/memory/standards/data-standards.md

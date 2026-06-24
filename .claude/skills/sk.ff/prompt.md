@@ -21,9 +21,9 @@ isolated context — state is passed via the file system (session.yaml + spec ar
 ### Phase 1 — Story Capture
 Invoke skill: sk.story
 - Context injected: session.yaml, system-context.md, architecture-decisions.md, domain-model.md
-- Waits for: story-{ID}.md written and clarified, with checkpoint_mode set in frontmatter
-- Reads back: active_story_id from session.yaml (updated by sk.story -> sk.specify)
-- Reads back: checkpoint_mode from story-{ID}.md frontmatter
+- Waits for: STORY_DIR/01-story/ written and clarified, with checkpoint_mode set in story.md frontmatter
+- Reads back: active_story_id + story_dir from session.yaml (updated by sk.story)
+- Reads back: checkpoint_mode from STORY_DIR/01-story/story.md frontmatter
 
 ### Phase 2 — Design [FEATURE MODE only]
 Condition: checkpoint_mode = validate → invoke sk.design
@@ -69,11 +69,11 @@ Story: {story-id} — {story title}
 Mode: {FEATURE | BUG}
 
 Artifacts created:
-  ✓ story-{ID}.md         (sk.story)
-  ✓ architecture.md       (sk.design — if validate checkpoint)
-  ✓ plan.md               (sk.plan)
+  ✓ 01-story/             (sk.story)
+  ✓ 02-design/            (sk.design — if validate checkpoint)
+  ✓ 03-plan/{Project}/    (sk.plan)
 
-Next step: /sk.implement
+Next step: /sk.implement --project {ProjectName}
 ```
 
 ## Output Artifacts

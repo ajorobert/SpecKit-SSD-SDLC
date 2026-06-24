@@ -1,14 +1,15 @@
 ---
 name: sk.plan
-description: "Invoke when: creating a technical implementation plan. Role: lead (orchestrator). Runs at unit level. Invokes: sk.planstory (for each story) → sk.analyze. Reads: session.yaml, architecture.md, data-model.md, api-spec.json, tech-stack.md."
+description: "Invoke when: creating a technical implementation plan. Role: lead (orchestrator). Project-scoped: --role/--project. Invokes: sk.planstory (per project) → sk.analyze. Writes: 03-plan/{ProjectName}/{plan,tasks,checklist,jira-subtask,estimation}.md."
 subagent_type: SpecKit Lead Agent
 inject_files:
+  - .specify/memory/standards/story-lifecycle.md
   - .claude/skills/governance/checkpoint-rules.md
   - .specify/memory/standards/tech-stack.md
 ---
 
-Orchestrator skill — full planning pipeline for a unit.
-Invokes sk.planstory for each specified story, then sk.analyze to validate constraints.
+Orchestrator skill — project-scoped planning pipeline for the active story.
+Plans each impacted project (03-plan/{ProjectName}/), then sk.analyze to validate constraints.
 Each sub-skill runs in its own isolated context.
 
 Read and execute the full workflow in `prompt.md` in this directory.

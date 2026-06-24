@@ -13,11 +13,12 @@ Declare at start: `[HOTFIX MODE] P0 fast path active — spec artifacts bypassed
 3. Create hotfix branch: hotfix/{story-id} from main (not dev)
    Report branch name before proceeding
 
-## Context loading
-1. story-{ID}.md — expected behavior, actual behavior, reproduction steps, acceptance criteria
-2. specs/intents/{intent}/units/{unit}/architecture.md (if exists — read for blast radius)
+## Context loading (resolve STORY_DIR per story-lifecycle.md §3)
+1. STORY_DIR/01-story/ — expected behavior, actual behavior, reproduction steps, acceptance criteria
+2. STORY_DIR/02-design/architecture.md (if exists — read for blast radius)
 3. .specify/memory/architecture-decisions.md
 4. .specify/memory/standards/coding-standards.md
+(Legacy fallback: specs/intents/{intent}/units/{unit}/{architecture.md,...} + story-{ID}.md)
 
 ## Gate 1 — Plan (abbreviated)
 Write a minimal plan covering:
@@ -27,7 +28,7 @@ Write a minimal plan covering:
 - Rollback method: what to revert if the fix makes things worse
 - Acceptance criteria mapping: each criterion → how it will be verified
 
-Write to: specs/intents/{intent}/units/{unit}/stories/{story-id}/plan.md
+Write to: STORY_DIR/03-plan/{ProjectName}/plan.md  (legacy fallback: .../stories/{story-id}/plan.md)
 Pause and display plan. Ask: "Confirm plan and proceed to implement? (y/n)"
 On n → revise until confirmed.
 
@@ -78,8 +79,8 @@ After merge:
 2. Recommend scheduling post-incident sk.verify to close the deferred gate
 
 ## Output Artifacts
-specs/intents/{intent}/units/{unit}/stories/{story-id}/plan.md
-src/** (fix files)
+STORY_DIR/03-plan/{ProjectName}/plan.md (legacy fallback: .../stories/{story-id}/plan.md)
+src/** (fix files, under the impacted project's code-root)
 PR (base: main)
 
 ## Quality Bar

@@ -1,74 +1,88 @@
 # sk.plan — Implementation Planning (Orchestrator)
-Orchestrates technical planning for stories within a unit, resolving cross-story dependencies.
-Role: lead (orchestrator) | Level: unit
+Orchestrates technical planning for the active story, **project-scoped** by role/project.
+Role: lead (orchestrator) | Level: story
 
-This skill orchestrates two internal sub-skills. It prepares a planning brief, invokes `sk.planstory` for each specified story, and runs `sk.analyze` at the end to catch cross-story conflicts.
+This skill prepares a planning brief, plans each impacted project (one plan per project), and
+runs `sk.analyze` to catch cross-project conflicts. Output goes to `STORY_DIR/03-plan/{ProjectName}/`.
 
 ## Invocation Forms
-- `sk.plan`                        — plan all `specified` stories missing plan.md
-- `sk.plan --story {id}`           — skip brief generation, plan exactly one story
-- `sk.plan --analyze-only`         — skip all planning, just re-run analyze
-- `sk.plan --refresh "{change}"`   — update brief with change, re-plan affected, analyze
+- `sk.plan`                                    — plan the active story for ALL impacted projects
+- `sk.plan --role {backend|frontend} --project {ProjectName}` — plan one project for one role
+- `sk.plan --project {ProjectName}`            — plan one project (role inferred from its type)
+- `sk.plan --analyze-only`                     — skip planning, just re-run analyze
+- `sk.plan --refresh "{change}"`               — update brief with change, re-plan affected, analyze
+
+## Role/Project Scoping (per story-lifecycle.md §4)
+Resolve the **target project set**:
+- `--project {ProjectName}` → exactly that project (must exist in `.specify/memory/projects/index.md`).
+- else → every project with a `02-design/projects/{ProjectName}.md` impact file.
+- `--role` filters/validates: `backend` → `backend`/`library` projects; `frontend` →
+  `frontend`/`mobile` projects. If `--role` and `--project` types disagree, STOP and report.
 
 ## Pre-flight
-1. Read session.yaml — verify `active_unit_id` is set
-   Missing: STOP — run sk.session focus --unit {unit-id} first
-2. Verify architecture.md exists in the unit directory
-   Missing: STOP — run sk.design first
-3. Read all `story-{ID}.md` files in the unit directory. Note their `status`.
-4. Read `checkpoint_mode` from session.yaml.
+1. Read session.yaml — resolve the active story via story-lifecycle.md §3 (`story_dir`).
+   No active story: STOP — run sk.session/sk.story first.
+2. Verify `STORY_DIR/02-design/architecture.md` exists. Missing: STOP — run sk.design first.
+3. Read `STORY_DIR/02-design/impact-analysis.md` + `02-design/projects/*.md` for the impacted
+   projects; read `.specify/memory/projects/index.md` for each project's `type`/`code-root`.
+4. Read `STORY_DIR/01-story/` (story.md, requirement.md, acceptance-criteria.md) for scope.
+5. Read `checkpoint_mode` from session.yaml.
+   (Backward compat: if only legacy `specs/intents/**` artifacts exist, read them in place.)
 
 ## Mode Detection and Resume Logic
 Determine mode based on arguments and existing files.
 
-**TARGETED** (`--story {id}`)
+**TARGETED** (`--project {ProjectName}` [`--role …`])
 - Skip Phase 0 (Planning Brief)
-- Run Phase 1 only for `{id}` (resume/overwrite existing)
-- Run Phase 2 (Analyze)
-- Enter Review Gate
+- Run Phase 1 only for that project (resume/overwrite existing)
+- Run Phase 2 (Analyze) → Review Gate
 
 **TARGETED** (`--analyze-only`)
-- Skip Phase 0 and Phase 1
-- Run Phase 2 (Analyze)
-- Enter Review Gate
+- Skip Phase 0 and Phase 1 → Run Phase 2 (Analyze) → Review Gate
 
 **REFRESH** (`--refresh "{change}"`)
 - Run Phase 0 (Planning Brief) including the `{change}`
-- Run Phase 1 only for stories affected by `{change}`
-- Run Phase 2 (Analyze)
-- Enter Review Gate
+- Run Phase 1 only for projects affected by `{change}` → Phase 2 → Review Gate
 
 **NORMAL / RESUME** (No flags)
-- If `planning-brief.md` is missing, or is empty: Run Phase 0
-- Let `S` be the set of stories with `status: specified`.
-- If any story in `S` is missing `plan.md`: Run Phase 1 for those missing stories.
-- Run Phase 2 (Analyze)
-- Enter Review Gate
+- If `STORY_DIR/03-plan/planning-brief.md` is missing/empty: Run Phase 0.
+- Let `P` be the target project set (all impacted projects).
+- For any project in `P` missing `03-plan/{ProjectName}/plan.md`: Run Phase 1 for it.
+- Run Phase 2 (Analyze) → Review Gate.
 
 ## Orchestration
 
 ### Phase 0 — Planning Brief
 Condition: Run in NORMAL/RESUME if missing. Run in REFRESH.
-1. Read all stories in the unit to identify commonalities.
-2. Write `specs/intents/{intent}/units/{unit}/planning-brief.md`:
-   - **Recommended Execution Order**: sequence stories based on dependencies.
-   - **Shared Infrastructure Notes**: e.g., "story 1 implements Redis; stories 3 & 4 depend on it"
-   - **Cross-story Dependencies**: list explicit linkages.
-   *(In REFRESH mode, document the {change} and its impact here as well).*
+1. Read `01-story/` + `02-design/` to identify cross-project commonalities.
+2. Write `STORY_DIR/03-plan/planning-brief.md`:
+   - **Recommended Execution Order**: sequence projects by dependency (e.g. backend contract
+     before frontend consumer; shared library before its consumers).
+   - **Shared Infrastructure Notes**: shared contracts, migrations, libraries.
+   - **Cross-Project Dependencies**: explicit linkages between projects.
+   *(In REFRESH mode, document the {change} and its impact here as well.)*
 
-### Phase 1 — Story Planning
-Condition: Run for stories determined by Mode Detection.
-For each target story `{id}`:
-Invoke skill: `sk.planstory`
-- Context injected: `planning-brief.md`, `architecture.md`, `data-model.md`, `ui-model.md` (if exists), `api-spec.json`, `story-{ID}.md`, `tech-stack.md`
-- Waits for: `plan.md` written in the story's directory.
-- *(Subagents run sequentially or in parallel, but isolated from each other.)*
+### Phase 1 — Per-Project Planning
+Condition: Run for each project in the target set.
+For each target project `{ProjectName}`, write `STORY_DIR/03-plan/{ProjectName}/` with five files
+(invoke `sk.planstory` per project for the detailed plan; apply §7 idempotency):
 
-### Phase 2 — Cross-Artifact Analysis
+- **`plan.md`** — implementation steps, approach, dependencies, architecture alignment.
+- **`tasks.md`** — ordered developer tasks (granular, assignable).
+- **`checklist.md`** — completion checklist (definition-of-done items, gates).
+- **`jira-subtask.md`** — proposed Jira sub-tasks for this project (title + estimate + parent).
+- **`estimation.md`** — estimated effort per task/total (story points or ideal-hours) + assumptions.
+
+Context injected per project: `planning-brief.md`, `02-design/architecture.md`,
+`02-design/database-design.md`, `02-design/api-contract.md`, `02-design/projects/{ProjectName}.md`,
+`01-story/*`, and that project's `.specify/memory/projects/{ProjectName}/tech-stack.md` +
+`coding-standards.md`.
+
+### Phase 2 — Cross-Project Analysis
 Condition: Always runs (except if pipeline aborted early).
 Invoke skill: `sk.analyze`
-- Context injected: all unit artifacts, all story `plan.md` files.
-- Waits for: Analyze report (read-only output) identifying any CRITICAL or HIGH findings.
+- Context injected: all `02-design/` artifacts + every `03-plan/{ProjectName}/plan.md`.
+- Waits for: Analyze report identifying any CRITICAL or HIGH cross-project findings.
 
 ### Phase 3 — Review Gate
 If `checkpoint_mode` is `confirm` or `validate`, and any new plan was generating or analyze ran:
@@ -77,36 +91,40 @@ Display:
 sk.plan | Review Gate  [checkpoint_mode: {mode}]
 
 Planning Brief (if generated/updated):
-  specs/intents/{intent}/units/{unit}/planning-brief.md
+  STORY_DIR/03-plan/planning-brief.md
 
-Story Plans:
-  {list all plan.md files that were just generated/updated}
+Project Plans:
+  {list all 03-plan/{ProjectName}/plan.md files just generated/updated}
 
 Analyze Report:
   {Output from sk.analyze. If there are findings, highlight them.}
 
 Check for:
-  - Plans do not contradict each other
-  - Plans follow the architecture.md requirements
+  - Project plans do not contradict each other
+  - Plans follow the 02-design/architecture.md requirements
   - No CRITICAL or HIGH findings in analyze report
 
-Type 'approved' to mark ALL generated plans as approved.
-Type 'approved story-001 story-002' to approve specifically.
+Type 'approved' to mark ALL generated project plans as approved.
+Type 'approved Backend.API Customer.Web' to approve specific projects.
 Type 'cancel' to stop without updating statuses.
 ```
 - Wait for user input.
-- On approval: For each approved story, set its frontmatter `checkpoint_status: approved`.
-- If `cancel`: leave `checkpoint_status` unchanged.
-- If `checkpoint_mode` is `autopilot`, automatically approve all stories just planned.
+- On approval: record `checkpoint_status: approved` for each approved project (in its
+  `03-plan/{ProjectName}/checklist.md` header and the story `01-story/story.md` frontmatter).
+- If `cancel`: leave statuses unchanged.
+- If `checkpoint_mode` is `autopilot`, automatically approve all projects just planned.
 
 ## Completion Report
 After pipeline completes, display:
 ```
 sk.plan complete.
-Unit: {unit-id}
+Story: {STORY-ID}
+
+Projects planned:
+  {list each {ProjectName} → 03-plan/{ProjectName}/ (5 files)}
 
 Phases run:
-  {list phases: Phase 0 (Planning Brief), Phase 1 (Stories: {list}), Phase 2 (Analyze)}
+  {Phase 0 (Planning Brief), Phase 1 (Projects: {list}), Phase 2 (Analyze)}
 
-Next step: /sk.implement
+Next step: /sk.implement --project {ProjectName}   (role comes from the session)
 ```

@@ -1,15 +1,22 @@
 # sk.scaffolding
-Structural scaffolding step for story implementation.
+Structural scaffolding step for story implementation (project-scoped).
 Role: backend | frontend | Level: story
 
-Internal sub-skill — invoked by sk.implement. Do not invoke directly.
+Internal sub-skill — invoked by sk.implement. Do not invoke directly. The orchestrator passes the
+target `{ProjectName}`.
+
+## Path Resolution (per story-lifecycle.md §3–§4)
+Resolve `STORY_DIR` from session.yaml `story_dir`. Read the plan/tasks from
+`03-plan/{ProjectName}/` and `04-implementation/{ProjectName}/tasks.yaml`. Write source code under
+the project's `code-root` (from `.specify/memory/projects/index.md`). Record what was scaffolded in
+`04-implementation/{ProjectName}/implementation.md`. Legacy fallback (no story_dir): unit story path.
 
 ## Step 0: Capability Pack Selection
 Before any other steps, load the tech stack packs relevant to this task.
 
-1. Read session.yaml → get `role` (backend | frontend) and `active_story_id`
-2. Read the active story frontmatter → check `tags` array for domain keywords
-3. Determine the active service surface (from `active_unit` or story context)
+1. Read session.yaml → get `role` (backend | frontend); resolve the active story (`story_dir`)
+2. Read the active story frontmatter (`01-story/story.md`) → check `tags` array for domain keywords
+3. Determine the target project from `{ProjectName}` and its `code-root` (projects/index.md)
 4. Read applicable packs. **Load ≤6 packs total** — prioritise specialist packs when the limit is reached.
 
 **Role = backend**
@@ -43,12 +50,13 @@ List the packs loaded before continuing.
 
 ## Context Loading — cacheable (load first, in order)
 1. specs/domains/{relevant-domain}/knowledge-base.md (if exists)
-2. specs/intents/{intent}/units/{unit}/knowledge-base.md (if exists)
-3. specs/intents/{intent}/units/{unit}/contracts/api-spec.json (if exists)
-4. specs/intents/{intent}/units/{unit}/contracts/README.md (if exists)
-5. specs/intents/{intent}/units/{unit}/architecture.md (if exists)
-6. specs/intents/{intent}/units/{unit}/data-model.md (if exists)
-7. .specify/memory/standards/coding-standards.md
+2. STORY_DIR/02-design/knowledge-base.md (if exists)
+3. STORY_DIR/02-design/api-spec.json (if exists)
+4. STORY_DIR/02-design/api-contract.md (if exists)
+5. STORY_DIR/02-design/architecture.md (if exists)
+6. STORY_DIR/02-design/database-design.md (if exists)
+7. .specify/memory/projects/{ProjectName}/coding-standards.md + .specify/memory/standards/coding-standards.md
+(Legacy fallback: specs/intents/{intent}/units/{unit}/{knowledge-base,architecture,data-model}.md + contracts/)
 
 ## Story context (tail — load LAST)
 Emit at end of user-input block, after all cacheable context:

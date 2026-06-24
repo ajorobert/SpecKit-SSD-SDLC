@@ -16,8 +16,10 @@ Role: architect | Level: intent
 5. Write impact report
 
 ## Output Artifacts
-specs/intents/{intent}/impact-{date}-{NNN}.md
+STORY_DIR/02-design/impact-{date}-{NNN}.md (resolve STORY_DIR per story-lifecycle.md §3; for a
+pre-story assessment with no active story, write to specs/impact-{date}-{NNN}.md)
 (NNN increments if multiple reports same date)
+(Legacy fallback: specs/intents/{intent}/impact-{date}-{NNN}.md)
 
 ## Quality Bar
 - All existing services evaluated for impact

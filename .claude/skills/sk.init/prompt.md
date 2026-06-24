@@ -26,6 +26,53 @@ Ask the following questions in a natural conversation (not a form). Gather enoug
   (e.g. REST API, web frontend, mobile app, background workers, admin panel)
 - For each service: what is its primary responsibility?
 
+**2a. Project Inventory** (counts + per-project details)
+
+This captures the concrete codebases (projects) in the workspace and feeds the project memory layer (`.specify/memory/projects/`). It is additive to — not a replacement for — Services and Apps above.
+
+1. **Automatic detection first (primary path).** Scan the repository to detect every project and classify it by **type** — `backend | frontend | mobile | library`:
+   - **Backend services:** `*.csproj` (non-test, non-library SDK), `*.sln`, `go.mod`, `pom.xml`, `build.gradle`, `requirements.txt` / `pyproject.toml` (with a web framework), `Cargo.toml` (with a server bin).
+   - **Frontend applications:** `package.json` whose deps include Next.js / React / Angular / Vue / Svelte / Vite (web targets).
+   - **Mobile applications:** `package.json` with `expo` / `react-native`, or `pubspec.yaml` (Flutter).
+   - **Shared libraries:** class-library `*.csproj` (`<OutputType>Library</OutputType>` or no entrypoint), npm packages with no app entrypoint (`"private": false` packages, `packages/*` workspaces), Go modules imported but not `main`, shared kernels/SDKs.
+   - For each detected project record: inferred **name**, **code root** (directory containing the manifest), **type**, and **tech stack**.
+   - **Do not remove or skip detection.** Present the detected projects as a table the user can confirm or correct.
+   - **Manual input always overrides detection.** When the user supplies a value, it wins over the detected one.
+
+2. **Counts (confirm against detection).** Use the scan to pre-fill, then confirm or ask:
+   - "How many projects are included in this workspace?" → Total projects
+   - "How many backend projects?" → Backend projects
+   - "How many frontend projects?" → Frontend projects
+   - "How many mobile projects?" → Mobile projects
+   - "How many shared libraries?" → Library projects
+
+   (The subtotals should sum to the total; if they don't, ask the user to reconcile.)
+
+3. **Per-project details.** For each backend, frontend, mobile, and library project (looping by the counts above), capture:
+   - **Project name** (e.g. `Backend.API`, `Customer.Web`, `Mobile.App`)
+   - **Code root / path** (e.g. `src/backend/Backend.API`, `src/web/customer`, `src/mobile`)
+   - **Technology stack** (e.g. `.NET 10 Web API`, `Angular`, `Flutter`)
+
+   Example:
+   ```
+   Backend Project 1:
+     Project name:  Backend.API
+     Code root:     src/backend/Backend.API
+     Tech stack:    .NET 10 Web API
+
+   Frontend Project 1:
+     Project name:  Customer.Web
+     Code root:     src/web/customer
+     Tech stack:    Angular
+
+   Mobile Project 1:
+     Project name:  Mobile.App
+     Code root:     src/mobile
+     Tech stack:    Flutter
+   ```
+
+   These answers are written to the project memory layer in **Step 2a**.
+
 **3. Tech Stack**
 - Backend: language, framework, version?
 - **Frontend surfaces** — NEW PROJECT only. Do NOT run this block in UPDATE mode. In UPDATE mode, show the current tech-stack.md value and ask only "What would you like to change?"
@@ -248,6 +295,80 @@ Compliance review: sk.verify checks constitution constraints at each quality gat
 All sections must be declarative and testable. Replace vague adjectives with measurable criteria.
 "Not decided" is acceptable only in Observability Contract — flag it; all others must have a decision.
 
+### Step 2a — Generate Project Memory & Shared Standards
+
+Using the Project Inventory answers from **interview step 2a**, write the project memory layer
+under `.specify/memory/projects/` and the shared standards under `.specify/memory/standards/`.
+Path layout and idempotency rules are defined canonically in
+`.specify/memory/standards/story-lifecycle.md` (§1, §7) — follow it.
+
+**Idempotency rules (apply to every file below):**
+- If `.specify/memory/projects/` (or a `{ProjectName}/` subfolder) does not exist, create it.
+- If a project already exists, **update** its files in place — do **not** recreate or wipe the folder.
+- **Preserve user modifications:** keep any sections, notes, or rules the user added that are not derived from the interview. Only refresh the fields that changed.
+- Never delete an existing project folder. If a project is no longer present, leave its folder and note it as stale rather than removing it (use the archive script if explicit removal is requested).
+
+**`.specify/memory/projects/index.md`** — the lightweight **router**, one row per project:
+```
+# Project Index
+Loaded by: sk.init, sk.session, sk.design, sk.plan, sk.implement, sk.test
+
+project | type | code-root
+
+Backend.API | backend | src/backend
+Customer.Web | frontend | src/web
+Admin.Panel | frontend | src/web/admin
+Mobile.App | mobile | src/mobile
+Shared.Kernel | library | src/shared
+```
+`type` ∈ `backend | frontend | mobile | library`. When updating, merge new rows with existing
+ones (match on `project` name); update the `type`/`code-root` of an existing row instead of
+adding a duplicate.
+
+**Shared standards** — create under `.specify/memory/standards/` if absent (these are
+cross-project, not per-project). If they already exist, leave them and only update on request:
+- `api-standards.md`, `data-standards.md`, `observability-standards.md` (use the templates in
+  `templates/project/.specify/memory/standards/` as the starting shape; fill from steps 3/5/7).
+- `story-lifecycle.md` — the canonical lifecycle/path reference. If missing, copy it from
+  `templates/project/.specify/memory/standards/story-lifecycle.md`. Never overwrite an existing one.
+
+**For each project, create `.specify/memory/projects/{ProjectName}/` containing three files:**
+
+`project.md`:
+```
+# {ProjectName}
+Type: {backend | frontend | mobile | library}
+Code Root: {code-root}
+
+## Responsibility
+{one-line responsibility — derive from Services and Apps if available, else infer}
+
+## Notes
+{any project-specific notes the user gave; preserve existing notes on update}
+```
+
+`tech-stack.md`:
+```
+# {ProjectName} — Tech Stack
+
+Primary Stack: {technology stack from interview, e.g. ".NET 10 Web API"}
+Language: {language + version if known}
+Framework: {framework + version if known}
+
+## Dependencies
+{notable libraries/services for this project, if known; else "TBD"}
+```
+
+`coding-standards.md`:
+```
+# {ProjectName} — Coding Standards
+
+Inherits: .specify/memory/standards/coding-standards.md
+
+## Project-Specific Rules
+{rules specific to this project's stack; if none beyond the shared standards, state "Follows shared standards — no project-specific overrides."}
+```
+
 ### Step 3 — Scaffold (if not exists)
 
 Create these only if they don't already exist:
@@ -268,6 +389,8 @@ Report what was created:
 ✓ .specify/memory/standards/coding-standards.md
 ✓ .specify/memory/standards/api-standards.md
 ✓ .specify/memory/standards/data-standards.md
+✓ .specify/memory/projects/index.md
+✓ .specify/memory/projects/{ProjectName}/  (project.md, tech-stack.md, coding-standards.md — one folder per project)
 ✓ specs/guide.yaml
 ✓ specs/knowledge-base.md
 
@@ -302,7 +425,8 @@ What would you like to update?
   [6] data-standards     — naming, required fields, migration rules
   [7] service-registry   — service list and boundaries
   [8] constitution       — architecture principles, error handling contract, observability contract, constraints
-  [9] all memory files   — re-run full interview for everything
+  [9] project inventory  — projects/index.md + per-project project.md / tech-stack.md / coding-standards.md
+  [10] all memory files  — re-run full interview for everything
 
 Enter numbers (comma-separated) or press Enter to cancel:
 ```
@@ -313,6 +437,8 @@ For each selected item:
 - Show the current value
 - Ask what should change
 - Regenerate only that file with the updated content
+
+**For [9] project inventory:** run the Project Inventory flow (interview step 2a) and the project memory generation (Step 2a). Re-run automatic detection, show existing projects from `.specify/memory/projects/index.md` as current values, and apply the same idempotency rules — update existing project folders in place, preserve user modifications, never delete a project folder, and add only genuinely new projects.
 
 ---
 
@@ -329,6 +455,10 @@ For each selected item:
 - `.specify/memory/standards/coding-standards.md`
 - `.specify/memory/standards/api-standards.md`
 - `.specify/memory/standards/data-standards.md`
+- `.specify/memory/projects/index.md`
+- `.specify/memory/projects/{ProjectName}/project.md` (one per project)
+- `.specify/memory/projects/{ProjectName}/tech-stack.md` (one per project)
+- `.specify/memory/projects/{ProjectName}/coding-standards.md` (one per project)
 - `specs/guide.yaml` (NEW PROJECT only, if absent)
 - `specs/knowledge-base.md` (NEW PROJECT only, if absent)
 
@@ -341,3 +471,5 @@ For each selected item:
 - `project-config.md`: Custom Rules section has at least one entry, or explicitly states "None"
 - `constitution.md`: Architecture Principles, Error Handling Contract, and Observability Contract all populated — no [PLACEHOLDER] tokens; "Not decided" only allowed in Observability Contract
 - `coding-standards.md`: Formatter/Linter and Error Handling Pattern `[Fill in]` placeholders replaced with actual project values
+- `projects/index.md`: one row per project, subtotals reconcile to the total, no duplicate project names; each listed project has a `{ProjectName}/` folder with all three files
+- `projects/{ProjectName}/`: `project.md`, `tech-stack.md`, `coding-standards.md` present with no `[Fill in]`/TBD-only files where the user supplied a value; existing user modifications preserved on update

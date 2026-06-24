@@ -1,38 +1,40 @@
 # sk.analyze
-Cross-artifact consistency check for the active unit.
-Role: lead | Level: unit
+Cross-artifact consistency check for the active story (across its projects).
+Role: lead | Level: story
 READ-ONLY — no files written, analysis report only.
 
 Internal sub-skill — invoked by sk.plan orchestrator. Do not invoke directly.
 
 **When to run:** As Phase 2 of the sk.plan orchestrator.
-Validates all generated plans against the unit architecture and global models to catch conflicts
+Validates all per-project plans against the story design and global models to catch conflicts
 and spec drift before implementation.
 CRITICAL, HIGH, or MEDIUM findings must be resolved before implementation may proceed.
 
-## Pre-flight
-1. Read session.yaml active_unit_id
-   NULL → STOP: run sk.session focus --unit {unit-id} first
-2. Resolve unit directory:
-   UNIT_DIR = specs/intents/{intent}/units/{unit}/
+## Pre-flight (per story-lifecycle.md §3)
+1. Resolve `STORY_DIR` from session.yaml `story_dir`/`active_story_id`.
+   NULL → STOP: run sk.session/sk.story first.
+   (Legacy fallback: UNIT_DIR = specs/intents/{intent}/units/{unit}/.)
 
 ## Context loading
 Load these artifacts (report MISSING if required artifact absent):
-- UNIT_DIR/architecture.md (required)
-- UNIT_DIR/stories/ (list all story-{ID}.md files)
-- UNIT_DIR/contracts/api-spec.json (if exists)
-- UNIT_DIR/data-model.md (if exists)
-- UNIT_DIR/stories/{story-id}/plan.md (for each specified story)
+- STORY_DIR/02-design/architecture.md (required)
+- STORY_DIR/01-story/ (story.md, acceptance-criteria.md)
+- STORY_DIR/02-design/api-spec.json (if exists)
+- STORY_DIR/02-design/database-design.md (if exists)
+- STORY_DIR/02-design/projects/*.md (per-project design impact)
+- STORY_DIR/03-plan/{ProjectName}/plan.md (for each planned project)
+- .specify/memory/projects/index.md
 - .specify/memory/service-registry.md
 - .specify/memory/domain-model.md
 - .specify/memory/architecture-decisions.md
 
 ## Consistency checks
 
-### A. Stories coverage
-- Every story-{ID}.md in UNIT_DIR/stories/ must appear in architecture.md stories-covered section
-- Every story listed in architecture.md stories-covered must have a corresponding story file
-- Missing stories: CRITICAL finding
+### A. Story/acceptance coverage
+- Every acceptance criterion in 01-story/acceptance-criteria.md must be addressed by at least one
+  project plan (`03-plan/{ProjectName}/plan.md`) or design artifact
+- Every project with a `02-design/projects/{ProjectName}.md` impact file must have a plan
+- Uncovered criteria or missing project plans: CRITICAL finding
 
 ### B. Contract consistency
 - Every endpoint in api-spec.json must be referenced or consistent with service-registry.md
@@ -40,12 +42,14 @@ Load these artifacts (report MISSING if required artifact absent):
 - Contract changes not reflected in service-registry.md: HIGH finding
 
 ### C. Data model alignment
-- Every entity in UNIT_DIR/data-model.md must be present in .specify/memory/domain-model.md
-- Entity attributes must not conflict between unit and global domain model
+- Every entity in 02-design/database-design.md must be present in .specify/memory/domain-model.md
+- Entity attributes must not conflict between the story design and global domain model
 - Conflicts or missing entities: HIGH finding
 
 ### D. Plan alignment
-- For each story: plan.md tech choices must not contradict architecture.md
+- For each project: plan.md tech choices must not contradict architecture.md
+- Cross-project dependencies must be consistent (no project depends on a contract another project
+  is not exposing); circular project dependencies: HIGH finding
 - Dependency on an external service not listed in architecture.md dependencies: HIGH finding
 
 ### E. Bounded context integrity

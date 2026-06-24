@@ -11,11 +11,12 @@ Declare mode at start.
 ## Pre-flight
 1. Read session.yaml active_story_id
    NULL → ask user: "Which story ID are you rolling back?"
-2. Resolve STORY_DIR: specs/intents/{intent}/units/{unit}/stories/{story-id}/
-3. Read story-{ID}.md frontmatter:
+2. Resolve `STORY_DIR` per story-lifecycle.md §3 (`story_dir`; e.g. `specs/STORY-001-customer-login/`).
+   Legacy fallback: specs/intents/{intent}/units/{unit}/stories/{story-id}/.
+3. Read STORY_DIR/01-story/story.md frontmatter (legacy: story-{ID}.md):
    - status must be shipped or merged — WARN if not, ask explicit confirmation to proceed anyway
-   - Record: branch, affected services, tags
-4. Read plan.md (if exists) — identify what was changed
+   - Record: branch, affected services/projects, tags
+4. Read 03-plan/{Project}/plan.md (if exists) — identify what was changed
 5. List migration files created during this story (check src/{service}/Migrations/ for timestamps matching story date range)
    Record: migration_files (may be empty)
 
@@ -76,12 +77,12 @@ On "yes":
 
 ## Step 4 — Post-rollback
 After execution (auto) or at end of plan (plan-only):
-1. Update story-{ID}.md status → rolled-back
-2. Note: run sk.specify --bug to capture a bug story for the root cause, if not already done
+1. Update STORY_DIR/01-story/story.md status → rolled-back (legacy: story-{ID}.md)
+2. Note: run sk.story --bug to capture a bug story for the root cause, if not already done
 
 ## Output Artifacts
-specs/intents/{intent}/units/{unit}/stories/{story-id}/rollback-plan.md
-story-{ID}.md status updated (auto mode only)
+STORY_DIR/rollback-plan.md (legacy fallback: .../stories/{story-id}/rollback-plan.md)
+01-story/story.md status updated (auto mode only)
 
 ## Quality Bar
 - Every migration in the story accounted for with explicit DATA LOSS annotation

@@ -2,6 +2,17 @@
 Manages local development session.
 Role: any
 
+> **Path & branch conventions are canonical in `.specify/memory/standards/story-lifecycle.md`**
+> (§3 story-id resolution, §5 branch convention). Load it before resolving any story path.
+
+## Session Rules (per story-lifecycle.md §5)
+- **One session can support multiple roles** — switch roles within a session via
+  `sk.session switch --role`. The session is not pinned to a single role.
+- **One feature branch represents one independent story.** The branch maps 1:1 to the story.
+- **Multiple projects can participate in the same story** — planning/implementation/testing are
+  project-scoped under the one story folder; the branch still represents the single story.
+- The active story is always the session's working focus.
+
 ## Subcommands
 
 ### sk.session start [--role <role>]
@@ -14,12 +25,12 @@ Role: any
    - If no role is provided, ask the user to select one: **Product Owner | Architect | Lead | Backend Developer | Frontend Developer**.
    - Map the selection to the role key used internally: `po | architect | lead | backend | frontend`.
 
-3. **Base branch**
+3. **Base branch** (default: `dev`)
    - Automatically detect the current git branch: `git branch --show-current` → `{current_branch_name}`.
    - Present these options:
-     1. If the current branch is `dev`, use `dev` as the base branch **(default)**.
-     2. Use the current branch `{current_branch_name}` as the base branch.
-     3. Other — let the user specify a custom branch name.
+     1. Use `dev` as the base branch **(default)** — branch from `dev` even if not currently on it.
+     2. Use the current branch `{current_branch_name}` as the base branch (override).
+     3. Other — let the user specify a custom branch name (override).
    - If the user skips the selection, default to `dev`.
 
 4. **Feature name** (auto-generated — do NOT ask the user unless it cannot be determined)
@@ -29,23 +40,36 @@ Role: any
    - Ask the user only if the feature name cannot be determined automatically by either source.
    - Convert to a branch-friendly format: lowercase, replace whitespace with hyphens (e.g. "Login page" → "login-page").
 
-5. **Story Id** (auto-generated)
-   - Scan all existing story files under `specs/intents/**/stories/`.
-   - Identify the highest existing story number, then increment it to create the next story ID.
+5. **Story Id** (auto-generated, per story-lifecycle.md §3)
+   - Glob `specs/STORY-*/` and the legacy `specs/intents/**/story-*.md`. Parse the numeric
+     segment, take `max + 1`, zero-pad to 3 → `{ID}` (e.g. `001`). If none exist, start at `001`.
+   - `active_story_id = "STORY-" + {ID}` (e.g. `STORY-001`) — the prefix appears exactly once.
+   - If continuing an existing story, reuse its `active_story_id` instead of minting a new one.
 
-6. **Checkout base + create feature branch**
-   - `git checkout {base_branch}`
-   - Generate the branch name: `feature/{story-id}-{jira-id}-{feature-name}-{YYYYMMDD}`
-     - Sanitize each segment: lowercase, replace whitespace with hyphens. Use today's date for `{YYYYMMDD}`.
+6. **Checkout base + create feature branch** (per story-lifecycle.md §5)
+   - `git checkout {base_branch}` (default `dev`).
+   - Generate the branch name: `feature/{active_story_id}/{feature-name}-{YYYYMMDD}`
+     - Example: `feature/STORY-001/customer-login-20260624`.
+     - Keep `{active_story_id}` **verbatim** (preserve the `STORY-NNN` casing). Sanitize only the
+       `{feature-name}` segment: lowercase, whitespace/punctuation → hyphens. Use today's date for
+       `{YYYYMMDD}`. The user may override the generated name (custom branch name).
    - `git checkout -b {generated_branch_name}`
 
 7. **session_id**: `{role}-{YYYYMMDD}` (or `session-{YYYYMMDD}` if no role).
 
-8. **Active story handling**
-   - The current active story is the session focus by default. Do NOT request additional story input from the user — continue with the existing focused story throughout the session.
-   - If a story change is required: allow the user to explicitly switch or provide a different story, and update the session focus (`active_story_id`, and the derived `active_unit_id` / `active_intent_id`) to the newly selected story.
+8. **Story folder + active story handling**
+   - Resolve `STORY_DIR = specs/{active_story_id}-{feature-name}/` (e.g.
+     `specs/STORY-001-customer-login/`) — `active_story_id` already includes `STORY-`, do NOT
+     prepend another. Created on first story-capture by sk.story; sk.session records the id/path.
+   - The current active story is the session focus by default. Do NOT request additional story
+     input — continue with the focused story throughout the session.
+   - If a story change is required: allow the user to switch, and update `active_story_id` /
+     `story_dir` to the newly selected story.
 
-9. **Write session.yaml**: role, session_id, branch (`{generated_branch_name}`), story_id, jira_id, active_intent_id, active_unit_id, active_story_id, stories_touched, units_touched.
+9. **Write session.yaml**: role, session_id, branch (`{generated_branch_name}`), base_branch,
+   story_id, `active_story_id`, `story_dir`, jira_id, projects_touched, roles_used, stories_touched.
+   (Legacy fields `active_intent_id` / `active_unit_id` / `units_touched` may be retained as null
+   for backward compatibility with un-migrated tooling.)
 
 10. **Report**: session started, feature branch, base branch, role, and active focus story.
     - If role set: list natural commands for that role.
@@ -54,11 +78,13 @@ Role: any
 ### sk.session restore
 Use when session.yaml is missing but the working branch already exists.
 1. Read current git branch name
-2. Parse role and date from branch name — format: {role}/session-{YYYYMMDD}
-   Cannot parse → ask user to provide role and session_id manually
-3. Derive session_id: {role}-{YYYYMMDD}
-4. Write session.yaml with recovered values (active_intent_id, active_unit_id, active_story_id, stories_touched, units_touched all null/[])
-5. Remind user to run sk.session focus to restore active story context
+2. Parse the story id and date from the branch name — format:
+   `feature/{story-id}/{feature-name}-{YYYYMMDD}` (per story-lifecycle.md §5).
+   Cannot parse → ask the user to provide role and story id manually.
+3. Derive session_id: {role}-{YYYYMMDD} (or session-{YYYYMMDD} if role unknown).
+4. Write session.yaml with recovered values; resolve `story_dir` from the parsed story id if a
+   `specs/STORY-{id}-*/` folder exists. Leave projects_touched/stories_touched empty.
+5. Remind the user to run `sk.session focus --story {id}` to restore active story context.
 6. Report: session restored on branch {branch}
 
 ### sk.session switch --role <role>
@@ -82,32 +108,36 @@ Use when session.yaml is missing but the working branch already exists.
      - **Cancel session end** — stop the workflow without committing, stashing, or changing the current branch.
    - NEVER stash or discard without explicit confirmation.
 4. git add specs/ .specify/memory/ history/
-5. Commit: "[{role or 'mixed'}] {session_id}: worked on {units_touched}, {stories_touched}"
+5. Commit: "[{role(s) used or 'mixed'}] {session_id}: {story_id} across {projects_touched}"
+   - If `projects_touched` is empty, derive it from the story folder: list the subfolders under
+     `STORY_DIR/04-implementation/` (the projects actually implemented). Use "—" if none.
 6. git push
-7. If gh CLI available: open PR to dev branch
+7. If gh CLI available: open PR to the base branch (default `dev`)
 8. Reset session.yaml all fields to null
 9. Report: session ended, branch pushed
 
-### sk.session focus --unit <id> | --story <id>
-1. If --unit: set active_unit_id, derive active_intent_id
-   Set active_story_id: null
-2. If --story: read story frontmatter
-   Set active_story_id, active_unit_id, active_intent_id
-3. Write session.yaml, report current focus
+### sk.session focus --story <id>
+1. Resolve the story per story-lifecycle.md §3: glob `specs/STORY-{id}-*/` (or read its
+   `01-story/story.md` frontmatter). Backward compat: a legacy `specs/intents/**/story-{id}.md`
+   resolves in place.
+2. Set `active_story_id` and `story_dir` (the resolved `STORY-{id}-{name}/` path).
+3. Write session.yaml, report current focus.
+   (Legacy `--unit <id>` is still accepted for un-migrated repos: set active_unit_id/intent and
+   leave active_story_id null.)
 
 ### sk.session status
 1. Read session.yaml
-2. If active_story_id: read story frontmatter
+2. If active_story_id: read `story_dir/01-story/story.md` frontmatter (legacy story file fallback)
 3. Report:
-   - Role (if set), branch, session_id
-   - Active: intent, unit, story
+   - Role(s) (if set), branch, base branch, session_id
+   - Active: story ({story_id}), story_dir, projects_touched
    - Story status and checkpoint_mode
    - If role set: natural commands for that role
    - If role null: all self-asserting commands available; note Group A requires role
 
-### sk.session list [--intent <id>] [--status <status>]
-1. Scan specs/intents/ for all story-*.md files
-2. Read frontmatter from each
+### sk.session list [--status <status>]
+1. Glob `specs/STORY-*/` (and legacy `specs/intents/**/story-*.md`) for all stories.
+2. Read frontmatter from each `01-story/story.md` (or the legacy story file).
 3. Display table:
    | ID | Title | Status | Owner | Checkpoint | Branch |
-4. Apply filters if provided
+4. Apply filters if provided.

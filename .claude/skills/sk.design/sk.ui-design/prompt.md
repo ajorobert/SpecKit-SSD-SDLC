@@ -31,16 +31,20 @@ Load the frontend packs relevant to this unit's surface before designing. **Load
 
 List the packs loaded before continuing.
 
+## Path Resolution (per story-lifecycle.md §3)
+Resolve `STORY_DIR` from session.yaml `story_dir`. The UI model is written to
+`STORY_DIR/02-design/ui-model.md`. Legacy fallback (no story_dir): the unit paths below.
+
 ## Input Artifacts
-specs/intents/{intent}/units/{unit}/unit-brief.md
-specs/intents/{intent}/units/{unit}/stories/ (all stories)
-specs/intents/{intent}/units/{unit}/architecture.md            (route/page intent, data flow, security)
-specs/intents/{intent}/units/{unit}/contracts/api-spec.json    (endpoints this UI consumes — if it exists)
-specs/intents/{intent}/units/{unit}/contracts/test-plan.md     (consumer section for this surface — if it exists)
-specs/intents/{intent}/units/{unit}/data-model.md              (entity shapes, optional — read only if present)
+STORY_DIR/01-story/ (story.md, acceptance-criteria.md)
+STORY_DIR/02-design/architecture.md            (route/page intent, data flow, security)
+STORY_DIR/02-design/api-spec.json              (endpoints this UI consumes — if it exists)
+STORY_DIR/02-design/test-plan.md               (consumer section for this surface — if it exists)
+STORY_DIR/02-design/database-design.md         (entity shapes, optional — read only if present)
 .specify/memory/domain-model.md
 .specify/memory/standards/coding-standards.md
 .claude/skills/design-principles/SKILL.md
+(Legacy fallback inputs: specs/intents/{intent}/units/{unit}/{unit-brief,architecture,data-model}.md + stories/ + contracts/)
 
 ## Steps
 1. [REFINE MODE] if ui-model.md exists, [CREATE MODE] if not.
@@ -93,8 +97,8 @@ If only ADVISORY findings: report "Frontend engineering review passed with advis
 If any MEDIUM or BLOCKING findings exist: report "Frontend engineering review FAILED." and list all findings.
 
 ## Output Artifacts
-specs/intents/{intent}/units/{unit}/ui-model.md
-specs/intents/{intent}/units/{unit}/knowledge-base.md
+STORY_DIR/02-design/ui-model.md   (legacy fallback: specs/intents/{intent}/units/{unit}/ui-model.md)
+STORY_DIR/02-design/knowledge-base.md
   (frontend section updated only if a non-derivable UI decision was made — see step below)
 
 ## Steps (continued)

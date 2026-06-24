@@ -24,17 +24,19 @@ Resolve platform before loading context:
 Platform determines test tooling and test scenarios. Declare platform at start of execution.
 
 ## Pre-flight
-1. Read session.yaml active_story_id
-   NULL → STOP: run sk.session focus --story {id} first
+1. Read session.yaml — resolve the active story via `.specify/memory/standards/story-lifecycle.md`
+   §3 (`story_dir`). No active story → STOP: run sk.session/sk.story first.
 
 ## Context loading
-- specs/intents/{intent}/units/{unit}/stories/{story-id}/story-{ID}.md
-  → extract acceptance criteria — each criterion becomes a test scenario
-- specs/intents/{intent}/units/{unit}/contracts/test-plan.md
-  → consumer section for the active platform:
-    - web → `## Consumer Tests / ### web` section
-    - mobile → `## Consumer Tests / ### mobile` section
-    - admin → `## Consumer Tests / ### admin` section
+- `STORY_DIR/01-story/acceptance-criteria.md`
+  → each acceptance criterion (AC-n / Given-When-Then) becomes a UAT scenario. This file is the
+    authoritative contract UAT validates against.
+- `STORY_DIR/01-story/story.md` → user story + actor, for user-flow framing.
+- `STORY_DIR/05-test/` → the frontend/mobile projects' `contract-test.md` (whichever frontend
+    projects this platform maps to) → consumer expectations already covered, to avoid duplication.
+    UAT is **platform-scoped** (web/mobile/admin), not project-scoped, so it reads across the
+    relevant frontend projects rather than a single `{ProjectName}`.
+  (Backward compat: legacy `story-{ID}.md` + `contracts/test-plan.md` read in place if present.)
 
 ## Test execution by platform
 
@@ -57,18 +59,47 @@ Platform determines test tooling and test scenarios. Declare platform at start o
 - Run tests against acceptance criteria
 - Report pass/fail per criterion
 
-## Post-execution
-Map each finding to the acceptance criterion it relates to.
+## Post-execution — Write `06-uat/` Artifacts (per story-lifecycle.md §2)
+Map each finding to the acceptance criterion it relates to, then write three files under
+`STORY_DIR/06-uat/` (create if absent, update in place per §7):
 
-Update story-{ID}.md:
-- test-status = pass — if ALL acceptance criteria scenarios PASS for the active platform
-- test-status = fail — if any AC scenario fails (document which criteria failed and platform)
+**`acceptance-result.md`** — per-criterion verdict:
+```
+# {STORY-ID} — UAT Acceptance Results  (platform: {web|mobile|admin})
 
-Note: if testing multiple platforms, all must pass before test-status = pass.
+| Criterion | Scenario | Result | Notes |
+|-----------|----------|--------|-------|
+| AC-1 | {…} | PASS/FAIL | {…} |
+
+## Passed Scenarios
+{list}
+
+## Failed Scenarios
+{list with reproduction + which AC}
+```
+
+**`user-flow-test.md`** — end-to-end journey walkthroughs (the actor's path through the feature),
+each step with expected vs. actual and any UX/accessibility feedback.
+
+**`signoff.md`** — approval record:
+```
+# {STORY-ID} — UAT Sign-off
+Platform(s) tested: {…}
+Approval Status: APPROVED | REJECTED | CONDITIONAL
+User Feedback: {…}
+Approver / Date: {…}
+```
+
+Update `STORY_DIR/01-story/story.md` frontmatter (legacy `story-{ID}.md` if that is the only copy):
+- `test-status = pass` — if ALL acceptance criteria scenarios PASS for every tested platform.
+- `test-status = fail` — if any AC scenario fails (record which criteria + platform in acceptance-result.md).
+
+Note: if testing multiple platforms, all must pass before `test-status = pass`.
 
 ## Quality Bar
 - Platform declared and correct tooling used
-- Every acceptance criterion has a mapped test result
+- Every acceptance criterion in 01-story/acceptance-criteria.md has a mapped result
 - No acceptance criterion left unmapped
 - Mobile platform never tested with browser tooling
+- 06-uat/ contains acceptance-result.md, user-flow-test.md, signoff.md
 - All AC-mapped scenarios must PASS before test-status = pass

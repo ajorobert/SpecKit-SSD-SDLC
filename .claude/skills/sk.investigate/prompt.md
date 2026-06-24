@@ -6,10 +6,11 @@ gstack: optional enhancement — if installed, invoke for additional debugging s
 ## Pre-flight
 1. Read session.yaml active_story_id
    NULL → STOP: run sk.session focus --story {id} first
-2. Resolve story directory:
-   STORY_DIR = specs/intents/{intent}/units/{unit}/stories/{story-id}/
+2. Resolve `STORY_DIR` per story-lifecycle.md §3 (`story_dir`; e.g. `specs/STORY-001-customer-login/`).
+   Legacy fallback: specs/intents/{intent}/units/{unit}/stories/{story-id}/.
+   The investigation report is written to `STORY_DIR/04-implementation/{ProjectName}/investigation-report.md`.
 3. Declare mode:
-   STORY_DIR/investigation-report.md exists → [REFINE MODE]
+   The investigation-report.md exists → [REFINE MODE]
      Read frontmatter only — get session_count, increment by 1, update frontmatter
      Never scan the report body to determine the session number
    Missing → [CREATE MODE]
@@ -17,15 +18,15 @@ gstack: optional enhancement — if installed, invoke for additional debugging s
      Set session_count: 1, first session is INV-001
 
 ## Context loading (cacheable — load first)
-- specs/intents/{intent}/units/{unit}/contracts/api-spec.json
+- STORY_DIR/02-design/api-spec.json (legacy: .../contracts/api-spec.json)
   → expected endpoint contracts (Tier B — stable across iterations)
 
 ## Story context (tail — load LAST)
 Emit at end of user-input block, after all cacheable context:
 ```
 <story id="{story-id}">
-  <story-md>…STORY_DIR/story-{ID}.md…</story-md>
-  <plan-md>…STORY_DIR/plan.md…</plan-md>
+  <story-md>…STORY_DIR/01-story/story.md…</story-md>
+  <plan-md>…STORY_DIR/03-plan/{ProjectName}/plan.md…</plan-md>
 </story>
 ```
 
@@ -70,7 +71,7 @@ must hold and is not obvious from reading the code.
 Skip obvious invariants (null checks, input validation, etc.) and note the skip with a brief
 reason in the report's Candidate Invariants section.
 
-KB_PATH = specs/intents/{intent}/units/{unit}/knowledge-base.md
+KB_PATH = STORY_DIR/02-design/knowledge-base.md  (legacy fallback: specs/intents/{intent}/units/{unit}/knowledge-base.md)
 
 If KB_PATH exists:
   Append to `## Candidate Invariants` section.
@@ -91,7 +92,7 @@ Display after writing the report and updating the knowledge base.
 #### If ALL findings in this session are Implementation Bug:
 ---
 Investigation INV-{NNN} complete.
-Report: {STORY_DIR}/investigation-report.md
+Report: {STORY_DIR}/04-implementation/{ProjectName}/investigation-report.md
 
 All findings are Implementation Bugs.
 
@@ -106,12 +107,12 @@ Candidate invariant(s) from this session appended to unit knowledge-base for arc
 #### If ANY finding in this session is Spec/Contract Mismatch:
 ---
 Investigation INV-{NNN} complete.
-Report: {STORY_DIR}/investigation-report.md
+Report: {STORY_DIR}/04-implementation/{ProjectName}/investigation-report.md
 
 One or more findings are Spec/Contract Mismatch — do not modify src/ yet.
 
 Next steps:
-1. Update the affected acceptance criteria in story-{ID}.md directly
+1. Update the affected acceptance criteria in STORY_DIR/01-story/acceptance-criteria.md directly
    (or ask the PO/lead if scope is unclear).
 2. If the contract shape (endpoint, field, response code) needs to change:
    run /sk.design --targeted contracts in REFINE MODE (architect role recommended).
@@ -124,7 +125,7 @@ Candidate invariant(s) from this session appended to unit knowledge-base for arc
 - Every finding classified: implementation bug vs. spec/contract mismatch
 - No spec or contract files modified without architect sign-off
 - Root cause documented for each finding
-- investigation-report.md written to STORY_DIR; session block prepended, prior sessions untouched
+- investigation-report.md written to STORY_DIR/04-implementation/{ProjectName}/; session block prepended, prior sessions untouched
 - session_count updated in frontmatter (read frontmatter only — never scan report body)
 - Candidate invariant derived per finding, or skip explicitly noted with reason
 - Next-step instructions displayed, matching the current session's finding classifications
