@@ -60,7 +60,7 @@ Condition: Run in NORMAL/RESUME if missing. Run in REFRESH.
 Condition: Run for stories determined by Mode Detection.
 For each target story `{id}`:
 Invoke skill: `sk.planstory`
-- Context injected: `planning-brief.md`, `architecture.md`, `data-model.md`, `api-spec.json`, `story-{ID}.md`, `tech-stack.md`
+- Context injected: `planning-brief.md`, `architecture.md`, `data-model.md`, `ui-model.md` (if exists), `api-spec.json`, `story-{ID}.md`, `tech-stack.md`
 - Waits for: `plan.md` written in the story's directory.
 - *(Subagents run sequentially or in parallel, but isolated from each other.)*
 

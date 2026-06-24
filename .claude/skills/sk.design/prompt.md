@@ -208,6 +208,60 @@ Auto-generate a unit-level routing index.
 5. If missing, create/update the system-level guide entry for this domain in `specs/guide.yaml`.
 6. Log: "Guide updated — {unit-id}".
 
+### Phase 6 — Frontend UI Design
+Condition: run ONLY if the unit has a frontend surface. This phase is self-contained — it does its own
+review, its own KB assessment, and registers its own artifact in the guide. It never alters the behaviour
+of Phases 1–5; for a pure backend unit it skips cleanly and the pipeline output is unchanged.
+
+**Frontend signal detection** — check unit-brief.md, all stories, and session.yaml for any of:
+  - role = frontend in session.yaml
+  - story `tags` or prose mention: page, screen, route, component, UI, frontend, portal, admin, mobile
+  - tech mention: Next.js, React, Tailwind, shadcn, Vite, Tanstack, React Native, Expo
+
+If NO frontend signal is found:
+  Log: "Phase 6 skipped — no frontend signals detected. Pipeline output unchanged."
+  Proceed to the completion report.
+
+If a frontend signal IS found:
+  Invoke skill: sk.ui-design
+  - Context injected: coding-standards.md, domain-model.md, design-principles/SKILL.md
+  - Reads from disk: architecture.md, contracts/api-spec.json, contracts/test-plan.md,
+    data-model.md (if present), unit-brief.md, stories
+  - Waits for: ui-model.md written and frontend engineering review passed
+
+  AUTOPILOT FRONTEND REVIEW HARD STOP — autopilot mode only
+  After sk.ui-design completes, check the frontend engineering review result:
+  - If any BLOCKING or MEDIUM findings exist: STOP. Display the findings and instruct the user to fix
+    the UI model and re-run, or escalate checkpoint_mode to 'confirm'. Do NOT mark the phase complete.
+  - If only ADVISORY findings: log them and proceed.
+  - If no findings: proceed.
+
+  REVIEW GATE 3 — confirm and validate modes only (skip for autopilot)
+  If the gate is active, display:
+  ```
+  sk.design | Gate 3 — Frontend UI Review  [checkpoint_mode: {mode}]
+
+  Review the following before completing design:
+    specs/intents/{intent}/units/{unit}/ui-model.md
+
+  Check for:
+    - Every story has a frontend surface (route/component) or is marked backend-only
+    - State placement is correct — no server-owned data in the global client store
+    - Every consumed field exists in the API contract — no invented endpoints
+    - Loading, empty, and error states are defined for every async surface
+    - Accessibility targets are present for interactive components
+
+  Type 'approved' to complete design. Type 'cancel' to stop — artifacts created so far will be preserved.
+  ```
+  - 'cancel': STOP. Report artifacts written so far.
+  - 'approved': continue.
+  If the gate is skipped: log "Gate 3 skipped (checkpoint_mode: autopilot)" and proceed.
+
+  After the gate, update the unit guide entry so ui-model.md is indexed:
+  - Add ui-model.md to the unit `specs/intents/{intent}/units/{unit}/guide.yaml` artifact list and
+    record any cross-cutting frontend constraint in its `also-check:` field.
+  - Log: "Guide updated with ui-model — {unit-id}".
+
 ## Checkpoint Pause Protocol
 When a review gate pause is required:
 1. Display the gate message clearly with the artifact paths
