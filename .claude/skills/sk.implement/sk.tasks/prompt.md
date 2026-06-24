@@ -11,7 +11,7 @@ list into `04-implementation/{ProjectName}/`. Legacy fallback (no unit_dir): the
 
 ## Input Artifacts
 UNIT_DIR/03-plan/{ProjectName}/plan.md (required) + tasks.md
-UNIT_DIR/stories/<story-file> frontmatter (checkpoint_status)
+UNIT_DIR/stories/story-{Layer}-{ID}.md frontmatter (checkpoint_status)
 (Legacy fallback: specs/intents/{intent}/units/{unit}/stories/{story-id}/plan.md)
 
 ## Steps

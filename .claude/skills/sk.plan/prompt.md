@@ -110,7 +110,7 @@ Type 'cancel' to stop without updating statuses.
 ```
 - Wait for user input.
 - On approval: record `checkpoint_status: approved` for each approved project (in its
-  `03-plan/{ProjectName}/checklist.md` header and the story `stories/<story-file>` frontmatter).
+  `03-plan/{ProjectName}/checklist.md` header and the story `stories/story-{Layer}-{ID}.md` frontmatter).
 - If `cancel`: leave statuses unchanged.
 - If `checkpoint_mode` is `autopilot`, automatically approve all projects just planned.
 

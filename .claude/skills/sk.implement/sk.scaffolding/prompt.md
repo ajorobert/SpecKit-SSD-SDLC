@@ -15,7 +15,7 @@ the project's `code-root` (from `.specify/memory/projects/index.md`). Record wha
 Before any other steps, load the tech stack packs relevant to this task.
 
 1. Read session.yaml → get `role` (backend | frontend); resolve the active story (`unit_dir`)
-2. Read the active story frontmatter (`stories/<story-file>`) → check `tags` array for domain keywords
+2. Read the active story frontmatter (`stories/story-{Layer}-{ID}.md`) → check `tags` array for domain keywords
 3. Determine the target project from `{ProjectName}` and its `code-root` (projects/index.md)
 4. Read applicable packs. **Load ≤6 packs total** — prioritise specialist packs when the limit is reached.
 

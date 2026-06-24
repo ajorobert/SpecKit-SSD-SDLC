@@ -9,7 +9,7 @@ Role: architect | Level: story
 1. Read session.yaml active_story_id
    NULL → STOP: run sk.session focus --story {id} first
 2. Load the story (per story-lifecycle.md §3): resolve `UNIT_DIR` from `unit_dir`, read
-   `UNIT_DIR/stories/<story-file>` (+ `requirement.md`, `acceptance-criteria.md`). Technical
+   `UNIT_DIR/stories/story-{Layer}-{ID}.md` (+ `requirement.md`, `acceptance-criteria.md`). Technical
    constraints/NFRs are written back into these files. Legacy fallback (no unit_dir):
    `specs/intents/{intent}/units/{unit}/stories/{story-id}/story-{ID}.md`.
    (Throughout this skill, "story-{ID}.md" refers to these `stories/` files in lifecycle mode.)

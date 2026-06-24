@@ -15,15 +15,23 @@ isolated context — state is passed via the file system (session.yaml + spec ar
 1. Read session.yaml — verify system-context.md and tech-stack.md populated
    system-context.md missing: STOP — run sk.init first
    tech-stack.md missing: STOP — run sk.init first
+2. **Active unit required** (per story-lifecycle.md §3) — sk.story captures into an existing unit.
+   Resolve `active_intent_id` + `active_unit_id` (→ `unit_dir`).
+   - MISSING → run the prerequisites first in sequence: `sk.intent` (if no active intent) then
+     `sk.unit` (always, to create/focus the unit). Only then proceed to Phase 1.
 
 ## Orchestration: [FEATURE MODE]
+
+### Phase 0 — Intent & Unit (prerequisite)
+If `active_unit_id`/`unit_dir` is not set: invoke `sk.intent` (when no active intent) → `sk.unit`
+to create `intent.md` / `unit-brief.md` and focus the session. Skip if already focused on a unit.
 
 ### Phase 1 — Story Capture
 Invoke skill: sk.story
 - Context injected: session.yaml, system-context.md, architecture-decisions.md, domain-model.md
 - Waits for: UNIT_DIR/stories/ written and clarified, with checkpoint_mode set in story.md frontmatter
 - Reads back: active_story_id + unit_dir from session.yaml (updated by sk.story)
-- Reads back: checkpoint_mode from UNIT_DIR/stories/<story-file> frontmatter
+- Reads back: checkpoint_mode from UNIT_DIR/stories/story-{Layer}-{ID}.md frontmatter
 
 ### Phase 2 — Design [FEATURE MODE only]
 Condition: checkpoint_mode = validate → invoke sk.design

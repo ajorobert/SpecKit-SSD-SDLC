@@ -25,7 +25,7 @@ gstack: optional enhancement — if installed, invoke for additional debugging s
 Emit at end of user-input block, after all cacheable context:
 ```
 <story id="{story-id}">
-  <story-md>…UNIT_DIR/stories/<story-file>…</story-md>
+  <story-md>…UNIT_DIR/stories/story-{Layer}-{ID}.md…</story-md>
   <plan-md>…UNIT_DIR/03-plan/{ProjectName}/plan.md…</plan-md>
 </story>
 ```
@@ -112,7 +112,7 @@ Report: {UNIT_DIR}/04-implementation/{ProjectName}/investigation-report.md
 One or more findings are Spec/Contract Mismatch — do not modify src/ yet.
 
 Next steps:
-1. Update the affected acceptance criteria in UNIT_DIR/stories/ (acceptance criteria in the story files) directly
+1. Update the affected acceptance criteria in UNIT_DIR/stories/ directly
    (or ask the PO/lead if scope is unclear).
 2. If the contract shape (endpoint, field, response code) needs to change:
    run /sk.design --targeted contracts in REFINE MODE (architect role recommended).

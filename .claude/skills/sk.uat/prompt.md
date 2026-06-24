@@ -28,10 +28,10 @@ Platform determines test tooling and test scenarios. Declare platform at start o
    §3 (`unit_dir`). No active story → STOP: run sk.session/sk.story first.
 
 ## Context loading
-- `UNIT_DIR/stories/ (acceptance criteria in the story files)`
+- `UNIT_DIR/stories/`
   → each acceptance criterion (AC-n / Given-When-Then) becomes a UAT scenario. This file is the
     authoritative contract UAT validates against.
-- `UNIT_DIR/stories/<story-file>` → user story + actor, for user-flow framing.
+- `UNIT_DIR/stories/story-{Layer}-{ID}.md` → user story + actor, for user-flow framing.
 - `UNIT_DIR/05-test/` → the frontend/mobile projects' `contract-test.md` (whichever frontend
     projects this platform maps to) → consumer expectations already covered, to avoid duplication.
     UAT is **platform-scoped** (web/mobile/admin), not project-scoped, so it reads across the
@@ -90,7 +90,7 @@ User Feedback: {…}
 Approver / Date: {…}
 ```
 
-Update `UNIT_DIR/stories/<story-file>` frontmatter (legacy `story-{ID}.md` if that is the only copy):
+Update `UNIT_DIR/stories/story-{Layer}-{ID}.md` frontmatter (legacy `story-{ID}.md` if that is the only copy):
 - `test-status = pass` — if ALL acceptance criteria scenarios PASS for every tested platform.
 - `test-status = fail` — if any AC scenario fails (record which criteria + platform in acceptance-result.md).
 
@@ -98,7 +98,7 @@ Note: if testing multiple platforms, all must pass before `test-status = pass`.
 
 ## Quality Bar
 - Platform declared and correct tooling used
-- Every acceptance criterion in stories/ (acceptance criteria in the story files) has a mapped result
+- Every acceptance criterion in stories/ has a mapped result
 - No acceptance criterion left unmapped
 - Mobile platform never tested with browser tooling
 - 06-uat/ contains acceptance-result.md, user-flow-test.md, signoff.md

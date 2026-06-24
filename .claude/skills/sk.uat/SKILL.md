@@ -1,6 +1,6 @@
 ---
 name: sk.uat
-description: "Invoke when: performing user acceptance testing against story acceptance criteria. Role: frontend-qa. Reads: session.yaml, stories/ (acceptance criteria in the story files). Writes: 06-uat/{acceptance-result,user-flow-test,signoff}.md + story test-status. Platform: web | mobile | admin."
+description: "Invoke when: performing user acceptance testing against story acceptance criteria. Role: frontend-qa. Reads: session.yaml, stories/. Writes: 06-uat/{acceptance-result,user-flow-test,signoff}.md + story test-status. Platform: web | mobile | admin."
 subagent_type: QA Frontend Agent
 inject_files:
   - .specify/memory/standards/story-lifecycle.md

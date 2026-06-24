@@ -17,7 +17,7 @@ Additional hard blocks:
 - story test-status ≠ pass → STOP: run sk.test (and sk.uat for frontend) until pass
 
 ## Context loading
-- UNIT_DIR/stories/<story-file> → title, branch, acceptance criteria summary
+- UNIT_DIR/stories/story-{Layer}-{ID}.md → title, branch, acceptance criteria summary
   (+ 07-security-audit/security-signoff.md and 06-uat/signoff.md for the PR gate summary)
   (legacy fallback: story-{ID}.md)
 - .specify/memory/service-registry.md → affected services for PR description

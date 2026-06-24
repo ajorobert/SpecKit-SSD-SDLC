@@ -1,6 +1,6 @@
 ---
 name: sk.ship
-description: "Invoke when: creating a PR and shipping a story after all quality gates pass. Role: lead. Reads: session.yaml, stories/<story-file>, 06-uat/signoff.md, 07-security-audit/security-signoff.md, service-registry.md. Requires: sk.verify PASS, test-status=pass, security-status=clear."
+description: "Invoke when: creating a PR and shipping a story after all quality gates pass. Role: lead. Reads: session.yaml, stories/story-{Layer}-{ID}.md, 06-uat/signoff.md, 07-security-audit/security-signoff.md, service-registry.md. Requires: sk.verify PASS, test-status=pass, security-status=clear."
 subagent_type: SpecKit Lead Agent
 inject_files:
   - .specify/memory/service-registry.md

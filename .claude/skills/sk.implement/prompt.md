@@ -32,7 +32,7 @@ This skill orchestrates two sub-skills in strict sequence. Each sub-skill runs w
 When handing context to sub-skills (sk.tasks, sk.scaffolding, sk.codegen), place story/plan/review-notes in the tail after all cacheable context:
 ```
 <story id="{story-id}" project="{ProjectName}">
-  <story-md>…UNIT_DIR/stories/<story-file>…</story-md>
+  <story-md>…UNIT_DIR/stories/story-{Layer}-{ID}.md…</story-md>
   <plan-md>…UNIT_DIR/03-plan/{ProjectName}/plan.md…</plan-md>
   <tasks-md>…UNIT_DIR/03-plan/{ProjectName}/tasks.md…</tasks-md>
   <prior-review>…UNIT_DIR/04-implementation/{ProjectName}/validation.md (if REFINE mode)…</prior-review>
@@ -116,7 +116,7 @@ completes, append it to `session.yaml` `projects_touched`, then proceed to the n
 
 ## Status Transitions
 Before invoking any sub-skill (in both normal or refine modes):
-Update `UNIT_DIR/stories/<story-file>` frontmatter `status` block (legacy `story-{ID}.md` if that
+Update `UNIT_DIR/stories/story-{Layer}-{ID}.md` frontmatter `status` block (legacy `story-{ID}.md` if that
 is the only copy), and the project's `04-implementation/{ProjectName}/progress.md`:
 - set `status.current` → in-progress
 - set `status.entered_at` → now (ISO 8601)

@@ -11,7 +11,7 @@ Load all packs applicable to this story for comprehensive gate evaluation.
 
 1. Read session.yaml → get `active_story_id` and `role`; resolve `UNIT_DIR` per
    `.specify/memory/standards/story-lifecycle.md` §3 (`unit_dir`).
-2. Read story frontmatter (`UNIT_DIR/stories/<story-file>`) → check `tags` array
+2. Read story frontmatter (`UNIT_DIR/stories/story-{Layer}-{ID}.md`) → check `tags` array
 3. Read ALL applicable packs for the story's role and domain. **Load ≤6 packs total.**
 
 Backend story: always `.claude/skills/backend-feature-patterns/SKILL.md`
@@ -51,7 +51,7 @@ Rubric blocks from:
 
 ## Output Artifacts
 Verification report (displayed, not written to file)
-UNIT_DIR/stories/<story-file> status updated if overall PASS
+UNIT_DIR/stories/story-{Layer}-{ID}.md status updated if overall PASS
 …/story.md verify-status field set to PASS or FAIL (written by Stop hook)
 
 ## Quality Bar

@@ -13,7 +13,7 @@ Declare mode at start.
    NULL → ask user: "Which story ID are you rolling back?"
 2. Resolve `UNIT_DIR` per story-lifecycle.md §3 (`unit_dir`; e.g. `specs/intents/001-authentication/units/login/`).
    Legacy fallback: specs/intents/{intent}/units/{unit}/stories/{story-id}/.
-3. Read UNIT_DIR/stories/<story-file> frontmatter (legacy: story-{ID}.md):
+3. Read UNIT_DIR/stories/story-{Layer}-{ID}.md frontmatter (legacy: story-{ID}.md):
    - status must be shipped or merged — WARN if not, ask explicit confirmation to proceed anyway
    - Record: branch, affected services/projects, tags
 4. Read 03-plan/{Project}/plan.md (if exists) — identify what was changed
@@ -77,12 +77,12 @@ On "yes":
 
 ## Step 4 — Post-rollback
 After execution (auto) or at end of plan (plan-only):
-1. Update UNIT_DIR/stories/<story-file> status → rolled-back (legacy: story-{ID}.md)
+1. Update UNIT_DIR/stories/story-{Layer}-{ID}.md status → rolled-back (legacy: story-{ID}.md)
 2. Note: run sk.story --bug to capture a bug story for the root cause, if not already done
 
 ## Output Artifacts
 UNIT_DIR/rollback-plan.md (legacy fallback: .../stories/{story-id}/rollback-plan.md)
-stories/<story-file> status updated (auto mode only)
+stories/story-{Layer}-{ID}.md status updated (auto mode only)
 
 ## Quality Bar
 - Every migration in the story accounted for with explicit DATA LOSS annotation

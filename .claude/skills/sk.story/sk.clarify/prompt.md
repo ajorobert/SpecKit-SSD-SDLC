@@ -9,7 +9,7 @@ Role: po | Level: story
 1. Read session.yaml active_story_id
    NULL → STOP: run sk.session focus --story {id} first
 2. Load the story (per story-lifecycle.md §3): resolve `UNIT_DIR` from `unit_dir`, read
-   `UNIT_DIR/stories/<story-file>` (+ `acceptance-criteria.md`, `requirement.md`). Clarifications
+   `UNIT_DIR/stories/story-{Layer}-{ID}.md` (+ `acceptance-criteria.md`, `requirement.md`). Clarifications
    are written back into these files. Legacy fallback (no unit_dir):
    `specs/intents/{intent}/units/{unit}/stories/{story-id}/story-{ID}.md`.
 
@@ -43,7 +43,7 @@ For each question:
 - If scope changed: flag to user and suggest updating story status
 
 ## Output Artifacts
-UNIT_DIR/stories/<story-file> (+ acceptance-criteria.md / requirement.md) — updated with
+UNIT_DIR/stories/story-{Layer}-{ID}.md (+ acceptance-criteria.md / requirement.md) — updated with
 clarifications inline. Legacy fallback: story-{ID}.md.
 (Throughout this skill, "story-{ID}.md" refers to these `stories/` files in lifecycle mode.)
 

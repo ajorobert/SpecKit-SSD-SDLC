@@ -15,7 +15,7 @@ Load packs before generating tests.
    project(s) per §4: `--project {ProjectName}` or every project under
    `UNIT_DIR/04-implementation/{ProjectName}/` matching the role. Read the project's `type`
    from `.specify/memory/projects/index.md` — it selects which test files this phase emits.
-2. Read `UNIT_DIR/stories/<story-file>` frontmatter → check `tags`
+2. Read `UNIT_DIR/stories/story-{Layer}-{ID}.md` frontmatter → check `tags`
 
 **Role = backend**
 - Always: `.claude/skills/backend-feature-patterns/SKILL.md`
@@ -35,8 +35,8 @@ Load packs before generating tests.
 List packs loaded before continuing.
 
 ## Input Artifacts
-UNIT_DIR/stories/ (acceptance criteria in the story files)   (each criterion → at least one test)
-UNIT_DIR/stories/ (requirements in the story files)           (business rules, NFRs)
+UNIT_DIR/stories/   (each criterion → at least one test)
+UNIT_DIR/stories/           (business rules, NFRs)
 UNIT_DIR/02-design/api-contract.md         (+ api-spec.json if present — endpoints/errors)
 UNIT_DIR/02-design/projects/{ProjectName}.md  (integration points, regression risks)
 UNIT_DIR/04-implementation/{ProjectName}/implementation.md  (what was built)
@@ -72,7 +72,7 @@ results. These docs are the human-readable record; the actual tests live in the 
 
 ### If project type = frontend / mobile
 1. Read `02-design/api-contract.md` — identify fields the frontend consumes.
-2. Read `stories/ (acceptance criteria in the story files)` — map criteria to scenarios.
+2. Read `stories/` — map criteria to scenarios.
 3. [REFINE MODE] if tests exist, [CREATE MODE] if not.
 4. **component tests** → component behavior/rendering:
    `tests/components/{ProjectName}/{component}.test.{ext}`. Document in `05-test/{ProjectName}/component-test.md`.

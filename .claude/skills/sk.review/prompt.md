@@ -49,7 +49,7 @@ List the packs loaded before continuing.
 Emit at end of user-input block, after all cacheable context:
 ```
 <story id="{story-id}" project="{ProjectName}">
-  <story-md>…UNIT_DIR/stories/<story-file>…</story-md>
+  <story-md>…UNIT_DIR/stories/story-{Layer}-{ID}.md…</story-md>
   <plan-md>…UNIT_DIR/03-plan/{ProjectName}/plan.md (if present)…</plan-md>
   <prior-review>…UNIT_DIR/04-implementation/{ProjectName}/validation.md (if present)…</prior-review>
 </story>

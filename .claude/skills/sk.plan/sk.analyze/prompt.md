@@ -31,7 +31,7 @@ Load these artifacts (report MISSING if required artifact absent):
 ## Consistency checks
 
 ### A. Story/acceptance coverage
-- Every acceptance criterion in stories/ (acceptance criteria in the story files) must be addressed by at least one
+- Every acceptance criterion in stories/ must be addressed by at least one
   project plan (`03-plan/{ProjectName}/plan.md`) or design artifact
 - Every project with a `02-design/projects/{ProjectName}.md` impact file must have a plan
 - Uncovered criteria or missing project plans: CRITICAL finding
