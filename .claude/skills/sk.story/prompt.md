@@ -23,21 +23,20 @@ Evaluate in this order:
 2. Load `.specify/memory/system-context.md`, `.specify/memory/architecture-decisions.md`, `.specify/memory/domain-model.md`
 3. Load `.specify/memory/standards/story-lifecycle.md` — the canonical path/lifecycle reference. All story paths in this skill resolve through it (§2, §3).
 
-## Path Resolution & Story ID (per story-lifecycle.md §3)
-- **Continue existing story** — if `session.yaml` already has an `active_story_id` / `story_dir`
-  for the work in progress, reuse that exact STORY id and folder. Do NOT mint a new id.
-- **New story** — compute the next sequence number: glob `specs/STORY-*/` (and legacy
-  `specs/intents/**/story-*.md`), take `max numeric + 1`, zero-pad to 3 → `{ID}` (e.g. `001`).
-  Set `active_story_id = "STORY-" + {ID}` (e.g. `STORY-001`).
-  Build the `{feature-name}` slug from the story title (lowercase, spaces → hyphens, strip punctuation).
-- `STORY_DIR = specs/{active_story_id}-{feature-name}/` (e.g. `specs/STORY-001-customer-login/`).
-  `active_story_id` already includes `STORY-` — do NOT prepend another. Phase-1 outputs live in
-  `STORY_DIR/01-story/`.
-- After resolving/creating the folder, write `active_story_id` and `story_dir` back to `session.yaml`.
-- **One story == one independent feature.** The current story is always the working focus.
-- **Backward compatibility:** if the target story exists only under the legacy
-  `specs/intents/**` layout, read it in place and offer migration per story-lifecycle.md §6
-  (copy, never move/delete).
+## Path Resolution & Story IDs (per story-lifecycle.md §2–§3)
+- **Resolve the unit** — require `active_intent_id` + `active_unit_id` (→ `unit_dir`) in
+  `session.yaml`. MISSING → STOP: run `sk.intent` then `sk.unit` first (they create
+  `intent.md` / `unit-brief.md` and focus the session). Stories are always captured under an
+  existing unit.
+- `STORIES_DIR = UNIT_DIR/stories/`. Read the intent code (from `intent.md`) and unit code (from
+  `unit-brief.md`) — story files are named `story-{Layer}-{INTENT}-{UNIT}-{NNN}.md`.
+- **Story id per layer** — for each layer (Frontend / Backend / Mobile) being captured, glob
+  `STORIES_DIR/story-{Layer}-{INTENT}-{UNIT}-*.md`, take `max NNN + 1`, zero-pad to 3.
+  Set `active_story_id` to the focused story's id (`{INTENT}-{UNIT}-{NNN}`).
+- **One unit == one feature == one branch.** A unit may carry several stories (one per impacted
+  layer); the active unit is the working focus. Acceptance criteria live **inside** each story file.
+- **Backward compatibility:** pre-existing `stories/story-{ID}.md` files are read/updated in place
+  (story-lifecycle.md §6).
 
 ## Orchestration
 
@@ -156,67 +155,57 @@ Before marking the story as ready:
    - Ask PO: "Type 'proceed' to accept and proceed (items will be flagged as risk), or 'clarify' to do one more manual round."
    - If 'proceed': set `status: ready`.
 
-### Phase 7 — Materialize `01-story/` Artifacts
-Once the story content is captured and validated (Phases 1–6), write it into the canonical
-phase-1 folder `STORY_DIR/01-story/`. This is the authoritative output of sk.story. Split the
-captured content across four files (create folder if absent; update in place if present —
-preserve any user-authored sections per story-lifecycle.md §7):
+### Phase 7 — Materialize `stories/` Artifacts
+Once the story content is captured and validated (Phases 1–6), write one **story file per layer**
+into `UNIT_DIR/stories/`. This is the authoritative output of sk.story. Each story file is
+self-contained (user story + requirements + acceptance criteria + frontmatter). Create the folder
+if absent; update files in place if present, preserving user-authored sections (§7).
 
-**`01-story/story.md`** — the narrative:
+**`stories/story-{Layer}-{INTENT}-{UNIT}-{NNN}.md`** — one per impacted layer
+(`Layer ∈ Frontend | Backend | Mobile`, e.g. `story-Frontend-AUTH-LOGIN-001.md`):
 ```
-# {STORY-ID} — {Title}
+---
+id: {INTENT}-{UNIT}-{NNN}
+layer: {frontend | backend | mobile}
+status: ready
+tags: []
+checkpoint_mode: {autopilot | confirm | validate}
+sibling_story: {other layer's id, if split}    # JIRA / multi-layer mode
+jira_id: {KEY}                                  # if linked
+---
+
+# {id} — {Title}
 
 ## User Story
 As a {actor}, I want {goal}, so that {benefit}.
 
-## Actor
-{the specific role — not generic "user"}
+## Acceptance Criteria
+### AC-1: {short title}
+- **Given** {precondition}
+- **When** {action}
+- **Then** {expected result}
+### AC-2: ...
+(minimum 3 criteria; at least one negative/error scenario)
 
-## Goal
-{the concrete action/outcome}
-
-## Benefit
-{the business value}
+## Requirements
+- **Functional:** {numbered, testable}
+- **Non-Functional:** {performance, scale, security, observability targets}
+- **Constraints:** {technical mandates, dependencies, downstream failure modes}
 
 ## Out of Scope
 {explicit exclusions}
 ```
+Use `templates/artifacts/story-template.md` for the canonical frontmatter/section shape.
+Determine which layers to write from the unit's `impacted_projects` (unit-brief.md): one story per
+impacted layer (frontend/backend/mobile). Acceptance criteria live **inside** each story file —
+there is no separate acceptance-criteria.md.
 
-**`01-story/requirement.md`** — requirements & constraints:
+**`stories/jira.md`** — write only when Jira data is present (JIRA MODE or a linked ticket);
+otherwise a stub noting "No Jira ticket linked.":
 ```
-# {STORY-ID} — Requirements
+# {INTENT}-{UNIT} — Jira
 
-## Functional Requirements
-{numbered, testable}
-
-## Non-Functional Requirements
-{performance, scale, security, observability targets}
-
-## Constraints
-{technical mandates, dependencies, downstream failure modes}
-```
-
-**`01-story/acceptance-criteria.md`** — testable scenarios (this file is the contract `sk.uat`
-validates against, per story-lifecycle.md):
-```
-# {STORY-ID} — Acceptance Criteria
-
-## AC-1: {short title}
-- **Given** {precondition}
-- **When** {action}
-- **Then** {expected result}
-
-## AC-2: ...
-(minimum 3 criteria; at least one negative/error scenario)
-```
-
-**`01-story/jira.md`** — optional; write only when Jira data is present (JIRA MODE or a linked
-ticket). Otherwise create a stub noting "No Jira ticket linked.":
-```
-# {STORY-ID} — Jira
-
-Issue: {KEY}
-Type: {issue type}
+Issue: {KEY}    Type: {issue type}
 Summary: {summary}
 Labels/Components: {…}
 
@@ -227,14 +216,11 @@ Labels/Components: {…}
 {verbatim AC from Jira, if any}
 ```
 
-> **[JIRA MODE, two-story]** — mint **two** STORY ids (consecutive, e.g. `STORY-001` frontend +
-> `STORY-002` backend), each with its own `specs/{active_story_id}-{slug}/01-story/` folder.
-> Cross-link them via `jira.md` and the `sibling_story` frontmatter on each `story.md`. Add **both**
-> ids to `session.yaml` `stories_touched`; set `active_story_id`/`story_dir` to whichever the user
-> focuses next (default: the first/frontend story). Downstream phases run per focused story.
->
-> **Backward compatibility:** the legacy single `story-{ID}.md` may still be written for tools
-> that read it, but `01-story/` is the canonical source going forward.
+> **[JIRA MODE / multi-layer]** — emit one story file per layer (frontend / backend / mobile)
+> under the **same unit's** `stories/`; cross-link them via `sibling_story` frontmatter and the
+> shared `stories/jira.md`. Add all generated story ids to `session.yaml` `stories_touched`; set
+> `active_story_id` to the layer the user focuses next (default: frontend). Design → security run
+> once **per unit** (shared), not per story.
 
 ## Completion Report
 ```

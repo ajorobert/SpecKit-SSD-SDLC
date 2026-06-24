@@ -3,7 +3,7 @@ Orchestrates technical planning for the active story, **project-scoped** by role
 Role: lead (orchestrator) | Level: story
 
 This skill prepares a planning brief, plans each impacted project (one plan per project), and
-runs `sk.analyze` to catch cross-project conflicts. Output goes to `STORY_DIR/03-plan/{ProjectName}/`.
+runs `sk.analyze` to catch cross-project conflicts. Output goes to `UNIT_DIR/03-plan/{ProjectName}/`.
 
 ## Invocation Forms
 - `sk.plan`                                    — plan the active story for ALL impacted projects
@@ -20,12 +20,12 @@ Resolve the **target project set**:
   `frontend`/`mobile` projects. If `--role` and `--project` types disagree, STOP and report.
 
 ## Pre-flight
-1. Read session.yaml — resolve the active story via story-lifecycle.md §3 (`story_dir`).
+1. Read session.yaml — resolve the active story via story-lifecycle.md §3 (`unit_dir`).
    No active story: STOP — run sk.session/sk.story first.
-2. Verify `STORY_DIR/02-design/architecture.md` exists. Missing: STOP — run sk.design first.
-3. Read `STORY_DIR/02-design/impact-analysis.md` + `02-design/projects/*.md` for the impacted
+2. Verify `UNIT_DIR/02-design/architecture.md` exists. Missing: STOP — run sk.design first.
+3. Read `UNIT_DIR/02-design/impact-analysis.md` + `02-design/projects/*.md` for the impacted
    projects; read `.specify/memory/projects/index.md` for each project's `type`/`code-root`.
-4. Read `STORY_DIR/01-story/` (story.md, requirement.md, acceptance-criteria.md) for scope.
+4. Read `UNIT_DIR/stories/` (story.md, requirement.md, acceptance-criteria.md) for scope.
 5. Read `checkpoint_mode` from session.yaml.
    (Backward compat: if only legacy `specs/intents/**` artifacts exist, read them in place.)
 
@@ -45,7 +45,7 @@ Determine mode based on arguments and existing files.
 - Run Phase 1 only for projects affected by `{change}` → Phase 2 → Review Gate
 
 **NORMAL / RESUME** (No flags)
-- If `STORY_DIR/03-plan/planning-brief.md` is missing/empty: Run Phase 0.
+- If `UNIT_DIR/03-plan/planning-brief.md` is missing/empty: Run Phase 0.
 - Let `P` be the target project set (all impacted projects).
 - For any project in `P` missing `03-plan/{ProjectName}/plan.md`: Run Phase 1 for it.
 - Run Phase 2 (Analyze) → Review Gate.
@@ -54,8 +54,8 @@ Determine mode based on arguments and existing files.
 
 ### Phase 0 — Planning Brief
 Condition: Run in NORMAL/RESUME if missing. Run in REFRESH.
-1. Read `01-story/` + `02-design/` to identify cross-project commonalities.
-2. Write `STORY_DIR/03-plan/planning-brief.md`:
+1. Read `stories/` + `02-design/` to identify cross-project commonalities.
+2. Write `UNIT_DIR/03-plan/planning-brief.md`:
    - **Recommended Execution Order**: sequence projects by dependency (e.g. backend contract
      before frontend consumer; shared library before its consumers).
    - **Shared Infrastructure Notes**: shared contracts, migrations, libraries.
@@ -64,7 +64,7 @@ Condition: Run in NORMAL/RESUME if missing. Run in REFRESH.
 
 ### Phase 1 — Per-Project Planning
 Condition: Run for each project in the target set.
-For each target project `{ProjectName}`, write `STORY_DIR/03-plan/{ProjectName}/` with five files
+For each target project `{ProjectName}`, write `UNIT_DIR/03-plan/{ProjectName}/` with five files
 (invoke `sk.planstory` per project for the detailed plan; apply §7 idempotency):
 
 - **`plan.md`** — implementation steps, approach, dependencies, architecture alignment.
@@ -75,7 +75,7 @@ For each target project `{ProjectName}`, write `STORY_DIR/03-plan/{ProjectName}/
 
 Context injected per project: `planning-brief.md`, `02-design/architecture.md`,
 `02-design/database-design.md`, `02-design/api-contract.md`, `02-design/projects/{ProjectName}.md`,
-`01-story/*`, and that project's `.specify/memory/projects/{ProjectName}/tech-stack.md` +
+`stories/*`, and that project's `.specify/memory/projects/{ProjectName}/tech-stack.md` +
 `coding-standards.md`.
 
 ### Phase 2 — Cross-Project Analysis
@@ -91,7 +91,7 @@ Display:
 sk.plan | Review Gate  [checkpoint_mode: {mode}]
 
 Planning Brief (if generated/updated):
-  STORY_DIR/03-plan/planning-brief.md
+  UNIT_DIR/03-plan/planning-brief.md
 
 Project Plans:
   {list all 03-plan/{ProjectName}/plan.md files just generated/updated}
@@ -110,7 +110,7 @@ Type 'cancel' to stop without updating statuses.
 ```
 - Wait for user input.
 - On approval: record `checkpoint_status: approved` for each approved project (in its
-  `03-plan/{ProjectName}/checklist.md` header and the story `01-story/story.md` frontmatter).
+  `03-plan/{ProjectName}/checklist.md` header and the story `stories/<story-file>` frontmatter).
 - If `cancel`: leave statuses unchanged.
 - If `checkpoint_mode` is `autopilot`, automatically approve all projects just planned.
 

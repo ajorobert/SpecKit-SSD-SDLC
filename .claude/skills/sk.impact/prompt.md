@@ -16,7 +16,7 @@ Role: architect | Level: intent
 5. Write impact report
 
 ## Output Artifacts
-STORY_DIR/02-design/impact-{date}-{NNN}.md (resolve STORY_DIR per story-lifecycle.md §3; for a
+UNIT_DIR/02-design/impact-{date}-{NNN}.md (resolve UNIT_DIR per story-lifecycle.md §3; for a
 pre-story assessment with no active story, write to specs/impact-{date}-{NNN}.md)
 (NNN increments if multiple reports same date)
 (Legacy fallback: specs/intents/{intent}/impact-{date}-{NNN}.md)

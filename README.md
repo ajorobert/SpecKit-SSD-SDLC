@@ -21,7 +21,7 @@
 SpecKit is built on a single core principle: **Context is the currency of AI productivity.** 
 
 Most AI failures occur because the model lacks context on *why* a decision was made. SpecKit solves this via:
-1. **The Story Lifecycle**: every feature is one `STORY-{ID}` that flows through seven numbered phases — `01-story → 02-design → 03-plan → 04-implementation → 05-test → 06-uat → 07-security-audit` — to release readiness.
+1. **The Unit Lifecycle**: work is organised Intent → Unit → Story. Each **unit** (a feature) is the lifecycle container — its `stories/` plus numbered phase folders flow `stories → 02-design → 03-plan → 04-implementation → 05-test → 06-uat → 07-security-audit` to release readiness.
 2. **Project-Aware Memory**: a `.specify/memory/projects/` router maps each detected project (backend / frontend / mobile / library) to its code root, so design, plan, implement, and test are scoped per project — one story can span many projects.
 3. **Atomic Context Tiers**: layered Knowledge Bases that prevent LLM context-overflow.
 4. **Spec-Aware Gates**: every implementation step is validated against high-level specs before it can be shipped.
@@ -45,18 +45,18 @@ bash .speckit/setup.sh
 `/sk.init` auto-detects every project, classifies it (`backend | frontend | mobile | library`), and writes the project memory router `.specify/memory/projects/index.md` plus per-project `{project,tech-stack,coding-standards}.md` and shared `standards/{api,data,observability}-standards.md`.
 
 ### 2. Enter a Session
-Every member of the team adopts a persona to unlock specialized commands. A single session can carry **multiple roles** (switch with `/sk.session switch --role`), and one feature branch represents one independent story:
+Every member of the team adopts a persona to unlock specialized commands. A single session can carry **multiple roles** (switch with `/sk.session switch --role`), and one feature branch represents one **unit** (the feature):
 
 ```bash
 /sk.session start --role {po | architect | lead | backend | frontend | security}
 ```
 
-`/sk.session start` branches from `dev` (override allowed) using the convention `feature/{story-id}/{feature-name}-{YYYYMMDD}` — e.g. `feature/STORY-001/customer-login-20260624`.
+`/sk.session start` branches from `dev` (override allowed) using the convention `feature/{intent-id}/{unit}-{YYYYMMDD}` — e.g. `feature/001-authentication/login-20260624`.
 
 ### 3. Set Your Focus
-Agents work best with a laser focus. Use `/sk.session focus` to lock onto the active story; every `/sk.*` command then resolves its `STORY_DIR` automatically.
+Agents work best with a laser focus. Use `/sk.session focus` to lock onto the active **unit**; every `/sk.*` command then resolves its `UNIT_DIR` automatically.
 ```bash
-/sk.session focus --story STORY-001
+/sk.session focus --unit 001-authentication/login
 ```
 
 ---
@@ -71,7 +71,7 @@ Your goal is to define *what* gets built without getting bogged down in implemen
 2. **Clarify**: The agent will loop until the story meets the "Definition of Ready."
 3. **Review Ready**: Use `/sk.session list` to see which stories are `ready` for the Architect.
 
-> **🔍 Review Ritual:** Audit `01-story/{story,requirement,acceptance-criteria}.md` in `specs/STORY-{ID}-{name}/`. Ensure the **Acceptance Criteria** are measurable and match your original business goal.
+> **🔍 Review Ritual:** Audit the per-layer story files in `specs/intents/{intent}/units/{unit}/stories/`. Ensure each story's **Acceptance Criteria** are measurable and match your original business goal.
 
 ### 📐 Architect: From Requirement to Contract
 Your goal is to ensure technical consistency across services.
@@ -79,7 +79,7 @@ Your goal is to ensure technical consistency across services.
 2. **ADR**: `/sk.adr` — Record significant technical decisions.
 3. **Guide**: The routing `guide.yaml` is auto-generated to keep future developers oriented.
 
-> **🔍 Review Ritual:** Audit `02-design/architecture.md`, `api-contract.md`, and the `02-design/projects/{Project}.md` impact files in `specs/STORY-{ID}-{name}/`. Verify that **Domain Boundaries** are respected and the data model doesn't create circular dependencies.
+> **🔍 Review Ritual:** Audit `02-design/architecture.md`, `api-contract.md`, and the `02-design/projects/{Project}.md` impact files under `specs/intents/{intent}/units/{unit}/`. Verify that **Domain Boundaries** are respected and the data model doesn't create circular dependencies.
 
 ### 💻 Engineer: From Plan to Code
 Your goal is high-quality implementation with zero technical debt. Work is **project-scoped**:
@@ -92,21 +92,22 @@ Your goal is high-quality implementation with zero technical debt. Work is **pro
 ### 🛡️ QA & Security: The Quality Gate
 Your goal is to certify that the work meets the team's standards.
 1. **Verify Contracts**: `/sk.test --project Backend.API` — Run provider/consumer/integration tests (`05-test/{Project}/`).
-2. **UAT**: `/sk.uat` — Acceptance testing against `01-story/acceptance-criteria.md` (`06-uat/`).
+2. **UAT**: `/sk.uat` — Acceptance testing against each story file's acceptance criteria (`06-uat/`).
 3. **Audit**: `/sk.security-audit` — OWASP/STRIDE/dependency scans (`07-security-audit/`) before shipping.
 
 > **🔍 Review Ritual:** Audit `05-test/{Project}/` docs and `07-security-audit/{owasp-report,stride-review,dependency-scan,security-signoff}.md`. Verify that **all** Acceptance Criteria have mapped tests and no CRITICAL vulnerabilities are open.
 
 ---
 
-### 3. Understand the Story Lifecycle & Session Focus
+### 3. Understand the Unit Lifecycle & Session Focus
 
-SpecKit organizes each feature as one **story** that flows through seven numbered phase folders. Planning, implementation, and testing are **project-scoped** — a story can span many projects:
+SpecKit organizes work Intent → Unit → Story. Each **unit** (a feature, e.g. *login* under *Authentication*) is the lifecycle container: `stories/` plus numbered phase folders. Planning, implementation, and testing are **project-scoped** — a unit can span many projects, and carries one story per layer:
 
 ```mermaid
 graph TD
-    Story[STORY-001: Customer Login] --> P1[01-story]
-    P1 --> P2[02-design]
+    Intent[001-authentication] --> Unit[units/login]
+    Unit --> S[stories/ &#40;Frontend/Backend/Mobile&#41;]
+    S --> P2[02-design]
     P2 --> P3[03-plan/&#123;Project&#125;]
     P3 --> P4[04-implementation/&#123;Project&#125;]
     P4 --> P5[05-test/&#123;Project&#125;]
@@ -118,23 +119,25 @@ graph TD
 ```
 
 **How do commands know what to work on?**
-You use `/sk.session focus` to lock your agent onto the active story. SpecKit saves this in a local `.claude/session.yaml` file (`active_story_id` + `story_dir`). Every `/sk.*` command reads it and resolves its `STORY_DIR` automatically, so the agent knows which story — and, with `--project`, which project — it is modifying without you repeating yourself.
+You use `/sk.session focus` to lock your agent onto the active **unit**. SpecKit saves this in a local `.claude/session.yaml` file (`active_intent_id` + `active_unit_id` + `unit_dir`). Every `/sk.*` command reads it and resolves its `UNIT_DIR` automatically, so the agent knows which unit — and, with `--project`, which project — it is modifying without you repeating yourself.
 
-**How do you move from goal to story?**
-1. Run `/sk.story` — the agent captures the story, loops through clarification until it meets completeness requirements, and writes `01-story/`.
-2. Focus your session, then run each phase, scoping engineering phases by project:
+**How do you move from goal to code?**
+1. `/sk.intent` → define the business capability (`intent.md`).
+2. `/sk.unit` → define the feature, its impacted projects, and user flows (`unit-brief.md`).
+3. `/sk.story` → capture one story per impacted layer into `stories/`.
+4. Run each phase, scoping engineering phases by project:
 
 ```bash
-/sk.session focus --story STORY-001                       # Lock onto the story for every /sk.* command
-/sk.plan --role backend --project Backend.API             # Per-project plan → 03-plan/Backend.API/
-/sk.implement --project Backend.API                       # Per-project code → 04-implementation/Backend.API/
+/sk.session focus --unit 001-authentication/login        # Lock onto the unit for every /sk.* command
+/sk.plan --role backend --project Backend.API            # Per-project plan → 03-plan/Backend.API/
+/sk.implement --project Backend.API                      # Per-project code → 04-implementation/Backend.API/
 ```
 
 > **💡 Where do these names come from?**
-> The `/sk.story` command generates the `STORY-{ID}` id (next free number) and the `{feature-name}` slug, and creates the `specs/STORY-{ID}-{feature-name}/` folder. Project names come from `.specify/memory/projects/index.md`, written by `/sk.init`.
+> `/sk.intent` mints the `{NNN}-{name}` intent id; `/sk.unit` names the unit and records impacted projects; `/sk.story` names each story `story-{Layer}-{INTENT}-{UNIT}-{NNN}.md`. Project names come from `.specify/memory/projects/index.md`, written by `/sk.init`.
 >
-> **📊 How do I check story statuses?**
-> Run `/sk.session list` to get a live dashboard view of all stories and their current workflow phase (e.g., `draft`, `in-progress`, `review`, `done`).
+> **📊 How do I check statuses?**
+> Run `/sk.session list` for a live dashboard of all units/stories and their current workflow phase.
 
 ### 4. Run the SDLC
 
@@ -156,11 +159,12 @@ sequenceDiagram
 Commands marked `[optional]` are skippable. Commands marked `[conditional]` are required only in certain cases. Everything else is mandatory.
 
 ```
-── SPECIFY (01-story) ─────────────────────────────────────────────────────────────
-/sk.story                ← capture one story; ensures completeness via clarify loop (po)
-                           writes 01-story/{story,requirement,acceptance-criteria,jira}.md
+── SPECIFY (intent → unit → stories/) ──────────────────────────────────────────────
+/sk.intent               ← define a business capability → specs/intents/{NNN}-{name}/intent.md (po)
+/sk.unit                 ← define a feature/unit under the intent → units/{unit}/unit-brief.md (po/lead)
+/sk.story                ← capture one story per impacted layer → stories/story-{Layer}-{ID}.md (po)
                            --bug flag: bug report framing (expected/actual/repro) instead of user story
-/sk.story --specify      ← [targeted] run Capture phase only: interview matrix → decomposition (po)
+/sk.story --specify      ← [targeted] run Capture phase only: interview matrix → story files (po)
 /sk.story --clarify      ← [targeted] run Clarify loop: resolves ambiguities via architect/po (architect/lead)
 [/sk.impact]             ← [optional] assess blast radius on existing services (architect)
 
@@ -192,7 +196,7 @@ Commands marked `[optional]` are skippable. Commands marked `[conditional]` are 
 [/sk.review]             ← [recommended] spec-aware code review: boundaries + contracts + ADRs (backend/frontend)
 /sk.test                 ← per-project tests → 05-test/{Project}/ (backend-qa/frontend-qa)
                            backend/library → unit + integration + contract; frontend/mobile → component + contract
-[/sk.uat]                ← [conditional: frontend work] UAT vs 01-story/acceptance-criteria → 06-uat/ (frontend-qa)
+[/sk.uat]                ← [conditional: frontend work] UAT vs stories/ acceptance criteria → 06-uat/ (frontend-qa)
                            --platform web   → Playwright/Cypress (Next.js)
                            --platform mobile → Maestro/Detox (React Native) — no browser tooling
                            --platform admin  → Playwright/Cypress (React Admin)
@@ -214,13 +218,15 @@ Commands marked `[optional]` are skippable. Commands marked `[conditional]` are 
 ### 🛠️ Setup & Session
 ```text
 /sk.init             ← Scan repo → project memory (projects/index.md + per-project) + shared standards + constitution (any)
-/sk.session          ← Manage local session: start/end/focus --story/status/list/switch/restore (any)
+/sk.session          ← Manage local session: start/end/focus --unit|--story/status/list/switch/restore (any)
 ```
 
 ### 📋 Specify & Plan
 ```text
-/sk.story            ← Full cycle intent → story capture + validation loop (po)
-/sk.story --specify  ← [Targeted] Capture intent → unit → story; --bug for bug report (po)
+/sk.intent           ← Define a business capability → specs/intents/{NNN}-{name}/intent.md (po)
+/sk.unit             ← Define a feature/unit (boundary, flows, impacted projects) → unit-brief.md (po/lead)
+/sk.story            ← Capture one story per impacted layer into the unit's stories/ (po)
+/sk.story --specify  ← [Targeted] Capture phase only → story files; --bug for bug report (po)
 /sk.story --clarify  ← [Targeted] Resolve ambiguities [modes: --po | --architect] (po/architect/lead)
 /sk.impact           ← Assess blast radius of proposed work (architect)
 /sk.design           ← Full design pipeline → 02-design/: architecture + impact-analysis + api-contract + database-design + per-project (architect)
@@ -242,7 +248,7 @@ Commands marked `[optional]` are skippable. Commands marked `[conditional]` are 
 ```text
 /sk.verify           ← PASS/FAIL quality gate across all gates [run after test, before ship] (architect/lead)
 /sk.test             ← Per-project tests → 05-test/{Project}/ (--project) (QA agents)
-/sk.uat              ← Acceptance testing vs 01-story/acceptance-criteria → 06-uat/: --platform web|mobile|admin (frontend-qa)
+/sk.uat              ← Acceptance testing vs stories/ acceptance criteria → 06-uat/: --platform web|mobile|admin (frontend-qa)
 /sk.security-audit   ← OWASP + STRIDE + dependency scan → 07-security-audit/ (security)
 /sk.investigate      ← Spec-aware debugging (backend/frontend)
 ```
@@ -264,7 +270,7 @@ Commands marked `[optional]` are skippable. Commands marked `[conditional]` are 
 
 ## 📦 Artifact Reference
 
-Two artifact trees: **project memory** (`.specify/memory/`, written once by `/sk.init` and updated as projects evolve) and the **per-story lifecycle** (`specs/STORY-{ID}-{name}/`, one folder per feature with seven numbered phases).
+Two artifact trees: **project memory** (`.specify/memory/`, written once by `/sk.init` and updated as projects evolve) and the **unit lifecycle** (`specs/intents/{intent}/units/{unit}/`, one container per feature with `stories/` plus numbered phase folders).
 
 ### 1. Project Memory & Standards (`.specify/memory/`)
 Created/maintained by `/sk.init` — a repo scan plus interview.
@@ -274,12 +280,12 @@ Created/maintained by `/sk.init` — a repo scan plus interview.
 - **`standards/story-lifecycle.md`**: canonical directory layout + path-resolution + branch + migration rules.
 - **`project-config.md`, `system-context.md`, `service-registry.md`, `constitution.md`**: core identity, definitions, and non-negotiable constraints (constitution via the `[8]` menu).
 
-### 2. The Story Lifecycle (`specs/STORY-{ID}-{name}/`)
-One folder per feature; each phase is owned by one command. Engineering phases (03/04/05) are **project-scoped** — one subfolder per participating project.
+### 2. The Unit Lifecycle (`specs/intents/{intent}/units/{unit}/`)
+`/sk.intent` writes `intent.md`; `/sk.unit` writes `unit-brief.md`. Below that, each phase is owned by one command. Engineering phases (03/04/05) are **project-scoped** — one subfolder per participating project.
 
 | Phase | Command | Artifacts |
 |---|---|---|
-| `01-story/` | `/sk.story` | `story.md`, `requirement.md`, `acceptance-criteria.md`, `jira.md` (optional) |
+| `stories/` | `/sk.story` | `story-{Layer}-{INTENT}-{UNIT}-{NNN}.md` (one per layer; AC inside), `jira.md` (optional) |
 | `02-design/` | `/sk.design` | `architecture.md`, `impact-analysis.md`, `api-contract.md`, `database-design.md`, `projects/{Project}.md` |
 | `03-plan/{Project}/` | `/sk.plan` | `plan.md`, `tasks.md`, `checklist.md`, `jira-subtask.md`, `estimation.md` |
 | `04-implementation/{Project}/` | `/sk.implement` | `implementation.md`, `progress.md`, `validation.md` (+ code under the project's `code-root`) |
@@ -338,8 +344,8 @@ bash .speckit/setup.sh
   - `system-context.md`, `domain-model.md`, `service-registry.md`
   - `architecture-decisions.md` (ADR Index)
   - `standards/` (api, data, observability standards + `story-lifecycle.md` canonical layout/path reference)
-- **Story Lifecycle (`specs/STORY-{ID}-{name}/`)**: seven numbered phase folders (`01-story` … `07-security-audit`); 03/04/05 are project-scoped.
-- **Knowledge Base System (`specs/`)**: Tier 1 (System-level), Tier 2 (Domain-level), Tier 3 (Units) containing only non-derivable context.
+- **Unit Lifecycle (`specs/intents/{intent}/units/{unit}/`)**: `stories/` + numbered phase folders (`02-design` … `07-security-audit`); 03/04/05 are project-scoped.
+- **Knowledge Base System (`specs/`)**: Tier 1 (System-level), Tier 2 (Domain-level), Tier 3 (Unit, in `02-design/knowledge-base.md`) containing only non-derivable context.
 
 </details>
 
@@ -382,10 +388,10 @@ SpecKit is tuned for Anthropic's prefix-based prompt cache (5-min TTL, up to 4 `
 ### Tier Model
 - **Tier A — Framework invariant**: governance + standards + system-context + ADRs + design-principles. Changes weekly.
 - **Tier B — Domain/project invariant**: domain-model, service-registry, `projects/index.md`, per-project standards, `02-design/*`, tech-stack packs. Stable across a dev's iteration loop.
-- **Tier C — Story invariant**: `01-story/story.md` + `03-plan/{Project}/plan.md`. Stable across 3–10 dev iterations on the same story.
-- **Tier D — Iteration tail**: diff, test output, review notes, user input, session-derived scalars (`active_story_id`, `story_dir`, `role`).
+- **Tier C — Story invariant**: the focused `stories/story-{Layer}-{ID}.md` + `03-plan/{Project}/plan.md`. Stable across 3–10 dev iterations on the same story.
+- **Tier D — Iteration tail**: diff, test output, review notes, user input, session-derived scalars (`active_intent_id`, `active_unit_id`, `active_story_id`, `unit_dir`, `role`).
 
-"Dynamic" is relative to the caller's loop: `01-story/story.md` is Tier D for a PO hopping stories but Tier C for a dev grinding one story.
+"Dynamic" is relative to the caller's loop: a story file is Tier D for a PO hopping stories but Tier C for a dev grinding one story.
 
 ### Canonical inject_files order (all sk.* skills)
 `governance rules → standards → system-context → ADRs → domain-model → service-registry → design-principles → tech-pack` → (cache boundary) → tail wrapper containing story/plan/review-notes/user input.

@@ -20,11 +20,11 @@ Load data-layer packs before designing the model.
 List the packs loaded before continuing.
 
 ## Path Resolution (per story-lifecycle.md §3)
-Resolve `STORY_DIR` from session.yaml `story_dir`. The data model is written to
-`STORY_DIR/02-design/database-design.md`. Legacy fallback (no story_dir): the unit paths below.
+Resolve `UNIT_DIR` from session.yaml `unit_dir`. The data model is written to
+`UNIT_DIR/02-design/database-design.md`. Legacy fallback (no unit_dir): the unit paths below.
 
 ## Input Artifacts
-STORY_DIR/02-design/architecture.md   (legacy fallback: specs/intents/{intent}/units/{unit}/architecture.md)
+UNIT_DIR/02-design/architecture.md   (legacy fallback: specs/intents/{intent}/units/{unit}/architecture.md)
 .specify/memory/domain-model.md
 .specify/memory/standards/data-standards.md
 .claude/skills/design-principles/SKILL.md
@@ -39,7 +39,7 @@ STORY_DIR/02-design/architecture.md   (legacy fallback: specs/intents/{intent}/u
    breaking → flag to user, wait for confirmation
 
 ## Output Artifacts
-STORY_DIR/02-design/database-design.md   (legacy fallback: specs/intents/{intent}/units/{unit}/data-model.md)
+UNIT_DIR/02-design/database-design.md   (legacy fallback: specs/intents/{intent}/units/{unit}/data-model.md)
 .specify/memory/domain-model.md (updated with new entities)
 
 ## Quality Bar

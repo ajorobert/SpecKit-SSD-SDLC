@@ -14,14 +14,14 @@ This skill orchestrates two sub-skills in strict sequence. Each sub-skill runs w
 
 ## Pre-flight
 1. Read session.yaml → get `role` (backend | frontend) and resolve the active story via
-   `.specify/memory/standards/story-lifecycle.md` §3 (`story_dir`).
+   `.specify/memory/standards/story-lifecycle.md` §3 (`unit_dir`).
    NULL active story → STOP: run sk.session/sk.story first.
    NULL role → STOP: run sk.session switch --role backend|frontend first.
 2. **Resolve target project(s)** (per story-lifecycle.md §4):
    - `--project {ProjectName}` → that project (must exist in `.specify/memory/projects/index.md`).
-   - else → every project under `STORY_DIR/03-plan/{ProjectName}/` whose type matches the session role.
-   - `PROJECT_IMPL_DIR = STORY_DIR/04-implementation/{ProjectName}/`.
-3. Verify the project plan exists: `STORY_DIR/03-plan/{ProjectName}/plan.md`.
+   - else → every project under `UNIT_DIR/03-plan/{ProjectName}/` whose type matches the session role.
+   - `PROJECT_IMPL_DIR = UNIT_DIR/04-implementation/{ProjectName}/`.
+3. Verify the project plan exists: `UNIT_DIR/03-plan/{ProjectName}/plan.md`.
    MISSING → STOP: run sk.plan --project {ProjectName} first.
 4. Read checkpoint_mode from session.yaml (default to validate).
 5. Check for a prior review report under `04-implementation/{ProjectName}/` (or legacy
@@ -32,17 +32,17 @@ This skill orchestrates two sub-skills in strict sequence. Each sub-skill runs w
 When handing context to sub-skills (sk.tasks, sk.scaffolding, sk.codegen), place story/plan/review-notes in the tail after all cacheable context:
 ```
 <story id="{story-id}" project="{ProjectName}">
-  <story-md>…STORY_DIR/01-story/story.md…</story-md>
-  <plan-md>…STORY_DIR/03-plan/{ProjectName}/plan.md…</plan-md>
-  <tasks-md>…STORY_DIR/03-plan/{ProjectName}/tasks.md…</tasks-md>
-  <prior-review>…STORY_DIR/04-implementation/{ProjectName}/validation.md (if REFINE mode)…</prior-review>
+  <story-md>…UNIT_DIR/stories/<story-file>…</story-md>
+  <plan-md>…UNIT_DIR/03-plan/{ProjectName}/plan.md…</plan-md>
+  <tasks-md>…UNIT_DIR/03-plan/{ProjectName}/tasks.md…</tasks-md>
+  <prior-review>…UNIT_DIR/04-implementation/{ProjectName}/validation.md (if REFINE mode)…</prior-review>
 </story>
 ```
 Source code is written under the project's `code-root` from `.specify/memory/projects/index.md`.
 
 ## Project Tracking Artifacts (per story-lifecycle.md §2)
 For each project implemented, maintain three tracking files under
-`STORY_DIR/04-implementation/{ProjectName}/` (create if absent, update in place per §7):
+`UNIT_DIR/04-implementation/{ProjectName}/` (create if absent, update in place per §7):
 
 **`implementation.md`** — what was built:
 ```
@@ -116,7 +116,7 @@ completes, append it to `session.yaml` `projects_touched`, then proceed to the n
 
 ## Status Transitions
 Before invoking any sub-skill (in both normal or refine modes):
-Update `STORY_DIR/01-story/story.md` frontmatter `status` block (legacy `story-{ID}.md` if that
+Update `UNIT_DIR/stories/<story-file>` frontmatter `status` block (legacy `story-{ID}.md` if that
 is the only copy), and the project's `04-implementation/{ProjectName}/progress.md`:
 - set `status.current` → in-progress
 - set `status.entered_at` → now (ISO 8601)

@@ -6,16 +6,16 @@ Internal sub-skill — invoked by sk.implement. Do not invoke directly. The orch
 target `{ProjectName}`.
 
 ## Path Resolution (per story-lifecycle.md §3–§4)
-Resolve `STORY_DIR` from session.yaml `story_dir`. Execute the tasks in
+Resolve `UNIT_DIR` from session.yaml `unit_dir`. Execute the tasks in
 `04-implementation/{ProjectName}/tasks.yaml`, writing code under the project's `code-root` (from
 `.specify/memory/projects/index.md`). As tasks complete, update
 `04-implementation/{ProjectName}/{implementation.md,progress.md}` and, before handoff,
 `validation.md` (build / coding-standard / design-compliance). In REFINE mode read the prior
-`validation.md`. Legacy fallback (no story_dir): the unit story path + review-{story-id}.md.
+`validation.md`. Legacy fallback (no unit_dir): the unit story path + review-{story-id}.md.
 
 ## Step 0: Capability Pack Selection
-1. Read session.yaml → get `role` (backend | frontend); resolve the active story (`story_dir`)
-2. Read the active story frontmatter (`01-story/story.md`) → check `tags` array for domain keywords
+1. Read session.yaml → get `role` (backend | frontend); resolve the active story (`unit_dir`)
+2. Read the active story frontmatter (`stories/<story-file>`) → check `tags` array for domain keywords
 3. Determine the target project from `{ProjectName}` and its `code-root` (projects/index.md)
 4. Read applicable packs. **Load ≤6 packs total** — prioritise specialist packs when the limit is reached.
 
@@ -50,9 +50,9 @@ List the packs loaded before continuing.
 
 ## Context Loading — cacheable (load first, in order)
 1. specs/domains/{relevant-domain}/knowledge-base.md (if exists)
-2. STORY_DIR/02-design/knowledge-base.md (if exists)
-3. STORY_DIR/02-design/api-spec.json (if exists)
-4. STORY_DIR/02-design/architecture.md (if exists)
+2. UNIT_DIR/02-design/knowledge-base.md (if exists)
+3. UNIT_DIR/02-design/api-spec.json (if exists)
+4. UNIT_DIR/02-design/architecture.md (if exists)
 5. .specify/memory/projects/{ProjectName}/coding-standards.md + .specify/memory/standards/coding-standards.md
 6. .specify/memory/standards/observability-standards.md
 (Legacy fallback: specs/intents/{intent}/units/{unit}/{knowledge-base,architecture}.md + contracts/api-spec.json)
@@ -61,15 +61,15 @@ List the packs loaded before continuing.
 Emit at end of user-input block, after all cacheable context:
 ```
 <story id="{story-id}">
-  <story-md>…STORY_DIR/story-{ID}.md…</story-md>
-  <plan-md>…STORY_DIR/plan.md…</plan-md>
-  <tasks-yaml>…STORY_DIR/tasks.yaml…</tasks-yaml>
-  <prior-review>…STORY_DIR/review-{story-id}.md (if REFINE mode)…</prior-review>
+  <story-md>…UNIT_DIR/story-{ID}.md…</story-md>
+  <plan-md>…UNIT_DIR/plan.md…</plan-md>
+  <tasks-yaml>…UNIT_DIR/tasks.yaml…</tasks-yaml>
+  <prior-review>…UNIT_DIR/review-{story-id}.md (if REFINE mode)…</prior-review>
 </story>
 ```
 
 ## Pre-flight for Generation
-1. Check for review report: STORY_DIR/review-{story-id}.md.
+1. Check for review report: UNIT_DIR/review-{story-id}.md.
 
 ## Execution Mode Detection
 - `review-{story-id}.md` EXISTS → **Refine mode**: only resolve blocking findings from the review report. Do not re-execute tasks already marked [X]. Do not regenerate passing code.

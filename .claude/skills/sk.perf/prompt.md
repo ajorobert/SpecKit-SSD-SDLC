@@ -55,7 +55,7 @@ For each selected optimization, write a task entry:
 - Acceptance criterion: measurable, tied to perf_target
 - Test method: how the improvement will be verified (benchmark, re-run load test, Lighthouse CI)
 
-Write tasks to: STORY_DIR/04-implementation/{ProjectName}/tasks.yaml (resolve STORY_DIR per
+Write tasks to: UNIT_DIR/04-implementation/{ProjectName}/tasks.yaml (resolve UNIT_DIR per
 story-lifecycle.md §3; legacy fallback: .../stories/{story-id}/tasks.yaml)
 (If no active story: write to .specify/perf-tasks.yaml and remind user to create a story)
 
@@ -75,8 +75,8 @@ Run the agreed test method for each completed optimization:
 If target missed: report remaining gap and suggest next candidate optimization.
 
 ## Output Artifacts
-STORY_DIR/04-implementation/{ProjectName}/perf-findings.md (diagnosis + ranked bottlenecks)
-STORY_DIR/04-implementation/{ProjectName}/tasks.yaml (or .specify/perf-tasks.yaml)
+UNIT_DIR/04-implementation/{ProjectName}/perf-findings.md (diagnosis + ranked bottlenecks)
+UNIT_DIR/04-implementation/{ProjectName}/tasks.yaml (or .specify/perf-tasks.yaml)
 src/** (optimized files, under the project's code-root)
 (Legacy fallback: specs/intents/{intent}/units/{unit}/stories/{story-id}/)
 benchmark results summary (inline report)

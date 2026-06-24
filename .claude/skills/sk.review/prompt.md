@@ -33,13 +33,13 @@ Load the tech stack packs relevant to this review before reading any code.
 List the packs loaded before continuing.
 
 ## Pre-flight
-1. Read session.yaml active_story_id; resolve `STORY_DIR` per story-lifecycle.md §3 (`story_dir`).
+1. Read session.yaml active_story_id; resolve `UNIT_DIR` per story-lifecycle.md §3 (`unit_dir`).
    Resolve the target project from `--project` / session role; review its `04-implementation/{Project}/`.
    NULL → STOP: run sk.session focus --story {id} first
 
 ## Context loading (cacheable — load first)
-- STORY_DIR/02-design/architecture.md — bounded context, module boundaries, owned entities (Tier B)
-- STORY_DIR/02-design/api-spec.json — endpoint signatures (Tier B)
+- UNIT_DIR/02-design/architecture.md — bounded context, module boundaries, owned entities (Tier B)
+- UNIT_DIR/02-design/api-spec.json — endpoint signatures (Tier B)
 - .specify/memory/architecture-decisions.md — ADR constraints (Tier A)
 - .specify/memory/standards/coding-standards.md + projects/{Project}/coding-standards.md (Tier A)
 - .specify/memory/standards/observability-standards.md — logging/metrics/health requirements (Tier A)
@@ -49,9 +49,9 @@ List the packs loaded before continuing.
 Emit at end of user-input block, after all cacheable context:
 ```
 <story id="{story-id}" project="{ProjectName}">
-  <story-md>…STORY_DIR/01-story/story.md…</story-md>
-  <plan-md>…STORY_DIR/03-plan/{ProjectName}/plan.md (if present)…</plan-md>
-  <prior-review>…STORY_DIR/04-implementation/{ProjectName}/validation.md (if present)…</prior-review>
+  <story-md>…UNIT_DIR/stories/<story-file>…</story-md>
+  <plan-md>…UNIT_DIR/03-plan/{ProjectName}/plan.md (if present)…</plan-md>
+  <prior-review>…UNIT_DIR/04-implementation/{ProjectName}/validation.md (if present)…</prior-review>
 </story>
 ```
 
@@ -95,7 +95,7 @@ If gstack is installed (`command -v gstack`): also invoke `gstack /review` for a
 
 ## Output Artifact
 If any findings exist, write a review report to:
-  STORY_DIR/04-implementation/{ProjectName}/review.md
+  UNIT_DIR/04-implementation/{ProjectName}/review.md
   (legacy fallback: specs/intents/{intent}/units/{unit}/stories/{story-id}/review-{story-id}.md)
 This file is what sk.implement REFINE mode reads to resolve findings.
 
@@ -116,7 +116,7 @@ On REJECTED: write/overwrite the file with current findings.
 On APPROVED: keep the review report at its path.
 1. If any blocking findings were raised during this review cycle (i.e. the story was previously REJECTED):
    Append a `## Implementation Pitfalls` entry to the story knowledge base:
-     STORY_DIR/02-design/knowledge-base.md
+     UNIT_DIR/02-design/knowledge-base.md
      (legacy fallback: specs/intents/{intent}/units/{unit}/knowledge-base.md)
    Format:
    ```

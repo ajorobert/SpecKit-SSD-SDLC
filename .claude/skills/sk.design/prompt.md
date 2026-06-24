@@ -14,8 +14,8 @@ isolated context — state is passed via the file system (session.yaml + spec ar
 
 ## Pre-flight
 1. Read session.yaml — resolve the active story via `.specify/memory/standards/story-lifecycle.md` §3
-   (`story_dir` / `active_story_id`). No active story: STOP — run sk.session/sk.story first.
-2. Read `STORY_DIR/01-story/` (story.md, requirement.md, acceptance-criteria.md) — confirm the
+   (`unit_dir` / `active_story_id`). No active story: STOP — run sk.session/sk.story first.
+2. Read `UNIT_DIR/stories/` (per-layer story files with their acceptance criteria) — confirm the
    story is captured. Missing: STOP — run sk.story first.
    (Backward compat: a legacy `story-{ID}.md` or unit-brief.md is read in place if present.)
 3. Read checkpoint_mode from session.yaml. If missing: default to validate.
@@ -23,7 +23,7 @@ isolated context — state is passed via the file system (session.yaml + spec ar
    analysis in Phase 0b. If absent: log and treat the whole repo as a single implicit project.
 
 ## Output Contract (per story-lifecycle.md §2)
-All design artifacts for this story are written under `STORY_DIR/02-design/`:
+All design artifacts for this story are written under `UNIT_DIR/02-design/`:
 - `architecture.md` — solution architecture, components, patterns, boundaries
 - `impact-analysis.md` — blast radius across services/projects, risks, sequencing
 - `api-contract.md` — endpoint/event/command contracts (human-readable; api-spec.json may
@@ -54,7 +54,7 @@ Evaluate in this order — first match wins:
   → run phase need detection, then run all needed phases
 
 ## Phase Need Detection (FRESH and RESUME modes only)
-Read `STORY_DIR/01-story/` (requirements + acceptance criteria). Determine which phases are needed:
+Read `UNIT_DIR/stories/` (requirements + acceptance criteria). Determine which phases are needed:
 
 - Phase 1 (architecture): always needed in FRESH mode
 - Phase 2 (data model): needed if the story mentions entities, tables, schema, data,
@@ -109,8 +109,8 @@ Condition: always runs (FRESH, RESUME, REFRESH). Produces `02-design/impact-anal
 per-project design files — the inputs `sk.plan`/`sk.implement` use to scope work by project.
 
 1. Read `.specify/memory/projects/index.md`. For each project row, judge whether this story
-   touches it (from `01-story/` requirements + the architecture being designed).
-2. Write `STORY_DIR/02-design/impact-analysis.md`:
+   touches it (from `stories/` requirements + the architecture being designed).
+2. Write `UNIT_DIR/02-design/impact-analysis.md`:
    ```
    # {STORY-ID} — Impact Analysis
 
@@ -123,7 +123,7 @@ per-project design files — the inputs `sk.plan`/`sk.implement` use to scope wo
    ## Risks
    {migration risk, breaking contract changes, blast radius}
    ```
-3. For **each impacted project**, write `STORY_DIR/02-design/projects/{ProjectName}.md`:
+3. For **each impacted project**, write `UNIT_DIR/02-design/projects/{ProjectName}.md`:
    ```
    # {ProjectName} — Design Impact ({STORY-ID})
 
@@ -171,8 +171,8 @@ If gate is active, display:
 sk.design | Gate 1 — Architecture Review  [checkpoint_mode: validate]
 
 Review the following before continuing:
-  STORY_DIR/02-design/architecture.md
-  STORY_DIR/02-design/knowledge-base.md  (if updated)
+  UNIT_DIR/02-design/architecture.md
+  UNIT_DIR/02-design/knowledge-base.md  (if updated)
 
 Check for:
   - Bounded context is correct and scoped to this unit only
@@ -201,7 +201,7 @@ If gate is active, display:
 sk.design | Gate 2 — Data Model Review  [checkpoint_mode: {mode}]
 
 Review the following before continuing:
-  STORY_DIR/02-design/database-design.md
+  UNIT_DIR/02-design/database-design.md
   .specify/memory/domain-model.md  (if updated)
 
 Check for:
@@ -254,9 +254,9 @@ Evaluate whether this design run produced non-derivable content worth capturing:
 Condition: always runs after any phase completes (all modes).
 
 Auto-generate a story-level routing index.
-1. Read `01-story/`, `02-design/architecture.md`, `02-design/database-design.md`, and contracts to understand the components.
+1. Read `stories/`, `02-design/architecture.md`, `02-design/database-design.md`, and contracts to understand the components.
 2. Read the actual directory structure (the impacted projects' `code-root`s) to identify where modules and files live.
-3. Generate or overwrite `STORY_DIR/02-design/guide.yaml`. Use `templates/artifacts/guide-template.yaml` as reference. It must contain the non-obvious cross-cutting constraints in the `also-check:` field.
+3. Generate or overwrite `UNIT_DIR/02-design/guide.yaml`. Use `templates/artifacts/guide-template.yaml` as reference. It must contain the non-obvious cross-cutting constraints in the `also-check:` field.
 4. If missing, create/update the system-level guide entry in `specs/guide.yaml`.
 5. Log: "Guide updated — {active_story_id}".
    (Legacy fallback: write the unit-level `specs/intents/{intent}/units/{unit}/guide.yaml` instead.)
@@ -266,7 +266,7 @@ Condition: run ONLY if the story has a frontend surface. This phase is self-cont
 review, its own KB assessment, and registers its own artifact in the guide. It never alters the behaviour
 of Phases 1–5; for a pure backend story it skips cleanly and the pipeline output is unchanged.
 
-**Frontend signal detection** — check `01-story/`, the impacted projects (`projects/index.md` types
+**Frontend signal detection** — check `stories/`, the impacted projects (`projects/index.md` types
 `frontend`/`mobile`), and session.yaml for any of:
   - role = frontend in session.yaml
   - story `tags` or prose mention: page, screen, route, component, UI, frontend, portal, admin, mobile
@@ -280,7 +280,7 @@ If a frontend signal IS found:
   Invoke skill: sk.ui-design
   - Context injected: coding-standards.md, domain-model.md, design-principles/SKILL.md
   - Reads from disk: 02-design/architecture.md, 02-design/api-spec.json, 02-design/test-plan.md,
-    02-design/database-design.md (if present), 01-story/
+    02-design/database-design.md (if present), stories/
   - Waits for: ui-model.md written and frontend engineering review passed
 
   AUTOPILOT FRONTEND REVIEW HARD STOP — autopilot mode only
@@ -296,7 +296,7 @@ If a frontend signal IS found:
   sk.design | Gate 3 — Frontend UI Review  [checkpoint_mode: {mode}]
 
   Review the following before completing design:
-    STORY_DIR/02-design/ui-model.md
+    UNIT_DIR/02-design/ui-model.md
 
   Check for:
     - Every story has a frontend surface (route/component) or is marked backend-only
@@ -312,7 +312,7 @@ If a frontend signal IS found:
   If the gate is skipped: log "Gate 3 skipped (checkpoint_mode: autopilot)" and proceed.
 
   After the gate, update the story guide entry so ui-model.md is indexed:
-  - Add ui-model.md to `STORY_DIR/02-design/guide.yaml` artifact list and record any cross-cutting
+  - Add ui-model.md to `UNIT_DIR/02-design/guide.yaml` artifact list and record any cross-cutting
     frontend constraint in its `also-check:` field.
   - Log: "Guide updated with ui-model — {active_story_id}".
 

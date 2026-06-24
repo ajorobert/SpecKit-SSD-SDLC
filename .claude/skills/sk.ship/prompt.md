@@ -4,7 +4,7 @@ Role: lead | Level: story
 gstack: optional — if installed, use `gstack /ship`; otherwise use `gh pr create`
 
 ## Pre-flight
-1. Read session.yaml active_story_id; resolve `STORY_DIR` per story-lifecycle.md §3 (`story_dir`).
+1. Read session.yaml active_story_id; resolve `UNIT_DIR` per story-lifecycle.md §3 (`unit_dir`).
    NULL → STOP: run sk.session focus --story {id} first
 
 ## Hard quality gate
@@ -17,7 +17,7 @@ Additional hard blocks:
 - story test-status ≠ pass → STOP: run sk.test (and sk.uat for frontend) until pass
 
 ## Context loading
-- STORY_DIR/01-story/story.md → title, branch, acceptance criteria summary
+- UNIT_DIR/stories/<story-file> → title, branch, acceptance criteria summary
   (+ 07-security-audit/security-signoff.md and 06-uat/signoff.md for the PR gate summary)
   (legacy fallback: story-{ID}.md)
 - .specify/memory/service-registry.md → affected services for PR description

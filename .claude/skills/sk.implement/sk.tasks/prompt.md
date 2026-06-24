@@ -5,13 +5,13 @@ Role: lead | Level: story
 Internal sub-skill — invoked by sk.implement orchestrator. Do not invoke directly.
 
 ## Path Resolution (per story-lifecycle.md §3–§4)
-Resolve `STORY_DIR` from session.yaml `story_dir`; the orchestrator passes the target
+Resolve `UNIT_DIR` from session.yaml `unit_dir`; the orchestrator passes the target
 `{ProjectName}`. Read the project plan from `03-plan/{ProjectName}/`, write the executable task
-list into `04-implementation/{ProjectName}/`. Legacy fallback (no story_dir): the unit story path.
+list into `04-implementation/{ProjectName}/`. Legacy fallback (no unit_dir): the unit story path.
 
 ## Input Artifacts
-STORY_DIR/03-plan/{ProjectName}/plan.md (required) + tasks.md
-STORY_DIR/01-story/story.md frontmatter (checkpoint_status)
+UNIT_DIR/03-plan/{ProjectName}/plan.md (required) + tasks.md
+UNIT_DIR/stories/<story-file> frontmatter (checkpoint_status)
 (Legacy fallback: specs/intents/{intent}/units/{unit}/stories/{story-id}/plan.md)
 
 ## Steps
@@ -33,7 +33,7 @@ STORY_DIR/01-story/story.md frontmatter (checkpoint_status)
      - Write test tasks before implementation tasks (TDD order)
    - phase: crosscut    — logging, error handling, documentation
 6. Write tasks to:
-   STORY_DIR/04-implementation/{ProjectName}/tasks.yaml
+   UNIT_DIR/04-implementation/{ProjectName}/tasks.yaml
    (and reflect the same task list as checkboxes in 04-implementation/{ProjectName}/progress.md)
    Legacy fallback: specs/intents/{intent}/units/{unit}/stories/{story-id}/tasks.yaml
 
@@ -65,7 +65,7 @@ phases:
 ```
 
 ## Output Artifacts
-STORY_DIR/04-implementation/{ProjectName}/tasks.yaml (+ progress.md checkboxes)
+UNIT_DIR/04-implementation/{ProjectName}/tasks.yaml (+ progress.md checkboxes)
 (Legacy fallback: specs/intents/{intent}/units/{unit}/stories/{story-id}/tasks.yaml)
 
 ## Quality Bar

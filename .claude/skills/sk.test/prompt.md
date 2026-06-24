@@ -11,11 +11,11 @@ Level: story
 Load packs before generating tests.
 
 1. Read session.yaml → get `role`; resolve the active story via
-   `.specify/memory/standards/story-lifecycle.md` §3 (`story_dir`). Resolve the target
+   `.specify/memory/standards/story-lifecycle.md` §3 (`unit_dir`). Resolve the target
    project(s) per §4: `--project {ProjectName}` or every project under
-   `STORY_DIR/04-implementation/{ProjectName}/` matching the role. Read the project's `type`
+   `UNIT_DIR/04-implementation/{ProjectName}/` matching the role. Read the project's `type`
    from `.specify/memory/projects/index.md` — it selects which test files this phase emits.
-2. Read `STORY_DIR/01-story/story.md` frontmatter → check `tags`
+2. Read `UNIT_DIR/stories/<story-file>` frontmatter → check `tags`
 
 **Role = backend**
 - Always: `.claude/skills/backend-feature-patterns/SKILL.md`
@@ -35,18 +35,18 @@ Load packs before generating tests.
 List packs loaded before continuing.
 
 ## Input Artifacts
-STORY_DIR/01-story/acceptance-criteria.md   (each criterion → at least one test)
-STORY_DIR/01-story/requirement.md           (business rules, NFRs)
-STORY_DIR/02-design/api-contract.md         (+ api-spec.json if present — endpoints/errors)
-STORY_DIR/02-design/projects/{ProjectName}.md  (integration points, regression risks)
-STORY_DIR/04-implementation/{ProjectName}/implementation.md  (what was built)
+UNIT_DIR/stories/ (acceptance criteria in the story files)   (each criterion → at least one test)
+UNIT_DIR/stories/ (requirements in the story files)           (business rules, NFRs)
+UNIT_DIR/02-design/api-contract.md         (+ api-spec.json if present — endpoints/errors)
+UNIT_DIR/02-design/projects/{ProjectName}.md  (integration points, regression risks)
+UNIT_DIR/04-implementation/{ProjectName}/implementation.md  (what was built)
 .specify/memory/projects/{ProjectName}/tech-stack.md  (test framework for this project)
 .specify/memory/standards/tech-stack.md     (shared fallback)
 (Backward compat: legacy `specs/intents/**/contracts/*` + `story-{ID}.md` read in place if present.)
 
 ## Test Documentation Output (per story-lifecycle.md §2)
 Alongside the runnable test code, write per-project markdown deliverables under
-`STORY_DIR/05-test/{ProjectName}/` (create if absent, update in place per §7). The files depend
+`UNIT_DIR/05-test/{ProjectName}/` (create if absent, update in place per §7). The files depend
 on the project `type`:
 
 - **backend / library** → `unit-test.md`, `integration-test.md`, `contract-test.md`
@@ -72,7 +72,7 @@ results. These docs are the human-readable record; the actual tests live in the 
 
 ### If project type = frontend / mobile
 1. Read `02-design/api-contract.md` — identify fields the frontend consumes.
-2. Read `01-story/acceptance-criteria.md` — map criteria to scenarios.
+2. Read `stories/ (acceptance criteria in the story files)` — map criteria to scenarios.
 3. [REFINE MODE] if tests exist, [CREATE MODE] if not.
 4. **component tests** → component behavior/rendering:
    `tests/components/{ProjectName}/{component}.test.{ext}`. Document in `05-test/{ProjectName}/component-test.md`.
@@ -86,7 +86,7 @@ STOP: "sk.test requires backend or frontend role.
 Run sk.session switch --role backend or frontend"
 
 ## Output Artifacts
-STORY_DIR/05-test/{ProjectName}/   — markdown docs (per project type, see above)
+UNIT_DIR/05-test/{ProjectName}/   — markdown docs (per project type, see above)
 tests/contract/{ProjectName}/provider/   (backend/library)
 tests/integration/{story-id}/            (backend/library)
 tests/contract/{ProjectName}/consumer/   (frontend/mobile)

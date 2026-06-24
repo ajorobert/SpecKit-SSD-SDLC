@@ -10,9 +10,9 @@ Role: backend | Level: unit
 Declare mode at start of execution.
 
 ## Pre-flight
-1. Resolve `STORY_DIR` per story-lifecycle.md §3 (`story_dir`).
+1. Resolve `UNIT_DIR` per story-lifecycle.md §3 (`unit_dir`).
    NULL → STOP: run sk.session focus --story {id} first
-2. Verify the data model exists: STORY_DIR/02-design/database-design.md
+2. Verify the data model exists: UNIT_DIR/02-design/database-design.md
    MISSING → STOP: run sk.design first (sk.design orchestrates architecture + data model + contracts)
    (Legacy fallback: specs/intents/{intent}/units/{unit}/data-model.md)
 3. List existing migration files in the impacted project's `code-root`/Migrations/ or equivalent path
@@ -20,8 +20,8 @@ Declare mode at start of execution.
    UNVERIFIED → warn user; require explicit confirmation before generating contract migration
 
 ## Context loading
-1. STORY_DIR/02-design/database-design.md — canonical entity definitions (legacy: data-model.md)
-2. STORY_DIR/02-design/architecture.md (if exists)
+1. UNIT_DIR/02-design/database-design.md — canonical entity definitions (legacy: data-model.md)
+2. UNIT_DIR/02-design/architecture.md (if exists)
 3. .specify/memory/standards/data-standards.md
 4. .claude/skills/persistence-patterns/SKILL.md
 
@@ -60,7 +60,7 @@ Write tests to src/{service}/Tests/Migrations/{migration-name}Tests.cs (or equiv
 ## Output Artifacts
 {code-root}/Migrations/{timestamp}_{story-id}_{name}.{ext}
 {code-root}/Tests/Migrations/{name}Tests.{ext}
-STORY_DIR/rollback-plan.md (legacy fallback: .../stories/{story-id}/rollback-plan.md)
+UNIT_DIR/rollback-plan.md (legacy fallback: .../stories/{story-id}/rollback-plan.md)
 
 ## Quality Bar
 - Expand migrations: zero DROP or destructive ALTER statements

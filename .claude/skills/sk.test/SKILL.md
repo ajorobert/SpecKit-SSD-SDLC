@@ -1,6 +1,6 @@
 ---
 name: sk.test
-description: "Invoke when: generating and running the test suite for a story, project-scoped (--project). Role: backend or frontend (required). Reads: session.yaml, 01-story/acceptance-criteria.md, 02-design/api-contract.md, tech-stack.md. Writes: 05-test/{Project}/ docs + provider/consumer/integration/component tests."
+description: "Invoke when: generating and running the test suite for a story, project-scoped (--project). Role: backend or frontend (required). Reads: session.yaml, stories/ (acceptance criteria in the story files), 02-design/api-contract.md, tech-stack.md. Writes: 05-test/{Project}/ docs + provider/consumer/integration/component tests."
 subagent_type: QA Backend Agent
 inject_files:
   - .specify/memory/standards/story-lifecycle.md

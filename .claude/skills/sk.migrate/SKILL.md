@@ -8,7 +8,7 @@ inject_files:
   - .claude/skills/persistence-patterns/SKILL.md
 preconditions:
   - any_file_exists:
-      - specs/STORY-*/02-design/database-design.md
+      - specs/intents/*/units/*/02-design/database-design.md
       - specs/intents/*/units/*/data-model.md
 ---
 

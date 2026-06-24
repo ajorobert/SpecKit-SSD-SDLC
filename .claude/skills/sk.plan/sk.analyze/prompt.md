@@ -11,18 +11,18 @@ and spec drift before implementation.
 CRITICAL, HIGH, or MEDIUM findings must be resolved before implementation may proceed.
 
 ## Pre-flight (per story-lifecycle.md §3)
-1. Resolve `STORY_DIR` from session.yaml `story_dir`/`active_story_id`.
+1. Resolve `UNIT_DIR` from session.yaml `unit_dir`/`active_story_id`.
    NULL → STOP: run sk.session/sk.story first.
    (Legacy fallback: UNIT_DIR = specs/intents/{intent}/units/{unit}/.)
 
 ## Context loading
 Load these artifacts (report MISSING if required artifact absent):
-- STORY_DIR/02-design/architecture.md (required)
-- STORY_DIR/01-story/ (story.md, acceptance-criteria.md)
-- STORY_DIR/02-design/api-spec.json (if exists)
-- STORY_DIR/02-design/database-design.md (if exists)
-- STORY_DIR/02-design/projects/*.md (per-project design impact)
-- STORY_DIR/03-plan/{ProjectName}/plan.md (for each planned project)
+- UNIT_DIR/02-design/architecture.md (required)
+- UNIT_DIR/stories/ (story.md, acceptance-criteria.md)
+- UNIT_DIR/02-design/api-spec.json (if exists)
+- UNIT_DIR/02-design/database-design.md (if exists)
+- UNIT_DIR/02-design/projects/*.md (per-project design impact)
+- UNIT_DIR/03-plan/{ProjectName}/plan.md (for each planned project)
 - .specify/memory/projects/index.md
 - .specify/memory/service-registry.md
 - .specify/memory/domain-model.md
@@ -31,7 +31,7 @@ Load these artifacts (report MISSING if required artifact absent):
 ## Consistency checks
 
 ### A. Story/acceptance coverage
-- Every acceptance criterion in 01-story/acceptance-criteria.md must be addressed by at least one
+- Every acceptance criterion in stories/ (acceptance criteria in the story files) must be addressed by at least one
   project plan (`03-plan/{ProjectName}/plan.md`) or design artifact
 - Every project with a `02-design/projects/{ProjectName}.md` impact file must have a plan
 - Uncovered criteria or missing project plans: CRITICAL finding

@@ -89,31 +89,37 @@ These are passive knowledge packs — never invoked directly. They are loaded vi
 7. Never edit or write files outside the project root directory. All file paths must resolve within the project root.
 8. The `.archive/` folder is human-review territory — never delete files from it.
 
-## Story Lifecycle (enterprise SDLC structure)
+## Unit Lifecycle (enterprise SDLC structure)
 Canonical reference: `.specify/memory/standards/story-lifecycle.md` — every lifecycle skill
-(sk.story, sk.design, sk.plan, sk.implement, sk.test, sk.uat, sk.security-audit, sk.session,
-sk.init) loads it and resolves all artifact paths through it. Do not hardcode lifecycle paths.
+(sk.intent, sk.unit, sk.story, sk.design, sk.plan, sk.implement, sk.test, sk.uat,
+sk.security-audit, sk.session, sk.init) loads it and resolves all artifact paths through it.
+Do not hardcode lifecycle paths.
 
-Each story owns one folder with seven numbered phase folders:
+The **unit** is the lifecycle container. Intent → Unit → (stories + numbered phase folders):
 ```
-specs/STORY-{ID}-{feature-name}/
-  01-story/  02-design/  03-plan/{Project}/  04-implementation/{Project}/
-  05-test/{Project}/  06-uat/  07-security-audit/
+specs/intents/{intent-id}/                 # sk.intent  (e.g. 001-authentication)
+  intent.md
+  units/{unit}/                            # sk.unit    (e.g. login)
+    unit-brief.md
+    stories/                               # sk.story   story-{Layer}-{INTENT}-{UNIT}-{NNN}.md + jira.md
+    02-design/                             # sk.design
+    03-plan/{Project}/                     # sk.plan
+    04-implementation/{Project}/           # sk.implement
+    05-test/{Project}/                     # sk.test
+    06-uat/                                # sk.uat
+    07-security-audit/                     # sk.security-audit
 ```
 Flow: Story → Design → Plan → Implementation → Test → UAT → Security Audit → release readiness.
-03/04/05 are project-scoped (one subfolder per participating project). Project memory lives in
-`.specify/memory/projects/` — `index.md` (router: `project | type | code-root`) + per-project
-`{ProjectName}/{project,tech-stack,coding-standards}.md`. Shared, cross-project standards live in
+03/04/05 are project-scoped (one subfolder per participating project); a unit may carry one story
+per layer (frontend/backend/mobile). Project memory lives in `.specify/memory/projects/` —
+`index.md` (router: `project | type | code-root`) + per-project
+`{ProjectName}/{project,tech-stack,coding-standards}.md`. Shared standards live in
 `.specify/memory/standards/` (api/data/observability + story-lifecycle).
-
-**Backward compatibility:** the legacy `specs/intents/{intent}/units/{unit}/stories/...` layout
-still resolves for read; lifecycle skills migrate it non-destructively (copy, never delete) per
-story-lifecycle.md §6.
 
 ## Knowledge Bases (non-derivable context)
 Tier 1 — system:  specs/knowledge-base.md
 Tier 2 — domain:  specs/domains/{domain}/knowledge-base.md
-Tier 3 — unit:    specs/intents/{intent}/units/{unit}/knowledge-base.md  (legacy; new stories carry KB notes in their STORY folder)
+Tier 3 — unit:    specs/intents/{intent}/units/{unit}/02-design/knowledge-base.md
 
 Read tier 1 before any work.
 Read relevant tier 2 when working within a domain.

@@ -3,18 +3,18 @@ Security audit of implementation for active story.
 Role: security | Level: story
 
 ## Pre-flight & Input Artifacts
-Resolve the active story via `.specify/memory/standards/story-lifecycle.md` §3 (`story_dir`).
+Resolve the active story via `.specify/memory/standards/story-lifecycle.md` §3 (`unit_dir`).
 No active story → STOP: run sk.session/sk.story first.
 
-- `STORY_DIR/01-story/` (story.md, requirement.md) — audit scope + security NFRs
-- `STORY_DIR/02-design/api-contract.md` (+ api-spec.json) — attack surface
-- `STORY_DIR/04-implementation/{ProjectName}/implementation.md` — files changed (scopes the scan)
+- `UNIT_DIR/stories/` (story.md, requirement.md) — audit scope + security NFRs
+- `UNIT_DIR/02-design/api-contract.md` (+ api-spec.json) — attack surface
+- `UNIT_DIR/04-implementation/{ProjectName}/implementation.md` — files changed (scopes the scan)
 - impacted projects' `code-root` from `.specify/memory/projects/index.md` → `src/**` to scan
 - `.specify/memory/architecture-decisions.md` — auth ADR + security decisions
   (Backward compat: legacy `specs/intents/**` artifacts read in place if present.)
 
 ## Output Artifacts (per story-lifecycle.md §2)
-Write four files under `STORY_DIR/07-security-audit/` (create if absent, update in place per §7):
+Write four files under `UNIT_DIR/07-security-audit/` (create if absent, update in place per §7):
 `owasp-report.md`, `stride-review.md`, `dependency-scan.md`, `security-signoff.md`.
 
 ## Steps

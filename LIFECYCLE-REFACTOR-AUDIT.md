@@ -1,6 +1,12 @@
 # Lifecycle Refactor — Implementation Audit
 
-> **STATUS: ALL ISSUES RESOLVED** (follow-up fix pass). H1, H2, M1–M5, and L1–L6 are fixed, plus
+> **SUPERSEDED (historical):** this audit covered the earlier **flat `specs/STORY-{ID}/`** model.
+> The structure was subsequently re-pivoted to the **unit-anchored** layout
+> (`specs/intents/{intent}/units/{unit}/` with `stories/` + `02-design`…`07-security-audit`), so
+> the H1 double-prefix and STORY-folder findings no longer apply. The canonical reference is
+> `.specify/memory/standards/story-lifecycle.md`. Kept for history.
+
+> **STATUS (for the prior model): ALL ISSUES RESOLVED** (follow-up fix pass). H1, H2, M1–M5, and L1–L6 are fixed, plus
 > the related legacy-path skills surfaced during verification (sk.knowledge-base, sk.migrate,
 > sk.perf, sk.refactor, sk.impact, and all design/plan/implement sub-skills). Path resolution is
 > now uniform through `story-lifecycle.md`; every legacy `specs/intents/**` reference that remains

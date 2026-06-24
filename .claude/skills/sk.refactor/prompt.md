@@ -50,7 +50,7 @@ Write refactor-plan.md covering:
 - Invariants preserved: public API shapes, observable behaviour, data contracts
 - Rollback: is this a branch? If yes, note branch name. If inline, note last safe commit.
 
-Write to: STORY_DIR/04-implementation/{ProjectName}/refactor-plan.md (resolve STORY_DIR per
+Write to: UNIT_DIR/04-implementation/{ProjectName}/refactor-plan.md (resolve UNIT_DIR per
 story-lifecycle.md §3; legacy fallback: specs/intents/{intent}/units/{unit}/refactor-plan.md)
 (or .specify/refactor-plan.md if not story-scoped)
 Display plan. Ask: "Proceed with this refactor? (y/n)"
@@ -70,7 +70,7 @@ Run existing tests (do not write new tests for refactored internals unless tests
 - Report: tests passed / tests updated / tests requiring attention
 
 ## Output Artifacts
-STORY_DIR/04-implementation/{ProjectName}/refactor-plan.md (or .specify/refactor-plan.md)
+UNIT_DIR/04-implementation/{ProjectName}/refactor-plan.md (or .specify/refactor-plan.md)
 src/** (refactored files, no net new files beyond renames)
 (Legacy fallback: specs/intents/{intent}/units/{unit}/refactor-plan.md)
 

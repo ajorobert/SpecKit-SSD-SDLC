@@ -5,14 +5,14 @@ Role: architect | Level: unit
 Internal sub-skill — invoked by sk.design. Do not invoke directly.
 
 ## Path Resolution (per story-lifecycle.md §3)
-Resolve `STORY_DIR` from session.yaml `story_dir`. Contracts are written to `STORY_DIR/02-design/`.
+Resolve `UNIT_DIR` from session.yaml `unit_dir`. Contracts are written to `UNIT_DIR/02-design/`.
 The machine-readable OpenAPI spec is `02-design/api-spec.json` (canonical source of truth for
 endpoints) with the human-readable summary `02-design/api-contract.md`. Legacy fallback (no
-story_dir): the `contracts/` subfolder under the unit path.
+unit_dir): the `contracts/` subfolder under the unit path.
 
 ## Input Artifacts
-STORY_DIR/02-design/architecture.md   (legacy fallback: specs/intents/{intent}/units/{unit}/architecture.md)
-STORY_DIR/02-design/database-design.md (legacy fallback: .../data-model.md)
+UNIT_DIR/02-design/architecture.md   (legacy fallback: specs/intents/{intent}/units/{unit}/architecture.md)
+UNIT_DIR/02-design/database-design.md (legacy fallback: .../data-model.md)
 .specify/memory/service-registry.md
 .specify/memory/standards/api-standards.md
 .specify/memory/standards/tech-stack.md (for test framework)
@@ -22,8 +22,8 @@ STORY_DIR/02-design/database-design.md (legacy fallback: .../data-model.md)
 1. [REFINE MODE] if contracts/ exists, [CREATE MODE] if not
 2. Check service-registry.md — no breaking changes without confirmation
 3. Design endpoints following api-standards.md
-4. Write OpenAPI spec → `STORY_DIR/02-design/api-spec.json` (machine contract, source of truth),
-   plus a human-readable `STORY_DIR/02-design/api-contract.md` summarizing endpoints, request/
+4. Write OpenAPI spec → `UNIT_DIR/02-design/api-spec.json` (machine contract, source of truth),
+   plus a human-readable `UNIT_DIR/02-design/api-contract.md` summarizing endpoints, request/
    response shapes, and error codes. Keep the two in sync.
 5. Write test plan with the following structure:
    ```
@@ -51,9 +51,9 @@ STORY_DIR/02-design/database-design.md (legacy fallback: .../data-model.md)
    breaking change → add versioned endpoint, flag to user
 
 ## Output Artifacts
-STORY_DIR/02-design/api-spec.json     (machine contract — source of truth)
-STORY_DIR/02-design/api-contract.md   (human-readable summary)
-STORY_DIR/02-design/test-plan.md
+UNIT_DIR/02-design/api-spec.json     (machine contract — source of truth)
+UNIT_DIR/02-design/api-contract.md   (human-readable summary)
+UNIT_DIR/02-design/test-plan.md
 tests/contract/{ProjectName}/provider/{endpoint}.provider.test.{ext}
 .specify/memory/service-registry.md (updated)
 (Legacy fallback: specs/intents/{intent}/units/{unit}/contracts/{api-spec.json,test-plan.md,README.md})

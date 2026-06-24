@@ -1,6 +1,6 @@
 ---
 name: sk.security-audit
-description: "Invoke when: performing a security audit of implementation for a story. Role: security. Reads: session.yaml, 01-story/, 02-design/, 04-implementation/, src/**, architecture-decisions.md. Writes: 07-security-audit/{owasp-report,stride-review,dependency-scan,security-signoff}.md. Evaluates OWASP Top 10 + STRIDE + dependency scan."
+description: "Invoke when: performing a security audit of implementation for a story. Role: security. Reads: session.yaml, stories/, 02-design/, 04-implementation/, src/**, architecture-decisions.md. Writes: 07-security-audit/{owasp-report,stride-review,dependency-scan,security-signoff}.md. Evaluates OWASP Top 10 + STRIDE + dependency scan."
 subagent_type: Security Agent
 inject_files:
   - .specify/memory/standards/story-lifecycle.md

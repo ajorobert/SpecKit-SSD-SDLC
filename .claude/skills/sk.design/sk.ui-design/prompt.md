@@ -32,15 +32,15 @@ Load the frontend packs relevant to this unit's surface before designing. **Load
 List the packs loaded before continuing.
 
 ## Path Resolution (per story-lifecycle.md §3)
-Resolve `STORY_DIR` from session.yaml `story_dir`. The UI model is written to
-`STORY_DIR/02-design/ui-model.md`. Legacy fallback (no story_dir): the unit paths below.
+Resolve `UNIT_DIR` from session.yaml `unit_dir`. The UI model is written to
+`UNIT_DIR/02-design/ui-model.md`. Legacy fallback (no unit_dir): the unit paths below.
 
 ## Input Artifacts
-STORY_DIR/01-story/ (story.md, acceptance-criteria.md)
-STORY_DIR/02-design/architecture.md            (route/page intent, data flow, security)
-STORY_DIR/02-design/api-spec.json              (endpoints this UI consumes — if it exists)
-STORY_DIR/02-design/test-plan.md               (consumer section for this surface — if it exists)
-STORY_DIR/02-design/database-design.md         (entity shapes, optional — read only if present)
+UNIT_DIR/stories/ (story.md, acceptance-criteria.md)
+UNIT_DIR/02-design/architecture.md            (route/page intent, data flow, security)
+UNIT_DIR/02-design/api-spec.json              (endpoints this UI consumes — if it exists)
+UNIT_DIR/02-design/test-plan.md               (consumer section for this surface — if it exists)
+UNIT_DIR/02-design/database-design.md         (entity shapes, optional — read only if present)
 .specify/memory/domain-model.md
 .specify/memory/standards/coding-standards.md
 .claude/skills/design-principles/SKILL.md
@@ -97,8 +97,8 @@ If only ADVISORY findings: report "Frontend engineering review passed with advis
 If any MEDIUM or BLOCKING findings exist: report "Frontend engineering review FAILED." and list all findings.
 
 ## Output Artifacts
-STORY_DIR/02-design/ui-model.md   (legacy fallback: specs/intents/{intent}/units/{unit}/ui-model.md)
-STORY_DIR/02-design/knowledge-base.md
+UNIT_DIR/02-design/ui-model.md   (legacy fallback: specs/intents/{intent}/units/{unit}/ui-model.md)
+UNIT_DIR/02-design/knowledge-base.md
   (frontend section updated only if a non-derivable UI decision was made — see step below)
 
 ## Steps (continued)

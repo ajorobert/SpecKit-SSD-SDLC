@@ -23,12 +23,12 @@ Load tech stack packs relevant to this unit's architecture before designing.
 List the packs loaded before continuing.
 
 ## Path Resolution (per story-lifecycle.md §2–§3)
-Resolve `STORY_DIR` from session.yaml `story_dir`. Write design output into `STORY_DIR/02-design/`.
-Legacy fallback (no story_dir): the `specs/intents/{intent}/units/{unit}/` paths shown below.
+Resolve `UNIT_DIR` from session.yaml `unit_dir`. Write design output into `UNIT_DIR/02-design/`.
+Legacy fallback (no unit_dir): the `specs/intents/{intent}/units/{unit}/` paths shown below.
 
 ## Input Artifacts
-STORY_DIR/01-story/ (story.md, requirement.md, acceptance-criteria.md)
-STORY_DIR/02-design/impact-analysis.md (if the orchestrator wrote it)
+UNIT_DIR/stories/ (story.md, requirement.md, acceptance-criteria.md)
+UNIT_DIR/02-design/impact-analysis.md (if the orchestrator wrote it)
 .specify/memory/domain-model.md
 .specify/memory/service-registry.md
 .specify/memory/architecture-decisions.md
@@ -66,8 +66,8 @@ If only ADVISORY findings: report "Engineering review passed with advisories." a
 If any MEDIUM or BLOCKING findings exist: report "Engineering review FAILED." and list all findings.
 
 ## Output Artifacts
-STORY_DIR/02-design/architecture.md   (legacy fallback: specs/intents/{intent}/units/{unit}/architecture.md)
-STORY_DIR/02-design/knowledge-base.md (boundary notes, if architecture changes domain ownership;
+UNIT_DIR/02-design/architecture.md   (legacy fallback: specs/intents/{intent}/units/{unit}/architecture.md)
+UNIT_DIR/02-design/knowledge-base.md (boundary notes, if architecture changes domain ownership;
   legacy fallback: the unit knowledge-base.md)
 
 ## Steps (continued)
