@@ -168,3 +168,9 @@ approved and let a human run the cleanup.
 **Original path:** .claude/skills/bff-patterns/bff-patterns.md
 **Archived to:** .archive/2026-06-25/bff-patterns.md
 **Review:** [ ] approved for permanent delete
+
+## 2026-06-25 — .claude/skills/SKILL_AUDIT.md
+**Reason:** Superseded by the seam refactor (2026-06-25). The audit analyzed the pre-refactor skill set (csharp-clean-arch, auth-patterns, messaging-patterns, redis-patterns, postgresql-patterns, etc.) which has since been restructured into the seam/edge/plumbing inventory. Its findings (single-owner markers, design-code-review derive, BFF overlap) are now resolved in backend-architecture + the rewritten skills.
+**Original path:** .claude/skills/SKILL_AUDIT.md
+**Archived to:** .archive/2026-06-25/SKILL_AUDIT.md
+**Review:** [ ] approved for permanent delete
