@@ -138,3 +138,15 @@ approved and let a human run the cleanup.
 **Original path:** .claude/skills/polly-resilience-patterns/
 **Archived to:** .archive/2026-05-18/polly-resilience-patterns
 **Review:** [ ] approved for permanent delete
+
+## 2026-05-18 — .claude/skills/observability-contracts/
+**Reason:** Folded inline into observability-backend §6 (PII deny-list, Loki label allow-list, trace correlation) and observability-frontend §6 (PII deny-list, trace correlation). Cross-skill duplication is intentional — both skills load independently and the PII rule must be present in both.
+**Original path:** .claude/skills/observability-contracts/
+**Archived to:** .archive/2026-05-18/observability-contracts
+**Review:** [ ] approved for permanent delete
+
+## 2026-05-18 — .claude/skills/observability-infra/
+**Reason:** Replaced by .specify/memory/observability-stack.md. Wiring is one-time setup, not recurring feature work. Skills now contain rules only.
+**Original path:** .claude/skills/observability-infra/
+**Archived to:** .archive/2026-05-18/observability-infra
+**Review:** [ ] approved for permanent delete

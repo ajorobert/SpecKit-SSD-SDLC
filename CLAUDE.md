@@ -28,10 +28,8 @@ Roles: po | architect | lead | backend | frontend | security
 These are passive knowledge packs — never invoked directly. They are loaded via inject_files in the relevant sk.* skills based on the work being done.
 
 ### Cross-Cutting
-| Skill folder | Load when |
-|---|---|
-| `observability-contracts` | Any observability work — defines resource attrs, runtime-config JSON shape, PII deny-list, Loki label allow-list, span naming. Loaded by every observability-{backend,frontend,infra} skill. |
-| `observability-infra` | OTel Collector config, Loki/Jaeger/Prometheus/GlitchTip deployment, Grafana dashboards, tail sampling, backend swap planning |
+
+Observability wiring lives in `.specify/memory/observability-stack.md` (not a skill). Skills below contain rules only — what to emit, at what level, with what properties.
 
 ### Backend
 | Skill folder | Load when |
@@ -45,7 +43,7 @@ These are passive knowledge packs — never invoked directly. They are loaded vi
 | `keycloak-patterns` | Keycloak JWT validation, IUserContext, RBAC policies, ABAC handlers, M2M, claim mapping |
 | `integration-adapter-patterns` | External integration adapter authoring: port-and-adapter split, typed HttpClient, DelegatingHandler chain, Polly v8 resilience, idempotency-aware retry |
 | `feature-management-patterns` | Microsoft.FeatureManagement, IFeatureManagerSnapshot, built-in + custom filters, variant features, flag naming, sunset discipline |
-| `observability-backend` | .NET service / BFF backend / Wolverine / Hangfire instrumentation (OTel, Serilog, Sentry .NET, dynamic sampler) |
+| `observability-backend` | Traces, logs (Serilog), metrics, error sink — rules for what to emit, at what level, with what properties; PII deny-list; per-component conventions. Wiring in `.specify/memory/observability-stack.md`. |
 
 ### Data
 | Skill folder | Load when |
@@ -63,7 +61,7 @@ These are passive knowledge packs — never invoked directly. They are loaded vi
 | `react-component-patterns` | Component decomposition, TypeScript props, form handling |
 | `zustand-state-management` | Global/shared UI state |
 | `accessibility-standards` | Any frontend implementation or UAT |
-| `observability-frontend` | OTel JS, Sentry, PostHog, Clarity, BFF runtime-config, source maps |
+| `observability-frontend` | OTel JS/RN, Sentry, PostHog (anonymous), Clarity — what to capture, error boundary, source-map upload, PII redaction, consent gating. Wiring in `.specify/memory/observability-stack.md`. |
 
 ### Frontend — Admin SPA
 | Skill folder | Load when |
