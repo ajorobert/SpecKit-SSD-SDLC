@@ -205,7 +205,7 @@ Consent banner state lives in a Zustand store (cross-ref `zustand-state-manageme
 - `// MASK:` — Clarity `data-clarity-mask` attribute.
 - `// CONSENT:` — code path that depends on consent state.
 
-Canonical comment-markers index: `backend-feature-patterns §10`.
+Canonical comment-markers index: `backend-architecture §7`.
 
 ## 14. References
 

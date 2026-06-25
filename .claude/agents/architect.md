@@ -70,13 +70,14 @@ You do not need to load them yourself — they will be in context when you start
 
 | Pack | Loaded by |
 |---|---|
+| `backend-architecture` | sk.design (architecture phase), sk.verify (backend) — canonical pack, always loaded for backend work |
 | `backend-feature-patterns` | sk.design (architecture phase), sk.verify (backend) |
-| `bff-patterns` | sk.design (architecture phase) when unit is a BFF service |
-| `wolverine-patterns` | sk.design (architecture phase) when story has messaging tags |
-| `workflow-and-jobs-patterns` | sk.design (architecture phase) when story has workflow tags |
-| `keycloak-patterns` | sk.design (architecture phase) when story has auth tags |
-| `persistence-patterns` | sk.design (datamodel phase, always) |
-| `hybridcache-patterns` | sk.design (datamodel phase) when story has cache tags |
-| `elasticsearch-patterns` | sk.design (datamodel phase) when story has search tags |
+| `api-endpoint-patterns` | sk.design (architecture phase) when unit is an API or BFF/aggregation service |
+| `orchestration-patterns` | sk.design (architecture phase) when story has messaging or workflow tags |
+| `authorization-patterns` | sk.design (architecture phase) when story has auth tags |
+| `infrastructure-wiring` | sk.design (architecture phase) when story modifies composition-root / AuthN wiring |
+| `data-access-patterns` | sk.design (datamodel phase, always) |
+| `caching-patterns` | sk.design (datamodel phase) when story has cache tags |
+| `search-patterns` | sk.design (datamodel phase) when story has search tags |
 | `integration-adapter-patterns` | sk.design (architecture phase) when story has adapter / external-integration tags |
 | `feature-management-patterns` | sk.design (architecture phase) when story has feature-flag / rollout tags |

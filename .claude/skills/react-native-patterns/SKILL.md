@@ -282,7 +282,7 @@ RN uses a different a11y API surface than the DOM. VoiceOver (iOS) and TalkBack 
 | Marker | Owner | Where it appears here |
 |---|---|---|
 | `// FETCH:` | `nextjs-patterns` | Outbound `apiFetch` call site (§2.9) |
-| `// AUTH:` | `fastendpoints-patterns` | Group `_layout.tsx` auth guard (§2.2); mutation handlers assuming authenticated context |
+| `// AUTH:` | `authorization-patterns` | Group `_layout.tsx` auth guard (§2.2); mutation handlers assuming authenticated context |
 | `// IDEMPOTENCY:` | `backend-feature-patterns` | Mutating `apiFetch` calls supplying `idempotencyKey` (§2.9) |
 | `// A11Y:` | `accessibility-standards` | Non-obvious a11y annotations (§2.11), e.g. enforced 44pt hit area via `hitSlop` |
 | `// EVENT:` | `observability-frontend` | Analytics emission sites (§4) |

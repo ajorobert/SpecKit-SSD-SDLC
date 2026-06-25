@@ -215,7 +215,7 @@ The browser's native View Transition API gives spatial continuity for admin navi
 | Marker | Owner | Where it appears here |
 |---|---|---|
 | `// FETCH:` | `nextjs-patterns` | Outbound `apiFetch` call site inside `queryFn`/`mutationFn` (§2.8) |
-| `// AUTH:` | `fastendpoints-patterns` | Route `beforeLoad` guards (§2.7); mutation handlers that assume authenticated context |
+| `// AUTH:` | `authorization-patterns` | Route `beforeLoad` guards (§2.7); mutation handlers that assume authenticated context |
 | `// IDEMPOTENCY:` | `backend-feature-patterns` | Mutating `apiFetch` calls supplying `idempotencyKey` (§2.8) |
 | `// EVENT:` | `observability-frontend` | Analytics emission sites (§4) |
 | `// MASK:` | `observability-frontend` | Recognised but NOT emitted on this surface — see §4 |

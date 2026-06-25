@@ -1,139 +1,197 @@
 ---
 name: design-code-review
-description: "Load when: reviewing C# .NET 10 backend code. Design pattern compliance, SOLID, architecture conventions, async correctness, security, performance, testability."
+description: "Load when: reviewing C# .NET 10 backend code. Thin review checklist that DERIVES its architecture checks from backend-architecture markers + NetArchTest invariants (it does not restate them), plus stack-neutral async/security/SOLID/testability checks."
+co_loads_with:
+  - backend-architecture (canonical seams, structure, markers, events model, invariants — the gate this skill checks against)
+  - backend-feature-patterns (handler/command/query/mapping shape — the per-feature application of the canonical)
 ---
 
-# .NET Design Pattern Review
+# Backend Code Review (derived)
 
-## Purpose
-Structured review checklist for C# .NET 10 backend code. Evaluates design pattern correctness, SOLID compliance, architecture layer adherence, async safety, security, and testability. Read-only — produces findings, does not modify code.
+## 1. Purpose
 
-## Core Rules
+Read-only review of C# .NET 10 backend code. **Produces findings; never modifies code.**
 
-### Review Dimensions (evaluate all seven)
+This skill is a **thin checklist**. It does **not** restate architecture rules — it derives every
+architecture check from the canonical (`backend-architecture`) and the per-feature shape
+(`backend-feature-patterns`). When the canonical changes, this checklist follows automatically because it
+points at the canonical rather than copying it. The reviewer's job: confirm code matches what those skills
+generate, and flag where it does not.
 
-**1. Layer Architecture**
-* Domain layer has zero infrastructure dependencies (no EF Core, no MassTransit, no HttpClient).
-* Application layer depends only on Domain interfaces — no direct DB access, no infrastructure calls.
-* Infrastructure implements interfaces from Domain/Application — never the reverse.
-* Controllers contain no business logic. Actions: validate → dispatch → respond.
-* Namespace follows `{ServiceName}.{Layer}.{Feature}` convention.
+---
 
-**2. Design Patterns**
-* Command/Query handlers use `IRequest<Result<T>>` via MediatR — one handler per use case.
-* Repository pattern: domain-semantic method names, not `IQueryable` exposure.
-* Factory pattern for complex aggregate construction — validates invariants before returning.
-* Provider/adapter pattern for external service integration — concrete implementations in Infrastructure only.
-* Result pattern used for expected failures — exceptions not used for control flow.
+## 2. Architecture & seam checks (DERIVED — point at the canonical, do not re-argue)
 
-**3. SOLID Compliance**
-* Single Responsibility: each class has one reason to change. Flag classes doing more than one concern.
-* Open/Closed: extension via new classes (new handlers, new strategies) not modifying existing ones.
-* Liskov Substitution: subtypes honour base type contracts fully.
-* Interface Segregation: interfaces are narrow and focused. Flag interfaces with 5+ methods.
-* Dependency Inversion: high-level modules depend on abstractions, not concrete types.
+### (a) The 4 NetArchTest invariants hold — `backend-architecture §8`
 
-**4. Async Correctness (.NET 10)**
-* No `.Result`, `.Wait()`, `.GetAwaiter().GetResult()` — deadlock risk.
-* No `async void` (except unavoidable event handlers).
-* No `Task.Run` wrapping I/O work.
-* `CancellationToken` accepted and forwarded in all async methods.
-* No unnecessary `ConfigureAwait(false)` in application code.
+`tests/Architecture` (NetArchTest + xUnit) mechanically encodes these. **If those tests exist, they are the
+gate** — the reviewer flags anything the tests would catch (and flags the *absence* of the test project as
+itself a finding). The four:
 
-**5. Security**
-* No credentials, connection strings, or secrets hardcoded.
-* All user input validated before processing (FluentValidation in Application layer).
-* Parameterised queries only — no string concatenation in SQL.
-* No sensitive data (passwords, tokens, PII) in log output.
-* Authorization checked before any domain operation — not only at route level.
+1. **Dispatch seam.** No type in any `*.Application` or `*.Api` references Wolverine `IMessageBus` /
+   `IMessageContext`, and none carries `[Transactional]`. All dispatch goes through
+   `IAppCommandBus` / `IAppQueryBus`.
+2. **Module encapsulation.** A module references another module **only** through its `*.Contracts` —
+   never its `Domain` / `Application` / `Infrastructure`.
+3. **Result at boundaries.** Public handler/endpoint methods return `Result` / `Result<T>`; boundaries do
+   not throw for expected failures.
+4. **Contract markers.** Every `ICommand` / `IQuery` carries a `StronglyTypedId`-typed identifier **and** an
+   authz scope marker; mutating commands and protected queries carry `[RequiresPermission]`
+   (or `[RunsAs]` for system principals). The marker/permission *catalog* is project vocabulary in
+   `authorization/` — the *shape* is fixed.
 
-**6. CQRS Compliance**
-* Every use case is implemented as either a **command** (`ICommand` / `ICommand<T>`) or a **query** (`IQuery<T>`) — never a generic `IRequest`.
-* Command handlers (`ICommandHandler<...>`) inject only **write** repositories (`I{Aggregate}WriteRepository`) and `IUnitOfWork`. They mutate aggregate roots through domain methods and return `Result` or `Result<TId>` only — never read DTOs.
-* Query handlers (`IQueryHandler<...>`) inject only **read** repositories (`I{Entity}ReadRepository` / `I{Entity}Queries`). They return DTOs / read models — never aggregate roots, never `IQueryable`.
-* No handler injects both a write repository and a read repository. No repository interface exposes both write methods (`AddAsync`, `UpdateAsync`) and projection methods (`GetXxxDtoAsync`).
-* Search-shaped queries (geo, full-text, faceted) route to Elasticsearch — never direct PostgreSQL queries from a search query handler.
-* Cache-aside lookups live on the read side only — either as a `Cached{Entity}ReadRepository` decorator or inside a query handler. Never inside a command handler.
-* After a command, clients re-fetch via the query side. Commands do not return read DTOs as a "convenience".
+### (b) Comment markers present where required — `backend-architecture §7`
 
-**7. Testability**
-* All dependencies injected via constructor — no `new` for services, no static calls.
-* No static mutable state.
-* Methods are deterministic and side-effect free where possible.
-* Handlers can be unit tested by mocking repository and external service interfaces.
+Markers are CI-greppable; their absence at a required site is a finding. Spot-check the §7 index, including:
 
-### Blocking Issues (must fix before ship)
-* Domain layer referencing infrastructure libraries.
-* Business logic in controllers.
-* `.Result` / `.Wait()` blocking calls in async context.
-* Hardcoded secrets or connection strings.
-* Missing input validation on public-facing endpoints.
-* `IQueryable` exposed from repository interfaces.
-* CQRS violations: a single repository interface exposing both write methods and projection/list/search methods; a command handler returning a read DTO; a query handler invoking write methods or `IUnitOfWork.CommitAsync`; a search query bypassing Elasticsearch and going directly to PostgreSQL; an Infrastructure read-repository implementation that targets more than one data store family (e.g. one class doing both Dapper and Elasticsearch calls) — split into `I{Entity}ReadRepository` (PostgreSQL) and `I{Entity}SearchRepository` (Elasticsearch) per `backend-feature-patterns` §9.
+- Endpoints carry `// ENDPOINT:` (route + verb) **and** `// AUTH:` (authorization policy / permission).
+- Integration-event emission sites carry `// OUTBOX:`.
+- Cached reads carry `// CACHE-TAG:`; invalidation sites carry `// CACHE-INVALIDATE:`.
+- Mapperly custom mappings carry `// MAP:`; HTTP idempotency dedup sites carry `// IDEMPOTENCY:`.
+- `// CONFIGUREAWAIT:` appears **only** on library/adapter lines (`*.Infrastructure`, shared utilities) —
+  never in module handlers (§7 `// CONFIGUREAWAIT:` rule).
 
-### Advisory Issues (flag and recommend)
-* Methods exceeding 30 lines — extract to private methods or separate class.
-* More than 3 constructor parameters — consider grouping related dependencies.
-* Missing XML documentation on public domain interfaces and DTOs.
-* Missing cancellation token propagation.
-* `catch (Exception)` without re-throw or structured logging.
+(Full owner table in §7 — do not duplicate it here; consult it.)
 
-## Patterns / Examples
+### (c) Seam-usage spot checks — `backend-feature-patterns §3–8`, `backend-architecture §2/§6`
 
-### Correct: Command handler
+| Check | Derived from | Looks like a failure when |
+|---|---|---|
+| Command handler is a **plain class** returning `Result` / `Result<T>` and **raises** domain events | feat §3, arch §6 | handler injects a bus, carries `[Transactional]`, opens a transaction, or publishes events itself |
+| Integration events emitted from a **`DomainEventHandler`** that **returns** `IIntegrationEvent`(s) | feat §4, arch §6 | integration event published directly from the command handler (dual-write — arch §6 outbox invariant) |
+| Mapping via a Mapperly **`[Mapper]` partial** | feat §8 | hand-written property copies or reflection mapping in the handler |
+| Query handlers cache-wrap via the **HybridCache seam** (`GetOrCreateAsync`) | feat §5, caching | query touches the write path, or caches inside a command handler |
+| Identity read **only** via `IUserContext` | arch §5, authorization-patterns | handler reads `ClaimsPrincipal` / Keycloak types, or threads raw claims |
+
+---
+
+## 3. Stack-neutral checks (KEEP — not stack-specific)
+
+### Async correctness (.NET 10)
+- No `.Result`, `.Wait()`, or `.GetAwaiter().GetResult()` — deadlock / sync-over-async risk.
+- No `async void` except unavoidable event handlers.
+- No `Task.Run` wrapping I/O-bound work.
+- `CancellationToken` accepted and forwarded through every async call in the chain.
+
+### Security
+- No hardcoded secrets, credentials, or connection strings.
+- Input validation present (FluentValidation validator next to the command — `backend-feature-patterns §7`).
+- Parameterised SQL only — no string concatenation / interpolation into queries.
+- No secrets / tokens / PII in log output (mark PII with `[Sensitive]` — `observability-backend`).
+- Authorization checked **before** the domain operation, not only at the route — and via the contract markers
+  (§2a invariant 4), not ad-hoc branches.
+
+### SOLID / maintainability smells
+- **SRP:** one reason to change per class; flag classes spanning multiple concerns.
+- **ISP:** narrow interfaces; flag interfaces with 5+ methods or repositories mixing write + projection methods.
+- Method length > 30 lines → extract.
+- More than 3 constructor parameters → group related dependencies.
+- Anemic aggregates: `if (entity.Status == X)` business branches in handlers belong on the aggregate
+  (`backend-feature-patterns §11`).
+
+### Testability
+- All dependencies constructor-injected — no `new` for services, no static service-locator calls.
+- No static mutable state.
+- Handlers unit-testable with fake repositories + `FakeUserContext` (`backend-feature-patterns §12`).
+
+---
+
+## 4. Blocking vs advisory
+
+**Blocking (must fix before ship):**
+- Any of the 4 NetArchTest invariants violated (§2a) — or the `tests/Architecture` project absent.
+- A required comment marker missing at its site (§2b) — e.g. an endpoint with no `// AUTH:`, an integration
+  event with no `// OUTBOX:`.
+- Integration event published from a command handler / any dual-write of state + event (arch §6 outbox invariant).
+- Bus injected or `[Transactional]` on a handler; identity read from `ClaimsPrincipal` instead of `IUserContext`.
+- Boundary method throwing for an expected failure instead of returning `Result`.
+- Blocking async (`.Result` / `.Wait()` / `.GetAwaiter().GetResult()`) in an async path.
+- Hardcoded secret / connection string; missing input validation on a public entry point; non-parameterised SQL;
+  PII/secret in logs.
+
+**Advisory (flag and recommend):**
+- Method > 30 lines; > 3 constructor parameters; interface with 5+ methods.
+- Missing `CancellationToken` propagation on a non-boundary async method.
+- `catch (Exception)` without re-throw or structured logging.
+- Missing XML docs on public contracts / DTOs.
+
+---
+
+## 5. Examples — CORRECT vs INCORRECT (real stack)
+
+### Correct — plain Wolverine-discovered handler, returns Result, raises a domain event
 ```csharp
-// ✅ Single responsibility, Result return, injected deps, CancellationToken
-public class DeactivateListingHandler(IListingRepository repo, IUnitOfWork uow)
-    : IRequestHandler<DeactivateListingCommand, Result>
+// ✅ plain class (no bus, no [Transactional]); returns Result; aggregate raises the event
+public sealed class ActivateListingHandler(IListingsRepository repo)
 {
-    public async Task<Result> Handle(DeactivateListingCommand cmd, CancellationToken ct)
+    public async Task<Result> Handle(ActivateListingCommand cmd, CancellationToken ct)
     {
         var listing = await repo.GetByIdAsync(cmd.ListingId, ct);
-        if (listing is null) return Result.Failure(new NotFoundError("Listing not found"));
-        listing.Deactivate();
-        await uow.CommitAsync(ct);
-        return Result.Success();
+        if (listing.IsError) return listing.Errors;
+
+        var activated = listing.Value.Activate();   // raises ListingActivatedEvent on success
+        if (activated.IsError) return activated.Errors;
+
+        await repo.SaveChangesAsync(ct);             // pipeline commits state + outbox atomically
+        return Result.Success;
     }
 }
 ```
 
-### Incorrect: Business logic in controller
+### Incorrect — handler injects a bus and dual-writes the event
 ```csharp
-// ❌ Controller doing domain work
-[HttpDelete("{id}")]
-public async Task<IActionResult> Delete(Guid id)
+// ❌ bus injected into the module (invariant #1); event published directly from the handler
+//    (arch §6 outbox invariant — state + event must commit via the outbox, not dual-written)
+public sealed class ActivateListingHandler(IListingsRepository repo, IMessageBus bus)
 {
-    var listing = await _db.Listings.FindAsync(id); // direct DB access
-    if (listing.OwnerId != User.GetId()) return Forbid(); // auth logic here
-    listing.IsActive = false; // domain mutation
-    await _db.SaveChangesAsync();
-    return NoContent();
+    public async Task<Result> Handle(ActivateListingCommand cmd, CancellationToken ct)
+    {
+        var listing = await repo.GetByIdAsync(cmd.ListingId, ct);
+        listing.Value.Activate();
+        await repo.SaveChangesAsync(ct);
+        await bus.PublishAsync(new ListingActivatedIntegrationEvent(cmd.ListingId.Value)); // dual-write
+        return Result.Success;
+    }
+}
+```
+Integration events belong in a `DomainEventHandler` that **returns** `IIntegrationEvent`(s)
+(`backend-feature-patterns §4`).
+
+### Correct — endpoint dispatches through the command-bus seam
+```csharp
+// ENDPOINT: POST /listings/{id}/activate
+// AUTH: requires listings:activate
+public sealed class ActivateListingEndpoint(IAppCommandBus bus) : Endpoint<ActivateListingRequest>
+{
+    public override async Task HandleAsync(ActivateListingRequest req, CancellationToken ct)
+    {
+        Result result = await bus.Send(new ActivateListingCommand(new ListingId(req.Id), req.IdempotencyKey), ct);
+        await this.SendResultAsync(result, ct);   // Result → HTTP per api-endpoint-patterns
+    }
 }
 ```
 
-### Correct: Repository interface
+### Incorrect — business logic + direct DB + ad-hoc auth in the endpoint
 ```csharp
-// ✅ Domain-semantic, no IQueryable leak
-public interface IListingRepository
+// ❌ direct DbContext, identity branch, and domain mutation in the entry point — no seam, no Result
+public override async Task HandleAsync(ActivateListingRequest req, CancellationToken ct)
 {
-    Task<Listing?> GetByIdAsync(Guid id, CancellationToken ct);
-    Task<IReadOnlyList<Listing>> GetActiveInAreaAsync(GeoPolygon area, CancellationToken ct);
-    Task AddAsync(Listing listing, CancellationToken ct);
-}
-
-// ❌ Leaks EF Core and query composition to callers
-public interface IListingRepository
-{
-    IQueryable<Listing> Query();
+    var listing = await _db.Listings.FindAsync(req.Id);            // direct DB access
+    if (listing.OwnerId != User.GetId()) { await SendForbiddenAsync(ct); return; } // ad-hoc auth, ClaimsPrincipal
+    listing.Status = ListingStatus.Active;                        // domain mutation in endpoint
+    await _db.SaveChangesAsync(ct);
 }
 ```
 
-## When to Use
-* Any backend C# code review for design pattern or SOLID compliance
-* Pre-merge review of pull requests touching Application, Domain, or Infrastructure layers
-* Architecture audit of an existing service
+---
 
-## When NOT to Use
-* Frontend code review (see `react-component-patterns`, `nextjs-patterns`)
-* Infrastructure scripts or Terraform/Bicep review
-* Database migration review (see `persistence-patterns` §6)
+## 6. When to use / NOT to use
+
+**Use for:**
+- Any backend C# review touching `*.Domain` / `*.Application` / `*.Infrastructure` / `*.Api`.
+- Pre-merge PR review and architecture audits of an existing service.
+
+**Do NOT use for:**
+- Frontend review (see `react-component-patterns`, `nextjs-patterns`).
+- Infrastructure scripts / Terraform / Bicep.
+- Database migration review (see `data-access-patterns`).

@@ -150,3 +150,21 @@ approved and let a human run the cleanup.
 **Original path:** .claude/skills/observability-infra/
 **Archived to:** .archive/2026-05-18/observability-infra
 **Review:** [ ] approved for permanent delete
+
+## 2026-06-25 — .claude/skills/wolverine-patterns/wolverine-patterns.md
+**Reason:** Dissolved in seam refactor: events seam -> backend-architecture, sagas -> orchestration-patterns, Wolverine wiring -> infrastructure-wiring
+**Original path:** .claude/skills/wolverine-patterns/wolverine-patterns.md
+**Archived to:** .archive/2026-06-25/wolverine-patterns.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-06-25 — .claude/skills/keycloak-patterns/keycloak-patterns.md
+**Reason:** Dissolved in seam refactor: AuthN wiring -> infrastructure-wiring, IUserContext -> backend-architecture, RBAC/ABAC usage -> authorization-patterns
+**Original path:** .claude/skills/keycloak-patterns/keycloak-patterns.md
+**Archived to:** .archive/2026-06-25/keycloak-patterns.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-06-25 — .claude/skills/bff-patterns/bff-patterns.md
+**Reason:** Dissolved in seam refactor: merged into api-endpoint-patterns (BFF/aggregation endpoints section)
+**Original path:** .claude/skills/bff-patterns/bff-patterns.md
+**Archived to:** .archive/2026-06-25/bff-patterns.md
+**Review:** [ ] approved for permanent delete

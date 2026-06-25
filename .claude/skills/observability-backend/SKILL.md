@@ -1,14 +1,15 @@
 ---
 name: observability-backend
 description: |
-  Backend observability rules for .NET 10: traces, logs (Serilog structured), metrics, error sink (GlitchTip via Sentry SDK). Covers what to emit, at what level, with what properties, and the PII deny-list. Per-component conventions for Wolverine, EF, Hangfire, Elsa, HybridCache, FastEndpoints, and Polly. Wiring/deployment lives in `.specify/memory/observability-stack.md`, not here.
+  Backend observability rules for .NET 10: traces, logs (Serilog structured), metrics, error sink (GlitchTip via Sentry SDK). Covers what to emit, at what level, with what properties, and the PII deny-list. Per-component conventions for the dispatch seam, EF, Hangfire, Elsa, HybridCache, FastEndpoints, and Polly. Wiring/deployment lives in `.specify/memory/observability-stack.md`, not here.
 when_to_load:
   - Task mentions: log, logging, trace, tracing, span, metric, error, observability, instrumentation, telemetry, sentry, glitchtip, serilog
   - Files touched: any code that emits ILogger calls, ActivitySource calls, or metric increments
 co_loads_with:
+  - backend-architecture (canonical seams, structure, markers, events model — read first)
   - backend-feature-patterns (handler observability)
 references:
-  - wolverine-patterns, persistence-patterns, hybridcache-patterns, elasticsearch-patterns, keycloak-patterns, file-pipeline-patterns, workflow-and-jobs-patterns, integration-adapter-patterns, fastendpoints-patterns (each has a §observability note)
+  - infrastructure-wiring, data-access-patterns, caching-patterns, search-patterns, authorization-patterns, file-pipeline-patterns, orchestration-patterns, integration-adapter-patterns, api-endpoint-patterns (each has a §observability note)
   - .specify/memory/observability-stack.md (one-time wiring / deployment)
 ---
 
@@ -29,7 +30,7 @@ Wiring (`AddOpenTelemetry`, Serilog sinks, Sentry SDK init, Collector endpoints)
 
 ## 2. Trace rules
 
-Auto-spans for free: FastEndpoints (HTTP), Wolverine (message handling), EF Core (DB), Polly via `Http.Resilience` (HTTP outbound), HybridCache (cache ops) — all emit spans automatically when the OTel SDK is wired.
+Auto-spans for free: FastEndpoints (HTTP), the dispatch seam (command/query + message handling, produced by `infrastructure-wiring`'s bus impl), EF Core (DB), Polly via `Http.Resilience` (HTTP outbound), HybridCache (cache ops) — all emit spans automatically when the OTel SDK is wired.
 
 **Add a custom span when:**
 
@@ -50,7 +51,7 @@ Auto-spans for free: FastEndpoints (HTTP), Wolverine (message handling), EF Core
 ```csharp
 private static readonly ActivitySource Source = new("YourContext.Listings");
 
-public async Task<ErrorOr<Success>> Handle(GenerateVariantsCommand cmd, CancellationToken ct)
+public async Task<Result> Handle(GenerateVariantsCommand cmd, CancellationToken ct)
 {
     // SPAN: business-meaningful boundary not covered by an auto-span
     using var activity = Source.StartActivity("process.image-variant");
@@ -58,7 +59,7 @@ public async Task<ErrorOr<Success>> Handle(GenerateVariantsCommand cmd, Cancella
     activity?.SetTag("your_context.variant_count", cmd.Variants.Count);
 
     var result = await _processor.ProcessAsync(cmd, ct);
-    if (result.IsError) activity?.SetStatus(ActivityStatusCode.Error, result.FirstError.Code);
+    if (result.IsError) activity?.SetStatus(ActivityStatusCode.Error, result.Errors[0].Code);
     return result;
 }
 ```
@@ -142,7 +143,7 @@ public sealed class ListingMetrics(IMeterFactory factory)
 **Cross-stack rule:** the same deny-list applies to frontend (`observability-frontend §6` duplicates this list — both skills load independently). Enforcement: a Serilog property scrubber and an OTel span processor apply the list; wiring lives in the memory doc.
 
 ```csharp
-public async Task<ErrorOr<Success>> Handle(CreateAccountCommand cmd, CancellationToken ct)
+public async Task<Result> Handle(CreateAccountCommand cmd, CancellationToken ct)
 {
     var result = await _service.CreateAsync(cmd, ct);
     // SENSITIVE: cmd.Email and cmd.Phone deliberately excluded; user_id only
@@ -179,7 +180,7 @@ public sealed class IndexerService(/* deps */)
 {
     private static readonly ActivitySource Source = new("YourContext.Search");
 
-    public async Task<ErrorOr<Success>> Reindex(string alias, CancellationToken ct)
+    public async Task<Result> Reindex(string alias, CancellationToken ct)
     {
         // SPAN: business-meaningful boundary
         using var activity = Source.StartActivity("search.reindex");
@@ -187,7 +188,7 @@ public sealed class IndexerService(/* deps */)
 
         var result = await DoReindexAsync(alias, ct);
         if (result.IsError)
-            activity?.SetStatus(ActivityStatusCode.Error, result.FirstError.Code);
+            activity?.SetStatus(ActivityStatusCode.Error, result.Errors[0].Code);
         return result;
     }
 }
@@ -208,12 +209,14 @@ Rule: don't probe DB from `/live` — a DB hiccup → all pods restart → casca
 
 **External probes via Blackbox Exporter** for external SaaS dependencies (vendor APIs, Elasticsearch cluster reachability). **Deferred from V1.**
 
-## 11. Wolverine handler observability
+## 11. Dispatch-seam / handler observability
 
-- **Auto-spans:** Wolverine emits a span per `Handle` invocation with message type as an attribute.
+The bus + outbox spans are produced by the dispatch seam (`infrastructure-wiring`'s bus impl); handlers stay library-agnostic.
+
+- **Auto-spans:** a span per command/query/message `Handle` invocation with message type as an attribute.
 - **Auto-metrics:** message processing latency, retry count, dead-letter count — all per message type (bounded cardinality).
 - **What you add:** log at INFO at the end of a state-mutating handler with `AggregateId` + `Operation` (cross-ref `backend-feature-patterns §3`).
-- **Sagas:** each saga step is its own span; saga state changes log at INFO with `SagaId` + `Step`.
+- **Sagas:** each saga step is its own span; saga state changes log at INFO with `SagaId` + `Step` (see `orchestration-patterns`).
 - **Outbox publish:** instrumented as a span linked to the parent handler span; consumer-side handler span links back via `traceparent` carried in message headers.
 
 ## 12. Hangfire job observability
@@ -232,7 +235,7 @@ Rule: don't probe DB from `/live` — a DB hiccup → all pods restart → casca
 
 - **Auto-metrics:** L1 hit / L2 hit / miss counters per cache tag (the bounded part); latency histogram.
 - **What you add:** rarely anything. Auto-emission covers the common cases.
-- **Cache invalidation events:** log at INFO when an integration-event handler fires `RemoveByTagAsync` (cross-ref `hybridcache-patterns §6`).
+- **Cache invalidation events:** log at INFO when an integration-event handler fires `RemoveByTagAsync` (cross-ref `caching-patterns`).
 
 ## 15. HTTP-client / Polly observability
 
@@ -268,18 +271,19 @@ Rule: don't probe DB from `/live` — a DB hiccup → all pods restart → casca
 - `// METRIC:` — metric emission line.
 - `// SENSITIVE:` — annotates a deliberately-excluded property (PII or otherwise).
 
-Canonical comment-markers index: `backend-feature-patterns §10`.
+Canonical comment-markers index: `backend-architecture §7`.
 
 ## 19. References
 
+- `backend-architecture §7` — canonical comment-markers index.
 - `backend-feature-patterns §3` — handler observability touchpoints.
-- `wolverine-patterns §6, §7, §10` — message + saga observability auto-emission.
-- `persistence-patterns §13` — DB observability auto-emission.
-- `hybridcache-patterns §6, §13` — cache observability + invalidation events.
-- `elasticsearch-patterns §10, §12` — ES client observability.
-- `keycloak-patterns §10` — audit-log property conventions.
-- `file-pipeline-patterns §13` — scan / upload state-change events worth logging.
-- `workflow-and-jobs-patterns §12` — Elsa + Hangfire OTel propagation.
+- `infrastructure-wiring` — the dispatch-seam bus + outbox spans; message + saga auto-emission.
+- `data-access-patterns` — DB observability auto-emission.
+- `caching-patterns` — cache observability + invalidation events.
+- `search-patterns` — ES client observability.
+- `authorization-patterns` — audit-log property conventions.
+- `file-pipeline-patterns` — scan / upload state-change events worth logging.
+- `orchestration-patterns` — Elsa + Hangfire OTel propagation.
 - `integration-adapter-patterns §12` — adapter OTel auto-instrumentation.
-- `fastendpoints-patterns §3` — endpoint observability auto-emission.
+- `api-endpoint-patterns` — endpoint observability auto-emission.
 - `.specify/memory/observability-stack.md` — one-time wiring: `AddOpenTelemetry` builder, Collector config, Tempo/Loki/Prometheus/GlitchTip endpoints, Serilog enricher registration, Sentry SDK trace-id alignment.

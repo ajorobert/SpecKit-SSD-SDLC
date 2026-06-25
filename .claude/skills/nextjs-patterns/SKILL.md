@@ -13,11 +13,10 @@ co_loads_with:
   - accessibility-standards
   - observability-frontend
 references:
-  - keycloak-patterns
+  - authorization-patterns
   - file-pipeline-patterns
-  - fastendpoints-patterns
+  - api-endpoint-patterns
   - observability-backend
-  - bff-patterns
 ---
 
 # Next.js Patterns (App Router 15+, Customer Portal)
@@ -146,7 +145,7 @@ app/
 ### 2.6 Authentication — NextAuth v5 + Keycloak
 NextAuth v5 is the only sanctioned auth library for the portal. The Keycloak provider is configured ONCE in `auth.ts` (wiring — out of scope here). Feature code consumes the exported `auth()`, `signIn()`, `signOut()`, and `handlers` only.
 
-**Session shape (what's in the JWT after Keycloak callback):** the public claim contract — what the backend issues and what the portal can read — is owned by `keycloak-patterns`. This skill assumes the session matches that contract:
+**Session shape (what's in the JWT after Keycloak callback):** the public claim contract — what the backend issues and what the portal can read — is owned by `authorization-patterns`. This skill assumes the session matches that contract:
 
 ```ts
 // @/lib/auth-types.ts
@@ -200,7 +199,7 @@ Every outbound call from the portal to a backend service goes through a single `
 
 1. **Traceparent forwarding** — the wrapper reads the current OTel context and emits a `traceparent` header so backend spans nest under the portal request. Header propagation contract is owned by `observability-backend`.
 2. **Authorization** — for user-context calls, the wrapper attaches `Authorization: Bearer <access_token>` from the current NextAuth session. For unauthenticated (CMS, public listing) calls, it omits the header. Never construct the header manually in feature code.
-3. **Idempotency-Key on mutations** — every `POST`, `PUT`, `PATCH`, `DELETE` carries an `Idempotency-Key` header. The wrapper requires the caller to supply `idempotencyKey`; if absent, it throws at build-test time. Key derivation rule and server semantics are owned by `fastendpoints-patterns`.
+3. **Idempotency-Key on mutations** — every `POST`, `PUT`, `PATCH`, `DELETE` carries an `Idempotency-Key` header. The wrapper requires the caller to supply `idempotencyKey`; if absent, it throws at build-test time. Key derivation rule and server semantics are owned by `api-endpoint-patterns`.
 
 ```ts
 // @/lib/server-fetch.ts — shape only; full implementation in repo
@@ -245,7 +244,7 @@ export async function serverFetch(path: string, opts: Options = {}): Promise<Res
 ### Used but not owned
 | Marker | Owner | Where it appears here |
 |---|---|---|
-| `// AUTH:` | `fastendpoints-patterns` | Server Component / Server Action authorization checks (§2.3, §2.6) |
+| `// AUTH:` | `authorization-patterns` | Server Component / Server Action authorization checks (§2.3, §2.6) |
 | `// IDEMPOTENCY:` | `backend-feature-patterns` | Mutating `serverFetch` call sites that supply `idempotencyKey` (§2.3, §2.9) |
 | `// EVENT:` | `observability-frontend` | Portal-side analytics emission (§4) |
 | `// MASK:` | `observability-frontend` | PII redaction at telemetry boundary (§4) |
@@ -271,5 +270,5 @@ The portal is the landing zone for the frontend observability markers (`// EVENT
 * **Mobile app** (React Native + Expo) — see `react-native-patterns`.
 * **Component decomposition, prop typing, form handling, custom hooks** — see `react-component-patterns`.
 * **Tailwind v4 setup, shadcn/ui rules, design tokens, CVA, dark mode** — see `frontend-design-system`.
-* **BFF aggregation** — when a screen needs data from 3+ services with cross-cutting concerns, the aggregation belongs in BFF, not in a Next.js Server Component. See `bff-patterns` for the decision matrix.
+* **BFF aggregation** — when a screen needs data from 3+ services with cross-cutting concerns, the aggregation belongs in BFF, not in a Next.js Server Component. See `api-endpoint-patterns` for the decision matrix.
 * **Backend implementation** — never restate handler, endpoint, validation, or persistence rules here. Cross-ref the owning backend skill instead.

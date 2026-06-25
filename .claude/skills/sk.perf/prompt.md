@@ -23,10 +23,10 @@ Declare at start: `[PERF MODE] Input: {load-test | profiler | both}. Role: {back
 ## Capability pack selection
 Load packs matching role (≤4 packs):
 
-Role = backend: always `.claude/skills/backend-feature-patterns/SKILL.md`
-- DB bottleneck signals (persistence, database, postgres, ef core, dapper, indexing, jsonb, postgis, concurrency) → `.claude/skills/persistence-patterns/SKILL.md`
-- Cache opportunity signals (cache, caching, hybrid cache, L1/L2, tag invalidation, distributed lock, rate limit, redlock, redis stream) → `.claude/skills/hybridcache-patterns/SKILL.md`
-- Search bottleneck signals → `.claude/skills/elasticsearch-patterns/SKILL.md`
+Role = backend: always `.claude/skills/backend-architecture/SKILL.md` (canonical SSOT), `.claude/skills/backend-feature-patterns/SKILL.md`
+- DB bottleneck signals (persistence, database, postgres, ef core, dapper, indexing, jsonb, postgis, concurrency) → `.claude/skills/data-access-patterns/SKILL.md`
+- Cache opportunity signals (cache, caching, hybrid cache, L1/L2, tag invalidation, distributed lock, rate limit, redlock, redis stream) → `.claude/skills/caching-patterns/SKILL.md`
+- Search bottleneck signals → `.claude/skills/search-patterns/SKILL.md`
 
 Role = frontend: always `.claude/skills/react-component-patterns/SKILL.md`, `.claude/skills/frontend-design-system/SKILL.md`
 

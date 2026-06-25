@@ -129,5 +129,5 @@ Frontend knobs apply via BFF env-var change → next runtime-config fetch (~60s)
 ## What's NOT in this doc
 
 - Rules for what to emit / at what level / what properties — see `.claude/skills/observability-backend/SKILL.md` and `.claude/skills/observability-frontend/SKILL.md`.
-- Per-stack-component observability cross-refs — those live in each relevant stack skill (`wolverine-patterns`, `persistence-patterns`, etc.).
+- Per-stack-component observability cross-refs — those live in each relevant stack skill (`orchestration-patterns`, `data-access-patterns`, etc.).
 - Working Collector YAML / Grafana provisioning JSON — those live in `deploy/observability/`. This doc is the architectural shape, not the deploy artifacts.
