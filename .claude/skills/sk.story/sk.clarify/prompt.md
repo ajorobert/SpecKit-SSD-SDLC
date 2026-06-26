@@ -8,8 +8,9 @@ Role: po | Level: story
 ## Pre-flight
 1. Read session.yaml active_story_id
    NULL → STOP: run sk.session focus --story {id} first
-2. Load story-{ID}.md from:
-   specs/intents/{intent}/units/{unit}/stories/{story-id}/story-{ID}.md
+2. Load the active story folder from:
+   specs/intents/{intent}/units/{unit}/{NN}-story/
+   Read `story.md`, `requirement.md`, and `acceptance-criteria.md`.
 
 ## Ambiguity scan
 Perform a structured coverage scan across these categories.
@@ -31,17 +32,17 @@ For each question:
 2. For multiple-choice: state **Recommended:** option with 1-2 sentence rationale, then list options as table
 3. For short-answer: state **Suggested:** answer with brief reasoning
 4. After user answers: record in working memory, then immediately:
-   - Append `- Q: <question> → A: <answer>` under `## Clarifications / ### Session YYYY-MM-DD` in story-{ID}.md
-   - Apply the clarification to the appropriate section in story-{ID}.md (acceptance criteria, scope, constraints, etc.)
-   - Save story-{ID}.md after each integration
+   - Append `- Q: <question> → A: <answer>` under `## Clarifications / ### Session YYYY-MM-DD` in `requirement.md`
+   - Apply the clarification to the appropriate file in the story folder (`acceptance-criteria.md` for criteria, `story.md` for scope, `requirement.md` for rules/constraints)
+   - Save the affected file after each integration
 5. Stop early if: all critical ambiguities resolved, user signals "done"/"proceed", or 5 questions reached
 
 ## After loop completes
-- Final pass: confirm no business [NEEDS CLARIFICATION] markers remain in story-{ID}.md
-- If scope changed: flag to user and suggest updating story status
+- Final pass: confirm no business [NEEDS CLARIFICATION] markers remain in the story folder
+- If scope changed: flag to user and suggest updating `status` in `story.md`
 
 ## Output Artifacts
-story-{ID}.md (updated with clarifications inline)
+{NN}-story/ — `requirement.md`, `acceptance-criteria.md`, and/or `story.md` updated with clarifications inline
 
 ## Quality Bar
 - All business ambiguities resolved or explicitly deferred before moving to technical stages
