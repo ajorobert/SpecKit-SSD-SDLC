@@ -1,12 +1,29 @@
-# sk.init — Project Initialization
+# sk.init — Project & Workspace Initialization
 
-Initialize or update a project's SpecKit memory layer.
+Initialize or update a project's SpecKit memory layer, or an enterprise
+workspace that governs multiple projects.
 
 ## Mode Detection
 
-Check whether `.specify/project-config.md` exists:
-- **Missing** → [NEW PROJECT] Full interview + generate all memory files + scaffold
-- **Exists** → [UPDATE] Show current values, selective re-generation menu
+Resolve the mode in this order (first match wins). The single-project
+[NEW PROJECT] and [UPDATE] flows are unchanged — workspace detection is
+layered on top and never alters them.
+
+1. `.specify/memory/projects/index.md` exists
+   → **[WORKSPACE UPDATE]** Enterprise workspace already initialized.
+     Show the project router + per-project update menu.
+2. Else, `.specify/project-config.md` exists
+   → **[UPDATE]** Single-project flow. Show current values, selective
+     re-generation menu. (unchanged)
+3. Else (neither exists) → ask one routing question first:
+
+   > "Are you initializing a **single project** or an **enterprise
+   > workspace** that contains multiple projects?"
+
+   - **Single project** → **[NEW PROJECT]** Full interview + generate all
+     memory files + scaffold. (unchanged)
+   - **Enterprise workspace** → **[WORKSPACE INIT]** Workspace interview +
+     generate workspace memory + per-project memory. (new — see below)
 
 ---
 
@@ -316,6 +333,274 @@ For each selected item:
 
 ---
 
+## [WORKSPACE INIT] Steps
+
+Enterprise mode. Initializes a workspace that governs multiple projects.
+This flow is independent of the single-project flows above — it does NOT
+generate or require `.specify/project-config.md`. Each project gets its own
+isolated memory folder under `.specify/memory/projects/{name}/`.
+
+### Step W1 — Workspace Interview
+
+Ask these in order. Keep it a tight, structured conversation.
+
+**1. Workspace identity**
+- What is the **workspace name**?
+- What is the **total number of projects** in this workspace? → `totalProjects`
+
+**2. Project mix**
+- How many **backend** projects? → `backendCount`
+- How many **frontend** projects? → `frontendCount`
+- How many **mobile** projects? → `mobileCount`
+
+**Validation (hard gate):**
+```
+backendCount + frontendCount + mobileCount == totalProjects
+```
+If the sum does NOT equal `totalProjects`, do not proceed. Report the
+mismatch (e.g. "You said 5 total but the breakdown sums to 4") and re-ask
+the four counts until the equation holds.
+
+**3. Per-project details**
+Loop over every project (group the loop by type so the user fills all
+backend projects, then all frontend, then all mobile). For each project
+collect:
+- **Project name** (used as the folder slug under `projects/`)
+- **Project type** — one of: `Backend` | `Frontend` | `Mobile`
+  (pre-assigned by which group is being filled; confirm only)
+- **Code root path** — absolute or workspace-relative path to the code
+- **Technology stack** — language + primary framework/libraries
+- **Framework version** — concrete version or range (never "TBD")
+- **Architecture pattern** — e.g. Clean Architecture, MVC, Feature-Sliced,
+  Modular Monolith, MVVM
+- **Coding standards** — formatter/linter + key conventions to enforce
+
+### Step W2 — Generate Workspace Memory
+
+Create the directory `.specify/memory/` if it does not exist.
+
+**`.specify/memory/projects/index.md`** — the workspace router.
+Write the workspace name as the heading, then a router table with one row
+per project:
+```
+# {Workspace Name} — Project Router
+
+Workspace memory index. Each project owns an isolated memory folder under
+`projects/{name}/`. Read the relevant project folder before working in it.
+
+Total projects: {totalProjects}  (Backend: {backendCount} · Frontend: {frontendCount} · Mobile: {mobileCount})
+
+| Project | Type | Code Root |
+|---|---|---|
+| [{name}](./{name}/project.md) | {type} | `{code root path}` |
+| ... | ... | ... |
+```
+
+### Step W3 — Generate Per-Project Memory
+
+For each project, create `.specify/memory/projects/{name}/` and write:
+
+**`projects/{name}/project.md`**
+```
+# {Project Name}
+
+| Field | Value |
+|---|---|
+| Workspace | {Workspace Name} |
+| Type | {Backend \| Frontend \| Mobile} |
+| Code Root | `{code root path}` |
+| Architecture Pattern | {architecture pattern} |
+
+## Responsibility
+{1–2 sentence inference of what this project does, from its name + type +
+stack. If the user gave a description, use it verbatim.}
+
+## Memory Files
+- [tech-stack.md](./tech-stack.md) — technology + framework version
+- [coding-standards.md](./coding-standards.md) — conventions to enforce
+
+## Notes
+{any extra context the user gave; otherwise "None"}
+```
+
+**`projects/{name}/tech-stack.md`**
+```
+# {Project Name} — Tech Stack
+
+| Field | Value |
+|---|---|
+| Type | {Backend \| Frontend \| Mobile} |
+| Technology Stack | {technology stack} |
+| Framework Version | {framework version} |
+| Architecture Pattern | {architecture pattern} |
+
+## Stack Detail
+{expand the stack into specifics: language, framework, key libraries,
+data layer, and — for backend — API style; for frontend/mobile — UI layer.
+Make reasonable inferences; never leave "TBD".}
+```
+
+**`projects/{name}/coding-standards.md`**
+```
+# {Project Name} — Coding Standards
+
+## Formatter / Linter
+{from interview, or the stack's standard tooling, e.g. dotnet format +
+EditorConfig, Prettier + ESLint, ktlint}
+
+## Conventions
+{the coding standards the user gave, as enforceable rules — one per line}
+
+## Architecture Rules
+- Architecture pattern: {architecture pattern} — layer/module boundaries
+  MUST be respected.
+{add pattern-appropriate boundary rules, e.g. for Clean Architecture:
+"domain layer has zero infrastructure dependencies".}
+```
+
+### Step W3.5 — Generate Shared Workspace Standards
+
+These are **workspace-wide** technical standards that all projects inherit
+(complement, not replace, each project's own `coding-standards.md`). Create
+`.specify/memory/standards/` and write the three files below.
+
+Ask one short batch of questions first (defaults in brackets — accept
+"use defaults" to skip):
+- **API:** URL style + versioning + error format? [REST, `/v{n}` path versioning, RFC 7807 Problem Details]
+- **Data:** naming convention + required audit fields? [snake_case, `id` + `created_at` + `updated_at`]
+- **Observability:** logging / tracing / metrics sinks? ["not decided yet" is valid and gets flagged]
+
+**`.specify/memory/standards/api-standards.md`**
+```
+# Workspace API Standards
+Applies to all backend/BFF projects in the workspace.
+
+## URL Structure
+{e.g. /api/{resource}, plural nouns, kebab-case}
+
+## Versioning
+{e.g. path-based /v1, header-based, or none}
+
+## Response Envelope
+{concrete success + collection shape}
+
+## Error Format
+{RFC 7807 Problem Details by default — concrete fields}
+
+## Pagination & Idempotency
+- List endpoints paginate (cursor or page/limit) — state which.
+- Mutating endpoints accept an idempotency key where applicable.
+```
+
+**`.specify/memory/standards/data-standards.md`**
+```
+# Workspace Data Standards
+Applies to every project that owns persistent state.
+
+## Naming Conventions
+{e.g. snake_case tables/columns for PostgreSQL}
+
+## Required Fields
+- id (primary key)
+- created_at
+- updated_at
+{plus any audit/tenant fields the user names}
+
+## Index, Migration & Transaction Rules
+- Every foreign key is indexed.
+- Schema changes ship as forward-only migrations.
+- One transaction per unit of work; no partial commits.
+```
+
+**`.specify/memory/standards/observability-standards.md`**
+```
+# Workspace Observability Standards
+Non-negotiable behaviour across every project, regardless of tooling.
+
+## Logging
+- Structured JSON: timestamp, level, service, trace_id, span_id, message.
+
+## Tracing
+- W3C traceparent: inbound extract, outbound inject, async payloads embed trace_id.
+
+## Metrics
+- RED on every endpoint: requests_total, errors_total, request_duration_seconds.
+
+## Health
+- GET /health on every service: 200 ok / 503 degraded.
+
+## Tooling
+- Logging sink: {answer or "framework default"}
+- Tracing backend: {answer or "not decided yet — flagged for resolution"}
+- Metrics sink: {answer or "not decided yet — flagged for resolution"}
+```
+
+### Step W4 — Confirm
+
+Report what was created, e.g.:
+```
+✓ .specify/memory/projects/index.md   (router — {totalProjects} projects)
+
+For each project:
+✓ .specify/memory/projects/{name}/project.md
+✓ .specify/memory/projects/{name}/tech-stack.md
+✓ .specify/memory/projects/{name}/coding-standards.md
+
+Shared standards:
+✓ .specify/memory/standards/api-standards.md
+✓ .specify/memory/standards/data-standards.md
+✓ .specify/memory/standards/observability-standards.md
+
+Next: run /sk.init again to add or update a project, or open a project
+folder under .specify/memory/projects/ to begin work.
+```
+
+---
+
+## [WORKSPACE UPDATE] Steps
+
+Triggered when `.specify/memory/projects/index.md` already exists.
+
+### Step 1 — Load Router
+
+Read `projects/index.md` silently to learn the workspace name, counts, and
+the current project list.
+
+### Step 2 — Present Menu
+
+```
+Workspace: [name from index.md]
+Projects: [list each name — type]
+
+What would you like to do?
+  [1] Add a new project        — interview + new projects/{name}/ folder + router row
+  [2] Update an existing project — pick one, regenerate its memory files
+  [3] Update the router only     — fix names / types / code roots in index.md
+  [4] Update shared standards    — api / data / observability standards
+
+Enter a number or press Enter to cancel:
+```
+
+### Step 3 — Execute
+
+- **[1] Add project** — run the Step W1 per-project questions for one
+  project, write its three memory files (Steps W3), append a row to the
+  router, and increment the relevant count + `totalProjects` in `index.md`.
+  Re-validate the count equation after updating.
+- **[2] Update project** — show that project's current memory values, ask
+  what changes, regenerate only the affected file(s) in its folder. Update
+  the router row if name/type/code-root changed.
+- **[3] Update router** — edit only `index.md`.
+- **[4] Update shared standards** — show current values from
+  `standards/{api,data,observability}-standards.md`, ask what changes,
+  regenerate only the affected file(s). If the `standards/` folder is
+  absent (workspace predates this step), generate it via Step W3.5.
+
+Never touch other projects' folders during an update — each project's
+memory is isolated.
+
+---
+
 ## Input Artifacts
 - `.specify/project-config.md` (UPDATE mode only)
 - `.specify/memory/*.md` (UPDATE mode only — to show current values)
@@ -332,6 +617,15 @@ For each selected item:
 - `specs/guide.yaml` (NEW PROJECT only, if absent)
 - `specs/knowledge-base.md` (NEW PROJECT only, if absent)
 
+### Workspace (WORKSPACE INIT / WORKSPACE UPDATE only)
+- `.specify/memory/projects/index.md` (router)
+- `.specify/memory/projects/{name}/project.md` (one per project)
+- `.specify/memory/projects/{name}/tech-stack.md` (one per project)
+- `.specify/memory/projects/{name}/coding-standards.md` (one per project)
+- `.specify/memory/standards/api-standards.md` (shared)
+- `.specify/memory/standards/data-standards.md` (shared)
+- `.specify/memory/standards/observability-standards.md` (shared)
+
 ## Quality Bar
 - No `<!-- TODO -->` or placeholder lines remain in generated files
 - `system-context.md`: all sections filled — no empty fields
@@ -341,3 +635,11 @@ For each selected item:
 - `project-config.md`: Custom Rules section has at least one entry, or explicitly states "None"
 - `constitution.md`: Architecture Principles, Error Handling Contract, and Observability Contract all populated — no [PLACEHOLDER] tokens; "Not decided" only allowed in Observability Contract
 - `coding-standards.md`: Formatter/Linter and Error Handling Pattern `[Fill in]` placeholders replaced with actual project values
+
+### Workspace quality bar (WORKSPACE INIT / WORKSPACE UPDATE only)
+- `projects/index.md`: count equation holds — `backendCount + frontendCount + mobileCount == totalProjects`; one router row per project; every Code Root populated
+- Each project folder has all three files: `project.md`, `tech-stack.md`, `coding-standards.md` — no folder partially generated
+- Each `tech-stack.md`: concrete Framework Version, never "TBD"
+- Each `coding-standards.md`: Architecture Pattern recorded with at least one enforceable boundary rule
+- Project folder slug matches the name used in the router row
+- Shared `standards/` folder present with all three files: `api-standards.md`, `data-standards.md`, `observability-standards.md` — concrete values; "not decided yet" allowed only for observability sinks and flagged
