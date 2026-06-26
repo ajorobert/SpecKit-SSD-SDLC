@@ -7,8 +7,11 @@ Role: po | Level: intent → unit → story
 - `sk.specify` (no flag) → [FEATURE MODE] user story interview framing
 Declare mode at start of execution.
 
+**Jira-seeded capture:** When the orchestrator passes Jira seed data (from `sk.story --jira {Jira_Id}`), use it to PRE-FILL the interview matrix (Actor, Action, Value, Trigger, Input, Output, Happy Path, Error Cases) and the acceptance criteria. Only ask the PO about dimensions Jira left genuinely empty or ambiguous — do not re-ask what the Jira task already answers. Set `jira_id: {Jira_Id}` in story frontmatter.
+
 ## Input Artifacts
 .specify/memory/system-context.md
+.specify/memory/projects/index.md (project router)
 session.yaml (active_intent_id, active_unit_id)
 
 ## Steps
@@ -35,10 +38,19 @@ If creating a new intent (active_intent_id was NULL before step 1):
 
 ### Step 3b — Context-Aware Probing (optional)
 Before asking questions, load:
-- Existing stories in the same unit (`specs/intents/{intent}/units/{unit}/stories/`) to avoid duplication.
+- Existing story folders in the same unit (`specs/intents/{intent}/units/{unit}/{NN}-story/`) to avoid duplication.
 - `.specify/memory/domain-model.md` to probe for entity relationships.
 - `.specify/memory/system-context.md` to check if the story touches integration points.
 Use this to generate 1-2 proactive questions (e.g. "This story involves the Order entity. Does it need to handle state transitions?").
+
+### Step 3c — Load Project Router
+Before capturing the story, load `.specify/memory/projects/index.md` as the project router.
+Use it to ground the requirement in the actual workspace:
+- **Available projects:** enumerate the projects and their types (Backend / Frontend / Mobile) so story capture is aware of which surfaces exist.
+- **Existing features:** scan the listed project folders for overlapping capabilities to avoid duplicating an existing feature.
+- **Domain context:** cross-reference `.specify/memory/domain-model.md` for the entities the story touches.
+- **Business rules:** carry any project-level constraints into the interview.
+The story is NOT split per project. Project impact is resolved later in `sk.architect-probe`, which records the **impacted projects** into `unit-brief.md`. This step only ensures the captured requirement is project-router-aware.
 
 ### Step 4 — Capture Story
 
@@ -76,19 +88,27 @@ Ask explicitly: what is explicitly out of scope.
 - Note: out of scope defaults to "no new features introduced by this fix"
 
 ### Step 5 — Write Story
-Write story to:
-  specs/intents/{intent}/units/{unit}/stories/story-{ID}.md
-  using story-template.md, ID format: {INTENT}-{UNIT}-{NNN}
+Create a single numbered story folder (the story is NOT split per project):
+  specs/intents/{intent}/units/{unit}/{NN}-story/
+where `{NN}` is the next zero-padded sequence within the unit (`01-story`, `02-story`, …).
+Story ID format stays `{INTENT}-{UNIT}-{NNN}` and is recorded in `story.md` frontmatter.
 
-In [BUG MODE]: set `story_type: bug` in frontmatter and populate:
+Write these files into that folder:
+  - `story.md` — frontmatter (`id`, `intent`, `unit`, `status`, `story_type`, `tags`, `checkpoint_mode`; plus `jira_id` when Jira-seeded) + the As-a/I-want/So-that user story + in/out-of-scope.
+  - `requirement.md` — the functional + non-functional business requirements derived from the interview.
+  - `acceptance-criteria.md` — the testable acceptance criteria (GWT or condition-based).
+
+In [BUG MODE]: set `story_type: bug` in `story.md` frontmatter and populate (in `story.md`):
   - `expected_behavior`
   - `actual_behavior`
   - `reproduction_steps`
   - `related_story` (if provided)
 
+When Jira-seeded: also write `jira.md` in the folder recording the source `{Jira_Id}`, issue summary, and a link back. In manual mode `jira.md` is not created.
+
 ### Step 5b — Tag Story with Domain Keywords
 After writing the story, scan the story title and acceptance criteria for tech domain signals.
-Set the `tags` array in story frontmatter using keywords from this list:
+Set the `tags` array in `story.md` frontmatter using keywords from this list:
 
 | Keyword to add | When present in story |
 |---|---|
@@ -102,25 +122,28 @@ Set the `tags` array in story frontmatter using keywords from this list:
 | `bff` | api gateway, bff, backend-for-frontend, aggregation, forwarding |
 | `state` | zustand, global state, shared state, store |
 
-Add matched tags to story frontmatter as: `tags: [tag1, tag2]`
+Add matched tags to `story.md` frontmatter as: `tags: [tag1, tag2]`
 Empty array if none match: `tags: []`
 
 ### Step 6 — Classify Checkpoint
-Read governance skill → set checkpoint_mode in story frontmatter.
+Read governance skill → set checkpoint_mode in `story.md` frontmatter.
 Bug stories default to checkpoint_mode: standard unless the fix touches
 a service boundary or data model (→ confirm).
 
 ## Output Artifacts
 specs/intents/{intent}/intent.md (if new)
 specs/intents/{intent}/units/{unit}/unit-brief.md (if new)
-specs/intents/{intent}/units/{unit}/stories/story-{ID}.md
+specs/intents/{intent}/units/{unit}/{NN}-story/story.md
+specs/intents/{intent}/units/{unit}/{NN}-story/requirement.md
+specs/intents/{intent}/units/{unit}/{NN}-story/acceptance-criteria.md
+specs/intents/{intent}/units/{unit}/{NN}-story/jira.md (only when Jira-seeded)
 
 ## Quality Bar
 
 ### Feature mode
 - Story has clear user story format
 - Minimum 3 acceptance criteria
-- checkpoint_mode set in frontmatter
+- checkpoint_mode set in `story.md` frontmatter
 - Out of scope items listed
 
 ### Bug mode

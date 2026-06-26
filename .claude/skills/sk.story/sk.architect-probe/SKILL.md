@@ -1,9 +1,10 @@
 ---
 name: sk.architect-probe
-description: "Invoke when: extracting and clarifying non-functional requirements, security boundaries, and technical constraints from the PO. Role: architect. Reads: session.yaml, architecture-decisions.md, story-{ID}.md. Writes: story-{ID}.md."
+description: "Invoke when: extracting and clarifying non-functional requirements, security boundaries, and technical constraints from the PO. Role: architect. Reads: session.yaml, architecture-decisions.md, projects/index.md, {NN}-story/. Writes: {NN}-story/requirement.md, unit-brief.md (impacted projects)."
 subagent_type: SpecKit Architect Agent
 inject_files:
   - .specify/memory/architecture-decisions.md
+  - .specify/memory/projects/index.md
 ---
 
 Resolves technical ambiguities (NFRs, scale, security, observability) in the active story using a structured loop.
