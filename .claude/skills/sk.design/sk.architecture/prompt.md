@@ -22,9 +22,15 @@ Load tech stack packs relevant to this unit's architecture before designing.
 
 List the packs loaded before continuing.
 
+## Design Output Layout
+All design artifacts for the unit live under `specs/intents/{intent}/units/{unit}/02-design/`
+(the design sibling of the story phase's `01-story/`). This sub-skill writes
+`02-design/architecture.md` and `02-design/impact-analysis.md`. Create the `02-design/`
+folder if it does not exist.
+
 ## Input Artifacts
 specs/intents/{intent}/units/{unit}/unit-brief.md
-specs/intents/{intent}/units/{unit}/stories/ (all stories)
+specs/intents/{intent}/units/{unit}/{NN}-story/ (all story folders — story.md, requirement.md, acceptance-criteria.md)
 .specify/memory/domain-model.md
 .specify/memory/service-registry.md
 .specify/memory/architecture-decisions.md
@@ -33,14 +39,22 @@ specs/intents/{intent}/units/{unit}/stories/ (all stories)
 ## Steps
 1. [REFINE MODE] if architecture.md exists, [CREATE MODE] if not
 2. If REFINE: read existing fully, preserve valid content, update changed sections
-3. List all stories in unit — confirm architecture covers each one
+3. List all stories in unit (read every `{NN}-story/` folder) — confirm architecture covers each one
 4. Define: service responsibility, bounded context, communication
    patterns, internal components, data flow, security approach
-5. Write architecture document
-6. If validate checkpoint: pause for user approval before continuing
-7. Suggest ADR for any cross-service decision made
+5. Write architecture document to `02-design/architecture.md`
+   (use `templates/artifacts/architecture-template.md` as the structure)
+6. Write the impact analysis to `02-design/impact-analysis.md`:
+   - Read `unit-brief.md` → Impacted Projects table (canonical list of affected projects)
+   - For each project, record change type (new | modified | config-only | none) and what the
+     design changes in it; capture cross-project contracts and sequencing/dependencies
+   - Use `templates/artifacts/impact-analysis-template.md` as the structure
+   - This is the design-phase, unit-scoped impact view; it does NOT replace sk.impact's
+     blast-radius report. Every project in unit-brief.md must appear exactly once.
+7. If validate checkpoint: pause for user approval before continuing
+8. Suggest ADR for any cross-service decision made
 
-## Engineering Review (mandatory — runs after step 5)
+## Engineering Review (mandatory — runs after steps 5–6)
 Validate the written architecture against:
 - `.specify/memory/service-registry.md` — no new service boundary violations
 - `.specify/memory/domain-model.md` — no entity ownership conflicts with existing units
@@ -61,17 +75,20 @@ If only ADVISORY findings: report "Engineering review passed with advisories." a
 If any MEDIUM or BLOCKING findings exist: report "Engineering review FAILED." and list all findings.
 
 ## Output Artifacts
-specs/intents/{intent}/units/{unit}/architecture.md
+specs/intents/{intent}/units/{unit}/02-design/architecture.md
+specs/intents/{intent}/units/{unit}/02-design/impact-analysis.md
 specs/intents/{intent}/units/{unit}/knowledge-base.md
-  (boundary section updated if architecture changes domain ownership)
+  (unit-tier KB stays at unit root — boundary section updated if architecture changes domain ownership)
 
 ## Steps (continued)
-8. If architecture introduces or changes domain boundary:
+9. If architecture introduces or changes domain boundary:
    Update unit knowledge-base.md boundary rationale
    If boundary change is significant: suggest domain-level
    knowledge base update via sk.knowledge-base --tier domain
 
 ## Quality Bar
+- Both `02-design/architecture.md` and `02-design/impact-analysis.md` written
+- impact-analysis.md lists every project from unit-brief.md Impacted Projects exactly once, each with a change type
 - All unit stories explicitly listed in stories-covered
 - Bounded context clearly defined
 - No conflicts with service-registry.md
