@@ -1,6 +1,6 @@
 ---
 name: sk.datamodel
-description: "Internal sub-skill of sk.design. Invoke via sk.design, not directly. Designs data entities, schema strategy, and access patterns for a unit. Role: architect. Reads: architecture.md, domain-model.md, data-standards.md. Writes: data-model.md, domain-model.md (updated)."
+description: "Internal sub-skill of sk.design. Invoke via sk.design, not directly. Designs data entities, schema strategy, and access patterns for a unit. Role: architect. Reads: 02-design/architecture.md, domain-model.md, data-standards.md. Writes: 02-design/database-design.md, domain-model.md (updated)."
 subagent_type: SpecKit Architect Agent
 inject_files:
   - .specify/memory/standards/data-standards.md
@@ -9,7 +9,7 @@ inject_files:
 ---
 
 Defines data model for a unit. ONE document per unit.
-Requires active_unit_id in session.yaml and architecture.md to exist.
+Requires active_unit_id in session.yaml and 02-design/architecture.md to exist.
 
 Internal sub-skill — invoked by sk.design. Do not invoke directly.
 

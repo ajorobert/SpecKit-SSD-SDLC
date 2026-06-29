@@ -1,6 +1,6 @@
 ---
 name: sk.ui-design
-description: "Internal sub-skill of sk.design. Invoke via sk.design, not directly. Designs the frontend surface for a unit — route/page tree, component architecture, state placement, API-consumption contracts, performance and accessibility strategy. Role: frontend. Reads: architecture.md, contracts/api-spec.json, contracts/test-plan.md, unit-brief.md, stories, domain-model.md. Writes: ui-model.md."
+description: "Internal sub-skill of sk.design. Invoke via sk.design, not directly. Designs the frontend surface for a unit — route/page tree, component architecture, state placement, API-consumption contracts, performance and accessibility strategy. Role: frontend. Reads: 02-design/architecture.md, 02-design/contracts/api-spec.json, 02-design/contracts/test-plan.md, 02-design/api-contract.md, unit-brief.md, stories, domain-model.md. Writes: 02-design/ui-model.md, 02-design/projects/{Frontend/Mobile project}.md."
 subagent_type: SpecKit Frontend Engineer Agent
 inject_files:
   - .specify/memory/standards/coding-standards.md

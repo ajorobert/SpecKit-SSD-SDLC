@@ -1,6 +1,6 @@
 ---
 name: sk.architecture
-description: "Internal sub-skill of sk.design. Invoke via sk.design, not directly. Defines service boundaries, bounded contexts, and design for a unit. Role: architect. Reads: unit-brief.md, stories, domain-model.md, service-registry.md, architecture-decisions.md. Writes: architecture.md, knowledge-base.md."
+description: "Internal sub-skill of sk.design. Invoke via sk.design, not directly. Defines service boundaries, bounded contexts, and design for a unit. Role: architect. Reads: unit-brief.md, stories, domain-model.md, service-registry.md, architecture-decisions.md. Writes: 02-design/architecture.md, 02-design/impact-analysis.md, knowledge-base.md."
 subagent_type: SpecKit Architect Agent
 inject_files:
   - .specify/memory/architecture-decisions.md

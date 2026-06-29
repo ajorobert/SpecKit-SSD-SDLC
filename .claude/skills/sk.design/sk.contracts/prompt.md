@@ -4,9 +4,17 @@ Role: architect | Level: unit
 
 Internal sub-skill — invoked by sk.design. Do not invoke directly.
 
+## Design Output Layout
+All design artifacts live under `specs/intents/{intent}/units/{unit}/02-design/`.
+This sub-skill writes the machine contract artifacts to `02-design/contracts/`
+(`api-spec.json` stays the canonical OpenAPI source), the human-readable
+`02-design/api-contract.md`, and one backend design page per impacted Backend project
+under `02-design/projects/`.
+
 ## Input Artifacts
-specs/intents/{intent}/units/{unit}/architecture.md
-specs/intents/{intent}/units/{unit}/data-model.md
+specs/intents/{intent}/units/{unit}/unit-brief.md (Impacted Projects table)
+specs/intents/{intent}/units/{unit}/02-design/architecture.md
+specs/intents/{intent}/units/{unit}/02-design/database-design.md
 .specify/memory/service-registry.md
 .specify/memory/standards/api-standards.md
 .specify/memory/standards/tech-stack.md (for test framework)
@@ -41,15 +49,31 @@ specs/intents/{intent}/units/{unit}/data-model.md
 6. Generate provider contract tests in correct framework per tech-stack.md
 7. If REFINE: never remove existing endpoints
    breaking change → add versioned endpoint, flag to user
+8. Write the human-readable `02-design/api-contract.md` from `templates/artifacts/api-contract-template.md`.
+   It is a companion to `contracts/api-spec.json` (the canonical OpenAPI source) — keep the two in sync;
+   never document an endpoint here that is absent from api-spec.json.
+9. Write one backend design page per impacted Backend project:
+   - Read `unit-brief.md` → Impacted Projects; for each row with Type = Backend, write
+     `02-design/projects/{ProjectName}.md` using `templates/artifacts/project-design-template.md`.
+   - File name = the project name from unit-brief.md (e.g. `MarketPlace.API.md`) — dynamic, not fixed.
+   - The page is a VIEW that synthesises the project-relevant slice of architecture.md,
+     database-design.md, and api-contract.md (endpoints owned, handlers, entities, security,
+     consistency/outbox per write path). It references the canonical docs; it does not redefine them.
+   - Frontend/Mobile project pages are NOT written here — sk.ui-design owns those.
 
 ## Output Artifacts
-specs/intents/{intent}/units/{unit}/contracts/api-spec.json
-specs/intents/{intent}/units/{unit}/contracts/test-plan.md
-specs/intents/{intent}/units/{unit}/contracts/README.md
+specs/intents/{intent}/units/{unit}/02-design/contracts/api-spec.json
+specs/intents/{intent}/units/{unit}/02-design/contracts/test-plan.md
+specs/intents/{intent}/units/{unit}/02-design/contracts/README.md
+specs/intents/{intent}/units/{unit}/02-design/api-contract.md
+specs/intents/{intent}/units/{unit}/02-design/projects/{BackendProject}.md (one per impacted Backend project)
 tests/contract/{unit}/provider/{endpoint}.provider.test.{ext}
 .specify/memory/service-registry.md (updated)
 
 ## Quality Bar
+- Machine artifacts written under `02-design/contracts/`; `api-contract.md` written at `02-design/` root
+- api-contract.md documents only endpoints present in contracts/api-spec.json (the two stay in sync)
+- One `02-design/projects/{ProjectName}.md` written for every impacted Backend project, named from unit-brief.md
 - All endpoints follow api-standards.md URL and response format
 - Test plan has provider section and at least one per-consumer section
 - Per-consumer sections list only the endpoints that consumer actually calls

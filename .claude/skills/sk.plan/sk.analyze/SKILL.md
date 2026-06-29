@@ -1,6 +1,6 @@
 ---
 name: sk.analyze
-description: "Internal sub-skill of sk.plan. Invoke via sk.plan, not directly. Runs a cross-artifact consistency check for the active unit. Role: lead. READ-ONLY — no files written. Reads: architecture.md, all stories, api-spec.json, data-model.md, service-registry.md, domain-model.md, architecture-decisions.md."
+description: "Internal sub-skill of sk.plan. Invoke via sk.plan, not directly. Runs a cross-artifact consistency check for the active unit. Role: lead. READ-ONLY — no files written. Reads: 02-design/architecture.md, 02-design/impact-analysis.md, all stories, 02-design/contracts/api-spec.json, 02-design/database-design.md, 03-plan/{Project}/plan.md, service-registry.md, domain-model.md, architecture-decisions.md."
 subagent_type: SpecKit Lead Agent
 inject_files:
   - .specify/memory/architecture-decisions.md
