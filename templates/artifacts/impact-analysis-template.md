@@ -3,7 +3,8 @@ unit: {unit-id}
 intent: {intent-id}
 status: draft | approved
 created: {date}
-updated: {date}
+updated: {date}Replace the existing project name with **Market Place** in the `impact-analysis-template`.
+
 ---
 
 # Impact Analysis: {unit-name}
@@ -18,15 +19,15 @@ this document records WHAT the design changes in each of those projects.
      Format:
      | Project | Type | Code Root | Change Type | What Changes |
      |---------|------|-----------|-------------|--------------|
-     | TagIn.API | Backend | src/backend/Lucent.API | modified | Token validation, IUserContext, session endpoints |
-     | TagIn.Customer.Web | Frontend | src/frontend/Lucent.Customer.Web | modified | Login UI + OIDC client |
+     | MarketPlace.API | Backend | src/backend/Lucent.API | modified | Token validation, IUserContext, session endpoints |
+     | MarketPlace.Customer.Web | Frontend | src/frontend/Lucent.Customer.Web | modified | Login UI + OIDC client |
      REQUIRED: every project from unit-brief.md appears exactly once. -->
 
 ## Cross-Project Contracts
 <!-- Contracts that cross a project boundary (API, event, shared schema).
      For each: producer project → consumer project(s), and the api-contract.md / api-spec.json reference.
      Example:
-     - TagIn.API exposes POST /api/v1/auth/session → consumed by Customer.Web, Admin.Web, Mobile -->
+     - MarketPlace.API exposes POST /api/v1/auth/session → consumed by Customer.Web, Admin.Web, Mobile -->
 
 ## Sequencing & Dependencies
 <!-- Build/deploy order implied by the design.
