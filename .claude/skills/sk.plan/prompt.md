@@ -14,17 +14,17 @@ One folder per impacted project; folder names come from `unit-brief.md` → Impa
 
 ```
 specs/intents/{intent}/units/{unit}/03-plan/
-├── {BackendProject}/        # e.g. TagIn.API        (--role backend)
+├── {BackendProject}/        # e.g. MarketPlace.API        (--role backend)
 │   ├── plan.md              # narrative execution plan
 │   ├── tasks.md             # ordered, granular task list
 │   ├── checklist.md         # readiness / definition-of-done
 │   ├── jira-subtask.md      # Jira sub-task breakdown
 │   └── estimation.md        # per-task + rolled-up estimates
-├── {CustomerWebProject}/    # e.g. TagIn.Customer.Web (--role frontend)
+├── {CustomerWebProject}/    # e.g. MarketPlace.Customer.Web (--role frontend)
 │   └── (same five files)
-├── {AdminWebProject}/       # e.g. TagIn.Admin.Web    (--role frontend)
+├── {AdminWebProject}/       # e.g. MarketPlace.Admin.Web    (--role frontend)
 │   └── (same five files)
-└── {MobileProject}/         # e.g. TagIn.Mobile       (--role mobile)
+└── {MobileProject}/         # e.g. MarketPlace.Mobile       (--role mobile)
     └── (same five files)
 ```
 
@@ -47,7 +47,7 @@ Impacted Projects table (see Project Resolution). Examples mirroring the unit la
 
 ## Project Resolution
 Resolve a `--projects {key}` selector to a row in `unit-brief.md` → Impacted Projects:
-1. Exact match on the project Name (e.g. `--projects TagIn.API`).
+1. Exact match on the project Name (e.g. `--projects MarketPlace.API`).
 2. Well-known aliases against the row's Type / Role:
    - `api` | `backend`  → the row with Type = Backend
    - `web` | `customer` → the Frontend row whose Role mentions customer/portal

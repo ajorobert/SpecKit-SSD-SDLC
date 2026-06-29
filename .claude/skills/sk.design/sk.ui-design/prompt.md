@@ -80,8 +80,8 @@ specs/intents/{intent}/units/{unit}/02-design/database-design.md         (entity
 12. Write one per-surface design page per impacted Frontend/Mobile project:
     - Read `unit-brief.md` → Impacted Projects; for each row with Type = Frontend or Type = Mobile,
       write `02-design/projects/{ProjectName}.md` using `templates/artifacts/project-design-template.md`.
-    - File name = the project name from unit-brief.md (e.g. `TagIn.Customer.Web.md`, `TagIn.Admin.Web.md`,
-      `TagIn.Mobile.md`) — dynamic, not fixed.
+    - File name = the project name from unit-brief.md (e.g. `MarketPlace.Customer.Web.md`, `MarketPlace.Admin.Web.md`,
+      `MarketPlace.Mobile.md`) — dynamic, not fixed.
     - The page is a VIEW that extracts this project's slice of ui-model.md (its routes/screens, components,
       state homes, consumed endpoints from api-contract.md, fetch strategy, a11y, loading/empty/error states).
       It references the canonical ui-model.md and api-contract.md; it does not redefine them.

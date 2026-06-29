@@ -6,8 +6,8 @@ Internal sub-skill — invoked by the sk.plan orchestrator, once per impacted pr
 Do not invoke directly.
 
 ## What "one project" means
-A unit may impact several projects (TagIn.API, TagIn.Customer.Web, TagIn.Admin.Web,
-TagIn.Mobile …). This sub-skill plans exactly ONE of them, named `{Project}` with code
+A unit may impact several projects (MarketPlace.API, MarketPlace.Customer.Web, MarketPlace.Admin.Web,
+MarketPlace.Mobile …). This sub-skill plans exactly ONE of them, named `{Project}` with code
 root `{CodeRoot}`. It aggregates the work from ALL of the unit's stories that touches
 `{Project}` into a single project execution plan. It does NOT re-plan the other projects.
 
@@ -53,8 +53,8 @@ UNIT_DIR/03-plan/{Project}/
 ├── jira-subtask.md   # Jira sub-task breakdown
 └── estimation.md     # per-task + rolled-up estimates
 ```
-`{Project}` is the exact project name from the Impacted Projects table (e.g. `TagIn.API`,
-`TagIn.Customer.Web`). Do NOT invent or abbreviate it.
+`{Project}` is the exact project name from the Impacted Projects table (e.g. `MarketPlace.API`,
+`MarketPlace.Customer.Web`). Do NOT invent or abbreviate it.
 
 ## Steps
 

@@ -55,7 +55,7 @@ specs/intents/{intent}/units/{unit}/02-design/database-design.md
 9. Write one backend design page per impacted Backend project:
    - Read `unit-brief.md` → Impacted Projects; for each row with Type = Backend, write
      `02-design/projects/{ProjectName}.md` using `templates/artifacts/project-design-template.md`.
-   - File name = the project name from unit-brief.md (e.g. `TagIn.API.md`) — dynamic, not fixed.
+   - File name = the project name from unit-brief.md (e.g. `MarketPlace.API.md`) — dynamic, not fixed.
    - The page is a VIEW that synthesises the project-relevant slice of architecture.md,
      database-design.md, and api-contract.md (endpoints owned, handlers, entities, security,
      consistency/outbox per write path). It references the canonical docs; it does not redefine them.
