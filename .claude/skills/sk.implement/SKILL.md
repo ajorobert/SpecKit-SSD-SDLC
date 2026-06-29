@@ -1,14 +1,19 @@
 ---
 name: sk.implement
-description: "Invoke when: generating tasks and executing implementation for a story. Role: backend or frontend (required — determines agent). Reads: session.yaml, plan.md, architecture.md, contracts, coding-standards.md. Writes: tasks.yaml, src/**."
-subagent_type: SpecKit Backend Engineer Agent
+description: "Invoke when: executing the implementation phase for a unit, producing one delivery folder per impacted project. Role: lead (orchestrator). Runs at unit level. Invokes: sk.implementproject (for each impacted project). Produces 04-implementation/{Project}/ (implementation.md, progress.md, validation.md) per impacted project. Reads: session.yaml, unit-brief.md, 02-design/**, 03-plan/{Project}/ (plan.md, tasks.md, checklist.md), coding-standards.md."
+subagent_type: SpecKit Lead Agent
 inject_files:
-  - .specify/memory/standards/coding-standards.md
-  - .specify/memory/standards/observability-standards.md
-  - .specify/memory/architecture-decisions.md
+  - .claude/skills/governance/checkpoint-rules.md
+  - .specify/memory/standards/tech-stack.md
 ---
 
-Generates task breakdown and executes implementation phase-by-phase. Role determines agent: backend → SpecKit Backend Engineer Agent, frontend → SpecKit Frontend Engineer Agent.
-Requires plan.md. Refine mode activated if review-{story-id}.md exists.
+Orchestrator skill — full implementation pipeline for a unit.
+Invokes `sk.implementproject` for each impacted project (from the unit's Impacted Projects table),
+each consuming that project's `03-plan/{Project}/` and producing a delivery folder under
+`04-implementation/{Project}/`. Each sub-skill runs in its own isolated context — state is passed
+via the file system (session.yaml + spec/plan artifacts).
+
+Requires `03-plan/{Project}/plan.md` for each targeted project. Refine mode activated per project if
+a `review-{story-id}.md` exists.
 
 Read and execute the full workflow in `prompt.md` in this directory.

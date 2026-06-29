@@ -1,6 +1,6 @@
 ---
 name: sk.scaffolding
-description: "Internal sub-skill of sk.implement. Invoke via sk.implement, not directly. Performs structural scaffolding (creating files, classes, stubs, test fixtures) with no business logic. Role: backend or frontend."
+description: "Internal sub-skill of sk.implement (via sk.implementproject). Invoke through the orchestrator, not directly. Performs structural scaffolding (creating files, classes, stubs, test fixtures) for ONE project within its {CodeRoot}, with no business logic. Role: backend | frontend | mobile."
 subagent_type: SpecKit Backend Engineer Agent
 inject_files:
   - .specify/memory/standards/coding-standards.md
@@ -8,10 +8,10 @@ inject_files:
   - .specify/memory/architecture-decisions.md
 ---
 
-Structural scaffolding step.
-Creates classes, interfaces, DTOs, stubs, and test fixtures without business logic.
-Requires active_story_id in session.yaml.
+Structural scaffolding step for one impacted project of a unit.
+Creates classes, interfaces, DTOs, stubs, and test fixtures within the project's {CodeRoot} — no
+business logic. Consumes `03-plan/{Project}/tasks.md`; tracks status in `04-implementation/{Project}/progress.md`.
 
-Internal sub-skill — invoked by sk.implement. Do not invoke directly.
+Internal sub-skill — invoked by sk.implementproject (once per project). Do not invoke directly.
 
 Read and execute the full workflow in `prompt.md` in this directory.
