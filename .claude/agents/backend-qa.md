@@ -58,6 +58,7 @@ tests/unit/{unit}/
 ## Capability Packs
 sk.test Step 0 loads applicable packs based on story tags. You do not need to load them.
 
-`backend-feature-patterns` (always), `persistence-patterns` (`db` tag), `keycloak-patterns` (`auth` tag),
-`wolverine-patterns` (`messaging` tag), `hybridcache-patterns` (`cache` tag),
+`backend-architecture` (always, canonical), `backend-feature-patterns` (always), `data-access-patterns` (`db` tag),
+`authorization-patterns` (`auth` tag), `orchestration-patterns` (`messaging` tag), `caching-patterns` (`cache` tag),
+`infrastructure-wiring` (composition-root / wiring changes),
 `integration-adapter-patterns` (`adapter` tag), `feature-management-patterns` (`feature flag` tag)

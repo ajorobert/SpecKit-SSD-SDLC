@@ -6,10 +6,11 @@ when_to_load:
   - Task mentions: feature flag, feature toggle, rollout, gradual release, percentage rollout, a/b test, variant, gating, IFeatureManager, sunset
   - Files touched: any *FeatureFilter.cs, feature flag definitions in appsettings.json, any handler/endpoint with conditional behavior keyed off flags
 co_loads_with:
+  - backend-architecture (canonical seams, structure, markers, events model — read first)
   - backend-feature-patterns (gating inside handlers)
-  - fastendpoints-patterns (gating at the endpoint layer)
+  - api-endpoint-patterns (gating at the endpoint layer)
 references:
-  - keycloak-patterns (TargetingFilter uses IUserContext for ABAC-style targeting)
+  - authorization-patterns (TargetingFilter reads IUserContext for ABAC-style targeting)
 ---
 
 # Feature Management Patterns
@@ -34,14 +35,14 @@ Three flag kinds: **Boolean** (`IsEnabledAsync` returns bool), **Filtered** (boo
 
 ## 3. Handler-side gating
 
-Inject `IFeatureManagerSnapshot` into the handler (see `backend-feature-patterns §3` for handler shape). Branch with `IsEnabledAsync`; the new and old paths both return `ErrorOr<T>`.
+Inject `IFeatureManagerSnapshot` into the handler (see `backend-feature-patterns §3` for handler shape). Branch with `IsEnabledAsync`; the new and old paths both return `Result<T>`.
 
 ```csharp
 namespace YourContext.Application.Features.Listings.Search;
 
 public sealed class SearchListingsHandler(IFeatureManagerSnapshot flags, IListingSearchService legacy, IListingSearchServiceV2 v2)
 {
-    public async Task<ErrorOr<PagedResult<ListingCardDto>>> Handle(SearchListingsQuery q, CancellationToken ct)
+    public async Task<Result<PagedResult<ListingCardDto>>> Handle(SearchListingsQuery q, CancellationToken ct)
     {
         // FLAG: listings.geo-search-v2 — gradual rollout of the v2 search path
         if (await flags.IsEnabledAsync("listings.geo-search-v2"))
@@ -53,20 +54,22 @@ public sealed class SearchListingsHandler(IFeatureManagerSnapshot flags, IListin
 
 ## 4. Endpoint-side gating
 
-Two shapes (see `fastendpoints-patterns §3` for endpoint shape):
+Two shapes (see `api-endpoint-patterns` for endpoint shape and the bus dispatch seam):
 
 ```csharp
 // (a) Inside HandleAsync — preferred when the endpoint exists in both states
 public override async Task HandleAsync(Request req, CancellationToken ct)
 {
     // FLAG: listings.new-flow
-    var cmd = await _flags.IsEnabledAsync("listings.new-flow") ? (object)new NewFlowCommand(req) : new LegacyCommand(req);
-    await this.ToHttpResultAsync(await _bus.InvokeAsync<ErrorOr<R>>(cmd, ct), Mapper.ToResponse, ct);
+    var result = await _flags.IsEnabledAsync("listings.new-flow")
+        ? await _bus.Send(new NewFlowCommand(req), ct)
+        : await _bus.Send(new LegacyCommand(req), ct);
+    await this.ToHttpResultAsync(result, Mapper.ToResponse, ct);
 }
 
 // (b) [FeatureGate] attribute — preferred when the endpoint should not exist at all when off
 [FeatureGate("vendors.kyc.beta")]
-public sealed class StartKycVerificationEndpoint(IMessageBus bus) : Endpoint<Request, Response>
+public sealed class StartKycVerificationEndpoint(IAppCommandBus bus) : Endpoint<Request, Response>
 {
     public override void Configure() { Post("/api/v1/vendors/kyc/start"); Policies("vendors.write"); }
     // when off: FeatureGate returns 404 automatically
@@ -100,7 +103,7 @@ Configuration via `appsettings.json` (the canonical source for V1):
 
 ## 6. Custom filters (ABAC-style targeting)
 
-Implement `IFeatureFilter` for tenant-aware decisions. Inject `IUserContext` (see `keycloak-patterns §2`) so the filter targets by tenant or role without re-parsing JWT claims. Filters run on every flag check — keep them cheap; no external I/O.
+Implement `IFeatureFilter` for tenant-aware decisions. Inject `IUserContext` (see `authorization-patterns`) so the filter targets by tenant or role without re-parsing JWT claims. Filters run on every flag check — keep them cheap; no external I/O.
 
 ```csharp
 namespace YourContext.Infrastructure.FeatureFlags;
@@ -122,7 +125,7 @@ public sealed class TenantFilter(IUserContext user) : IFeatureFilter
 `IVariantFeatureManagerSnapshot.GetVariantAsync(name)` returns a `Variant` with a `Name` plus optional `Configuration` payload. Each variant is declared in config with an allocation percentage.
 
 ```csharp
-public async Task<ErrorOr<ListingDetailDto>> Handle(GetListingDetailQuery q, CancellationToken ct)
+public async Task<Result<ListingDetailDto>> Handle(GetListingDetailQuery q, CancellationToken ct)
 {
     var dto = await reads.GetDetailAsync(q.ListingId, ct);
     if (dto is null) return Error.NotFound("Listing.NotFound");
@@ -188,11 +191,12 @@ public async Task Search_uses_v2_when_flag_on()
 - `// FLAG:` — annotates each flag evaluation call site.
 - `// SUNSET:` — annotates the sunset date on a flag-gated branch; greppable for cleanup sweeps.
 
-The canonical comment-markers index lives in `backend-feature-patterns §10`.
+The canonical comment-markers index lives in `backend-architecture §7`.
 
 ## 12. References
 
+- `backend-architecture §7` — canonical comment-markers index.
 - `backend-feature-patterns §3` — handler-side gating shape.
-- `fastendpoints-patterns §3` — endpoint-side gating with `[FeatureGate]`.
-- `keycloak-patterns §2` — `IUserContext` for custom targeting filters.
+- `api-endpoint-patterns` — endpoint-side gating with `[FeatureGate]`.
+- `authorization-patterns` — `IUserContext` for custom targeting filters.
 - `.specify/memory/system-context.md` — project flag inventory + sunset review cadence.

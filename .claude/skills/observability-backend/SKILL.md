@@ -1,348 +1,289 @@
 ---
 name: observability-backend
-description: "Load when: instrumenting C# .NET 10 services, BFF backend code, Wolverine handlers, or Hangfire jobs. OTel SDK + ASP.NET Core wiring, Serilog destructuring, Wolverine/Hangfire trace propagation, IOptionsMonitor<ObservabilityOptions> dynamic sampler + log level, PII redaction in-process, Sentry .NET. Read observability-contracts first."
+description: |
+  Backend observability rules for .NET 10: traces, logs (Serilog structured), metrics, error sink (GlitchTip via Sentry SDK). Covers what to emit, at what level, with what properties, and the PII deny-list. Per-component conventions for the dispatch seam, EF, Hangfire, Elsa, HybridCache, FastEndpoints, and Polly. Wiring/deployment lives in `.specify/memory/observability-stack.md`, not here.
+when_to_load:
+  - Task mentions: log, logging, trace, tracing, span, metric, error, observability, instrumentation, telemetry, sentry, glitchtip, serilog
+  - Files touched: any code that emits ILogger calls, ActivitySource calls, or metric increments
+co_loads_with:
+  - backend-architecture (canonical seams, structure, markers, events model — read first)
+  - backend-feature-patterns (handler observability)
+references:
+  - infrastructure-wiring, data-access-patterns, caching-patterns, search-patterns, authorization-patterns, file-pipeline-patterns, orchestration-patterns, integration-adapter-patterns, api-endpoint-patterns (each has a §observability note)
+  - .specify/memory/observability-stack.md (one-time wiring / deployment)
 ---
 
-# Observability — Backend (.NET)
+# Observability — Backend Rules
 
-## Purpose
-.NET implementation of the contracts defined in `observability-contracts`. Covers C# services (FastEndpoints / clean-arch), the BFF backend code (Next.js route handlers can stay TypeScript — see `observability-frontend` for the BFF runtime-config endpoint), Wolverine consumers, and Hangfire jobs.
+## 1. Mental model — three signals + one error sink
 
-**Read `observability-contracts` first.** This skill assumes you know the resource attribute schema, runtime-config shape, PII deny-list, and span naming conventions.
+| Signal | Destination | What it answers |
+|---|---|---|
+| **Traces** (OTel) | Tempo | What HAPPENED — request path through services, with timings and parent-child relationships |
+| **Logs** (Serilog structured) | Loki | What was OBSERVED at a point in time — discrete events with structured properties |
+| **Metrics** (OTel) | Prometheus | COUNTS over time — for dashboards, alerting, SLO measurement |
+| **Errors** (Sentry SDK) | GlitchTip *(deferred from V1)* | UNEXPECTED exceptions — for incident triage |
 
-## Core Rules
+Rule of thumb: one event → all four signals possible, but choose what's USEFUL. Over-instrumentation has cost. Spans propagate trace-id via the W3C `traceparent` header; Sentry SDK is configured so `sentry.trace_id == OTel trace ID` for cross-correlation.
 
-### Pipeline (.NET side)
-```
-.NET service ─OTel SDK (OTLP/gRPC)─► OTel Collector
-            ─Serilog → OTel logs──►
-            ─Sentry .NET (Sentry-compatible DSN)─► GlitchTip
-```
+Wiring (`AddOpenTelemetry`, Serilog sinks, Sentry SDK init, Collector endpoints) lives in `.specify/memory/observability-stack.md`. This skill answers WHAT to emit. The memory doc answers HOW to wire it up.
 
-* OTel SDK is the only telemetry API for traces and metrics. Never use Jaeger/Prometheus client libraries directly.
-* Serilog writes to OTel via `Serilog.Sinks.OpenTelemetry`. Don't add another log sink to ship logs upstream — the collector is the single egress point.
-* Sentry .NET ships unhandled exceptions only. Handled errors stay in Serilog/OTel logs.
+## 2. Trace rules
 
-### Required Packages
-* `OpenTelemetry.Extensions.Hosting`
-* `OpenTelemetry.Exporter.OpenTelemetryProtocol`
-* `OpenTelemetry.Instrumentation.AspNetCore`
-* `OpenTelemetry.Instrumentation.Http`
-* `OpenTelemetry.Instrumentation.EntityFrameworkCore`
-* `Npgsql.OpenTelemetry`
-* `OpenTelemetry.Instrumentation.Runtime` + `.Process`
-* `Serilog.AspNetCore` + `Serilog.Sinks.OpenTelemetry` + `Serilog.Enrichers.Span`
-* `Sentry.AspNetCore`
+Auto-spans for free: FastEndpoints (HTTP), the dispatch seam (command/query + message handling, produced by `infrastructure-wiring`'s bus impl), EF Core (DB), Polly via `Http.Resilience` (HTTP outbound), HybridCache (cache ops) — all emit spans automatically when the OTel SDK is wired.
 
-### Startup Validation
-Fail fast on missing observability config. The host MUST throw on startup if any of these are unset:
-* `Observability:ServiceName`
-* `Observability:Environment`
-* `Observability:OtlpEndpoint`
+**Add a custom span when:**
 
-Without `service.name` + `deployment.environment`, Loki labels become useless and dashboards break (see `observability-contracts` Loki Label Allow-List).
+- The operation is >5ms and not already covered by an auto-span.
+- The operation is a meaningful business boundary (e.g. `process.image-variant`, `geo.search-expansion`).
+- You need to attach business attributes that auto-spans don't carry.
 
-### Runtime Configuration via `IOptionsMonitor<ObservabilityOptions>`
-Source priority (later wins):
-1. `appsettings.json`
-2. Environment variables (`Observability__TraceSampleRate=0.1`)
-3. Mounted ConfigMap file (`/etc/config/observability.json`) — `IOptionsMonitor` watches it via file provider.
+**Don't add a span for:**
 
-Apply changes live via:
-* **OTel sampler** — custom `Sampler` reads `IOptionsMonitor.CurrentValue` inside `ShouldSample()` (the SDK builds the provider once; the sampler is the only mutable surface).
-* **Serilog level** — `LoggingLevelSwitch.MinimumLevel` updated in `IOptionsMonitor.OnChange` callback.
-* **PII deny-list** — destructuring policy reads `IOptionsMonitor.CurrentValue` per `TryDestructure` call.
+- Trivial CPU work (<1ms).
+- Operations already wrapped by an auto-span.
+- Tight loops (one span per iteration kills the trace).
 
-### Trace Context Propagation Across the Two Manual Hops
-Auto-instrumentation handles HTTP and EF Core. The two hops you must wire manually:
+**Naming convention:** `<verb>.<noun>` (e.g. `process.image-variant`) or `<aggregate>.<operation>` (e.g. `listing.activate`).
 
-**Wolverine outbox** — outgoing middleware injects `traceparent` into envelope headers; incoming middleware extracts and starts a child span named `wolverine.handle <MessageType>`.
+**Attributes:** use OTel semantic conventions (`http.*`, `db.*`, `messaging.*`) where applicable. Custom attributes prefixed `your_context.*` (snake_case, dot-separated).
 
-**Hangfire jobs** — `IClientFilter`/`IServerFilter` captures `Activity.Current.Id` at enqueue (`OnCreating`) and restores it at execution (`OnPerforming`), starting a span named `hangfire.job <JobName>`.
-
-### Logging Discipline
-* **Every log line includes `TraceId` and `SpanId`** when an Activity is active. `Serilog.Enrichers.Span` does this — make it mandatory.
-* Use **structured logging only** (`logger.LogInformation("listing {ListingId} activated", id)`, never string concatenation).
-* `Information` level is the production default. Use `Debug` only behind a runtime flag.
-* **Never log handled exceptions to Sentry/GlitchTip.** Convention: GlitchTip = unhandled / fatal; Serilog = handled / warning.
-* PII fields in log properties get redacted by the destructuring policy before serialization (defense-in-depth — the collector also redacts).
-
-### Metrics
-* Use `Meter` API only.
-* Auto-instrumentation provides RED for HTTP, runtime metrics, and process metrics.
-* For consumers/jobs, manually emit `messaging.consumer.duration`, `messaging.consumer.errors`, `hangfire.job.duration`, `hangfire.job.failures`.
-* Custom business metrics use the `YourContext.*` (or your bounded-context) prefix.
-* **Cardinality budget**: 100 unique label combinations per metric. User/tenant data goes to logs.
-
-### PII Redaction (In-Process — Authoritative Layer)
-* `PiiDestructuringPolicy` for Serilog, reading deny-list from `IOptionsMonitor`.
-* `PiiRedactionSpanProcessor` for OTel spans (same deny-list applied to span attributes).
-* Default deny-list defined in `observability-contracts`. Per-service `AdditionalPiiDenyFields` and `PiiAllowFields` come from `ObservabilityOptions`.
-
-## Patterns / Examples
-
-### `Program.cs` — single source of truth
 ```csharp
-// Bind options + watch ConfigMap
-builder.Services.AddOptions<ObservabilityOptions>()
-    .Bind(builder.Configuration.GetSection("Observability"))
-    .ValidateDataAnnotations();
+private static readonly ActivitySource Source = new("YourContext.Listings");
 
-builder.Configuration.AddJsonFile(
-    "/etc/config/observability.json", optional: true, reloadOnChange: true);
-
-// Startup validation — fail fast
-var serviceName = builder.Configuration["Observability:ServiceName"]
-    ?? throw new InvalidOperationException("Observability:ServiceName missing");
-var environment = builder.Configuration["Observability:Environment"]
-    ?? throw new InvalidOperationException("Observability:Environment missing");
-
-builder.Services.AddSingleton<RuntimeRatioSampler>();
-
-builder.Services.AddOpenTelemetry()
-    .ConfigureResource(r => r
-        .AddService(
-            serviceName: serviceName,
-            serviceNamespace: "directory",
-            serviceVersion: typeof(Program).Assembly.GetName().Version?.ToString())
-        .AddAttributes(new Dictionary<string, object>
-        {
-            ["deployment.environment"] = environment,
-            ["service.instance.id"]    = Environment.MachineName,
-        }))
-    .WithTracing(t => t
-        .SetSampler(sp => sp.GetRequiredService<RuntimeRatioSampler>())
-        .AddAspNetCoreInstrumentation()
-        .AddHttpClientInstrumentation()
-        .AddEntityFrameworkCoreInstrumentation()
-        .AddNpgsql()
-        .AddSource("Wolverine")
-        .AddSource("Hangfire")
-        .AddProcessor<PiiRedactionSpanProcessor>()
-        .AddOtlpExporter())
-    .WithMetrics(m => m
-        .AddAspNetCoreInstrumentation()
-        .AddHttpClientInstrumentation()
-        .AddRuntimeInstrumentation()
-        .AddProcessInstrumentation()
-        .AddMeter("YourContext.*")
-        .AddOtlpExporter());
-
-// Serilog — level switch bound to IOptionsMonitor
-var levelSwitch = new LoggingLevelSwitch(LogEventLevel.Information);
-builder.Host.UseSerilog((ctx, sp, lc) =>
+public async Task<Result> Handle(GenerateVariantsCommand cmd, CancellationToken ct)
 {
-    var monitor = sp.GetRequiredService<IOptionsMonitor<ObservabilityOptions>>();
-    levelSwitch.MinimumLevel = ParseLevel(monitor.CurrentValue.LogMinimumLevel);
-    monitor.OnChange(o => levelSwitch.MinimumLevel = ParseLevel(o.LogMinimumLevel));
+    // SPAN: business-meaningful boundary not covered by an auto-span
+    using var activity = Source.StartActivity("process.image-variant");
+    activity?.SetTag("your_context.aggregate_id", cmd.UploadId);
+    activity?.SetTag("your_context.variant_count", cmd.Variants.Count);
 
-    lc.MinimumLevel.ControlledBy(levelSwitch)
-      .Enrich.FromLogContext()
-      .Enrich.WithSpan()
-      .Destructure.With(new PiiDestructuringPolicy(monitor))
-      .WriteTo.OpenTelemetry(o =>
-      {
-          o.Endpoint = ctx.Configuration["Observability:OtlpEndpoint"];
-          o.ResourceAttributes = new Dictionary<string, object>
-          {
-              ["service.name"]            = serviceName,
-              ["deployment.environment"]  = environment,
-          };
-      });
-});
-
-// Sentry/GlitchTip — unhandled exceptions only
-builder.WebHost.UseSentry(o =>
-{
-    o.Dsn         = builder.Configuration["Sentry:Dsn"];
-    o.Release     = typeof(Program).Assembly.GetName().Version?.ToString();
-    o.Environment = environment;
-    o.TracesSampleRate = 0;            // tracing handled by OTel
-    o.SetBeforeSend(PiiScrubber.Scrub);
-});
-
-static LogEventLevel ParseLevel(string s) =>
-    Enum.TryParse<LogEventLevel>(s, true, out var l) ? l : LogEventLevel.Information;
-```
-
-### `RuntimeRatioSampler` (the only mutable surface in OTel .NET)
-```csharp
-public sealed class RuntimeRatioSampler(IOptionsMonitor<ObservabilityOptions> opts) : Sampler
-{
-    public override SamplingResult ShouldSample(in SamplingParameters p)
-    {
-        var o = opts.CurrentValue;
-        if (!o.TracingEnabled) return new SamplingResult(SamplingDecision.Drop);
-
-        var rate = Math.Clamp(o.TraceSampleRate, 0.0, 1.0);
-        if (rate >= 1.0) return new SamplingResult(SamplingDecision.RecordAndSample);
-        if (rate <= 0.0) return new SamplingResult(SamplingDecision.Drop);
-
-        // Deterministic on traceId so a sampled trace stays sampled across services.
-        var idHigh = BitConverter.ToUInt64(p.TraceId.ToByteArray(), 8);
-        var threshold = (ulong)(rate * ulong.MaxValue);
-        return idHigh < threshold
-            ? new SamplingResult(SamplingDecision.RecordAndSample)
-            : new SamplingResult(SamplingDecision.Drop);
-    }
-    public override string Description => "RuntimeRatioSampler";
+    var result = await _processor.ProcessAsync(cmd, ct);
+    if (result.IsError) activity?.SetStatus(ActivityStatusCode.Error, result.Errors[0].Code);
+    return result;
 }
 ```
 
-### `PiiDestructuringPolicy` (live deny-list)
+## 3. Log rules
+
+Serilog structured logging only via `ILogger<T>` (Microsoft abstraction; Serilog is the sink). Use message templates with structured properties; **never** string interpolation.
+
 ```csharp
-public class PiiDestructuringPolicy(IOptionsMonitor<ObservabilityOptions> opts) : IDestructuringPolicy
+// WRONG — opaque to Loki; can't filter by UserId
+_log.LogInformation($"User {userId} did X");
+
+// RIGHT — UserId indexed as a structured property
+// LOG: structured property — UserId is a log-line field, not a Loki label (see §7)
+_log.LogInformation("User {UserId} did X", userId);
+```
+
+Structured property naming: PascalCase in code (`UserId`, `TenantId`, `AggregateId`); Serilog flattens to `user_id` in Loki/JSON. **Trace correlation auto-attached:** the Serilog `WithSpan` enricher pins `TraceId` and `SpanId` on every log line. Don't log what's already on a span attribute — duplication.
+
+## 4. Log level decision rule
+
+| Level | When | Example |
+|---|---|---|
+| `Verbose` / `TRACE` | Almost never. Only in tight loops you're actively profiling. Off in production. | "Iterating row 1234 of bulk reindex" |
+| `Debug` | Internal state useful during local dev. Off in production. | "Cache miss for key {Key}, falling through to source" |
+| `Information` | Significant business events worth keeping in production. **Default level for production.** | "Listing {ListingId} activated by user {UserId}" |
+| `Warning` | Recoverable abnormal condition. Worth attention but didn't break anything. | "Retry exhausted on {VendorName} after {Count} attempts; fallback used" |
+| `Error` | Operation failed and was NOT recovered. Needs human attention. **Auto-captured by Sentry SDK → GlitchTip.** | "Saga {SagaName} step {Step} failed permanently for {AggregateId}" |
+| `Fatal` / `Critical` | Process-level failure imminent. Rare. | "Database connection pool exhausted; service degraded" |
+
+**Critical rule:** if you find yourself logging at ERROR for a recoverable condition (caught and handled), that's a WARN. ERROR means "human, look at this."
+
+## 5. Metric rules
+
+| Kind | Use for |
+|---|---|
+| **Counter** | Monotonically-increasing count (events, completions, errors) |
+| **Histogram** | Distribution (latency, payload size, time-to-process) |
+| **Gauge** | Point-in-time measurement (queue depth, connection count) — used sparingly |
+
+**Naming:** `your_context_<aggregate>_<operation>_<unit>_<suffix>` per Prometheus conventions:
+- `_total` (counter), `_seconds` (histogram for latency), `_bytes` (histogram for size), `_count` (gauge).
+- Example: `your_context_listings_activated_total`, `your_context_listings_geosearch_latency_seconds`.
+
+**Cardinality rule (critical):** label values must be **bounded**. High-cardinality labels (UserId, request URL with params, free-text error messages) break Prometheus.
+
+| Safe label values | Unsafe — never use as a metric label |
+|---|---|
+| `aggregate_type`, `operation`, `outcome` (success/failure) | `user_id`, `aggregate_id` (per-row) |
+| `tenant_id` (only if total tenants ≤ ~100s) | `error_message` (free text) |
+| HTTP method, status-code class (2xx/4xx/5xx) | Full request URL with query string |
+
+For per-tenant or per-user breakdowns, aggregate from logs in Grafana — don't pay the per-label-value cardinality cost in Prometheus.
+
+```csharp
+public sealed class ListingMetrics(IMeterFactory factory)
 {
-    private static readonly HashSet<string> DefaultDeny = new(StringComparer.OrdinalIgnoreCase)
+    private readonly Counter<long> _activated = factory.Create("YourContext.Listings")
+        .CreateCounter<long>("your_context_listings_activated_total");
+    private readonly Histogram<double> _latency = factory.Create("YourContext.Listings")
+        .CreateHistogram<double>("your_context_listings_geosearch_latency_seconds");
+
+    // METRIC: counter + histogram with bounded labels only
+    public void RecordActivation(string region, string outcome) =>
+        _activated.Add(1, new("region", region), new("outcome", outcome));
+    public void RecordSearchLatency(double seconds, string region) =>
+        _latency.Record(seconds, new("region", region));
+}
+```
+
+## 6. PII deny-list (critical)
+
+> **Rule:** Never include the following in log properties, span attributes, or metric labels: email, phone, full name, exact date-of-birth, payment card data (PAN, CVV), government IDs (SSN, passport, etc.), full street address, JWT tokens, API keys, passwords, OAuth tokens, IP for residents (region/country-code only is OK), session IDs.
+
+| Category | Rule |
+|---|---|
+| Always allowed | `user_id` (Guid), `tenant_id`, `aggregate_id`, error codes (NOT error messages with sensitive content), HTTP status codes, latency, payload sizes |
+| Always denied | Listed above — passwords, tokens, secrets, full PII |
+| Borderline (case-by-case; default DENY) | `preferred_username` (depends on org policy), partial IP for rate-limiting context (first 3 octets only, last octet zeroed) |
+
+**Cross-stack rule:** the same deny-list applies to frontend (`observability-frontend §6` duplicates this list — both skills load independently). Enforcement: a Serilog property scrubber and an OTel span processor apply the list; wiring lives in the memory doc.
+
+```csharp
+public async Task<Result> Handle(CreateAccountCommand cmd, CancellationToken ct)
+{
+    var result = await _service.CreateAsync(cmd, ct);
+    // SENSITIVE: cmd.Email and cmd.Phone deliberately excluded; user_id only
+    _log.LogInformation("Account created for user {UserId} in tenant {TenantId}",
+        result.Value.UserId, result.Value.TenantId);
+    return Result.Success;
+}
+```
+
+## 7. Loki label allow-list (cardinality protection)
+
+Loki indexes labels but not properties. Wrong label choice → cardinality explosion → ingestion slowdown → cost.
+
+**Allowed labels (5–8 max per log line):** `service.name`, `service.namespace`, `service.version`, `env`, `level`, `tenant_id` (only if bounded tenant count), `aggregate` (only if bounded — listings, vendors, uploads, etc.).
+
+**NOT labels — use structured properties; filter via LogQL:** `user_id`, `aggregate_id` (per-row), `idempotency_key`, `route` (with parameters), `error_code`, `trace_id`, `span_id`.
+
+One-line: if it's high-cardinality OR per-request unique, it's a property, not a label.
+
+## 8. OTel ↔ Sentry trace correlation (the bridge)
+
+> **Rule:** Sentry SDK MUST be configured so `sentry.trace_id == OTel trace ID`. Wiring lives in `.specify/memory/observability-stack.md`. Effect: GlitchTip error issues link back to the originating Tempo trace via the trace_id; one click moves between error and the full request span tree.
+
+What happens on an ERROR-level log with an exception: Serilog's Sentry sink auto-captures the exception, attaches `Activity.Current.TraceId`, fires to GlitchTip.
+
+What you do in code: nothing manual. Log at ERROR with the exception object — `_log.LogError(ex, "Operation failed: {Operation}", op)`. The bridge happens automatically.
+
+**Anti-pattern:** manually calling `SentrySdk.CaptureException(ex)` in a handler — duplicates the auto-capture and breaks the trace correlation.
+
+## 9. Custom span pattern
+
+```csharp
+public sealed class IndexerService(/* deps */)
+{
+    private static readonly ActivitySource Source = new("YourContext.Search");
+
+    public async Task<Result> Reindex(string alias, CancellationToken ct)
     {
-        "password","passwd","pwd","secret","token","api_key","apikey","authorization",
-        "ssn","sin","tax_id","national_id","email","email_address","phone","phone_number",
-        "mobile","credit_card","card_number","cvv","pan","date_of_birth","dob",
-        "address","street","postal_code","zip","ip_address","ip",
-    };
+        // SPAN: business-meaningful boundary
+        using var activity = Source.StartActivity("search.reindex");
+        activity?.SetTag("your_context.alias", alias);
 
-    public bool TryDestructure(object value, ILogEventPropertyValueFactory factory, out LogEventPropertyValue result)
-    {
-        if (value is null) { result = null!; return false; }
-
-        var o = opts.CurrentValue;
-        var denied = new HashSet<string>(
-            DefaultDeny.Concat(o.AdditionalPiiDenyFields), StringComparer.OrdinalIgnoreCase);
-        denied.ExceptWith(o.PiiAllowFields);
-
-        var members = value.GetType().GetProperties().Select(p => new LogEventProperty(
-            p.Name,
-            denied.Contains(p.Name)
-                ? new ScalarValue("[REDACTED]")
-                : factory.CreatePropertyValue(p.GetValue(value), destructureObjects: true)));
-
-        result = new StructureValue(members);
-        return true;
+        var result = await DoReindexAsync(alias, ct);
+        if (result.IsError)
+            activity?.SetStatus(ActivityStatusCode.Error, result.Errors[0].Code);
+        return result;
     }
 }
 ```
 
-### Wolverine — outbox trace propagation
-```csharp
-public class TracePropagationOutgoingMiddleware : IOutgoingMiddleware
-{
-    public ValueTask InvokeAsync(Envelope envelope, IMessageContext context, Func<ValueTask> next)
-    {
-        if (Activity.Current is { } activity)
-        {
-            Propagators.DefaultTextMapPropagator.Inject(
-                new PropagationContext(activity.Context, Baggage.Current),
-                envelope.Headers,
-                (headers, key, value) => headers[key] = value);
-        }
-        return next();
-    }
-}
+Spans nest automatically inside the parent (caller's span); don't fight that. One `ActivitySource` per bounded context.
 
-public class TracePropagationIncomingMiddleware : IIncomingMiddleware
-{
-    public async ValueTask InvokeAsync(Envelope envelope, IMessageContext context, Func<ValueTask> next)
-    {
-        var parentContext = Propagators.DefaultTextMapPropagator.Extract(
-            default, envelope.Headers,
-            (headers, key) => headers.TryGetValue(key, out var v) ? new[] { v } : Array.Empty<string>());
+## 10. Health checks
 
-        using var activity = ActivitySource.StartActivity(
-            $"wolverine.handle {envelope.MessageType}",
-            ActivityKind.Consumer,
-            parentContext.ActivityContext);
+**In-app health endpoints:**
 
-        activity?.SetTag("messaging.system", "wolverine");
-        activity?.SetTag("messaging.operation", "receive");
-        activity?.SetTag("messaging.destination", envelope.MessageType);
-        await next();
-    }
-}
-```
+| Endpoint | Probes | Failure semantics |
+|---|---|---|
+| `/health/live` | Process is alive — **don't probe DB or upstreams** | Process is restarted by orchestrator |
+| `/health/ready` | Process can serve traffic — may probe DB, Keycloak JWKS | Pod removed from load-balancer rotation |
 
-### Hangfire — trace propagation across the job boundary
-```csharp
-public class TraceContextJobFilter : IClientFilter, IServerFilter
-{
-    private const string TraceParentKey = "TraceParent";
-    private const string TraceStateKey  = "TraceState";
+Rule: don't probe DB from `/live` — a DB hiccup → all pods restart → cascade outage.
 
-    public void OnCreating(CreatingContext context)
-    {
-        if (Activity.Current is { } activity)
-        {
-            context.SetJobParameter(TraceParentKey, activity.Id);
-            context.SetJobParameter(TraceStateKey, activity.TraceStateString);
-        }
-    }
-    public void OnCreated(CreatedContext context) { }
+**External probes via Blackbox Exporter** for external SaaS dependencies (vendor APIs, Elasticsearch cluster reachability). **Deferred from V1.**
 
-    public void OnPerforming(PerformingContext context)
-    {
-        var parent = context.GetJobParameter<string>(TraceParentKey);
-        var state  = context.GetJobParameter<string>(TraceStateKey);
-        if (string.IsNullOrEmpty(parent)) return;
+## 11. Dispatch-seam / handler observability
 
-        var activity = ActivitySource.StartActivity(
-            $"hangfire.job {context.BackgroundJob.Job.Method.Name}",
-            ActivityKind.Consumer,
-            parent);
-        if (activity is not null && !string.IsNullOrEmpty(state))
-            activity.TraceStateString = state;
+The bus + outbox spans are produced by the dispatch seam (`infrastructure-wiring`'s bus impl); handlers stay library-agnostic.
 
-        context.Items["__trace_activity"] = activity;
-    }
+- **Auto-spans:** a span per command/query/message `Handle` invocation with message type as an attribute.
+- **Auto-metrics:** message processing latency, retry count, dead-letter count — all per message type (bounded cardinality).
+- **What you add:** log at INFO at the end of a state-mutating handler with `AggregateId` + `Operation` (cross-ref `backend-feature-patterns §3`).
+- **Sagas:** each saga step is its own span; saga state changes log at INFO with `SagaId` + `Step` (see `orchestration-patterns`).
+- **Outbox publish:** instrumented as a span linked to the parent handler span; consumer-side handler span links back via `traceparent` carried in message headers.
 
-    public void OnPerformed(PerformedContext context)
-    {
-        if (context.Items.TryGetValue("__trace_activity", out var a) && a is Activity activity)
-            activity.Dispose();
-    }
-}
+## 12. Hangfire job observability
 
-// Registration: GlobalJobFilters.Filters.Add(new TraceContextJobFilter());
-```
+- **Auto-spans:** Hangfire instruments via OTel `Hangfire.Activity`; each job execution is a span.
+- **Custom: cron-job idempotency check** — log at INFO with `JobId` + `Cron` + `Outcome` (`executed` / `skipped-idempotent`).
+- **Failures:** job exceptions auto-bubble to ERROR + Sentry capture via the Hangfire exception filter pipeline (wiring; rule is the property name `JobId`).
 
-### Custom business metric (cardinality-safe)
-```csharp
-public class ListingMetrics
-{
-    private readonly Counter<long> _activated;
-    public ListingMetrics(IMeterFactory factory)
-    {
-        var meter = factory.Create("YourContext.Listings");
-        _activated = meter.CreateCounter<long>("directory.listings.activated.count");
-    }
+## 13. Elsa workflow observability
 
-    // GOOD — bounded labels (status, region)
-    public void RecordActivation(string status, string region) =>
-        _activated.Add(1, new("status", status), new("region", region));
+- **Auto-spans:** each activity execution is a span (Elsa emits via `ActivitySource`).
+- **Workflow-level metric:** instances started/completed/faulted counters keyed by workflow definition name (bounded cardinality).
+- **Bookmark resume:** trace context carried via the resume signal — bookmark-create span and bookmark-resume span share a `workflow_id` attribute.
 
-    // BAD — DO NOT add user_id, listing_id, tenant_id as labels. Log them instead.
-}
-```
+## 14. HybridCache observability
 
-## Operational Controls (backend knobs)
-All apply via ConfigMap reload; no pod restart required.
+- **Auto-metrics:** L1 hit / L2 hit / miss counters per cache tag (the bounded part); latency histogram.
+- **What you add:** rarely anything. Auto-emission covers the common cases.
+- **Cache invalidation events:** log at INFO when an integration-event handler fires `RemoveByTagAsync` (cross-ref `caching-patterns`).
 
-| Knob | ConfigMap field | Effect | Propagation |
-|---|---|---|---|
-| Disable tracing | `Observability.TracingEnabled=false` | `RuntimeRatioSampler` returns `Drop` for all spans | ~5s |
-| Throttle trace sample rate | `Observability.TraceSampleRate=0.01` | Per-span decision uses new rate | ~5s |
-| Adjust Serilog level | `Observability.LogMinimumLevel=Warning` | `LoggingLevelSwitch` applies live | ~5s |
-| Add PII deny entries | `Observability.AdditionalPiiDenyFields=["..."]` | Destructuring policy reads new list per event | ~5s |
-| Allow specific PII field | `Observability.PiiAllowFields=["email"]` | Bypass redaction for this service only — **PR-justified** | ~5s |
+## 15. HTTP-client / Polly observability
 
-What you cannot change at runtime in .NET OTel: the provider composition (instrumentations, exporters). That's a deploy.
+- **Auto-spans:** every outbound HTTP via typed `HttpClient` emits a span (covered by `integration-adapter-patterns`).
+- **Auto-metrics:** retry count, circuit-breaker state changes, timeout events — all auto-emitted by `Microsoft.Extensions.Http.Resilience`.
+- **What you do:** nothing. Don't manually log retries in adapter code — duplicates the auto-emission.
 
-## When to Use
-* Wiring a new .NET service or BFF backend route handler for observability
-* Adding a Wolverine handler or Hangfire job
-* Reviewing a backend PR that adds logging, metrics, or error reporting
-* Investigating "missing trace" or "log not in Loki" from a service
+## 16. FastEndpoints observability
 
-## When NOT to Use
-* Frontend instrumentation — see `observability-frontend`
-* OTel Collector / Loki / Jaeger / Prometheus / GlitchTip deployment — see `observability-infra`
-* Defining new contracts (resource attrs, JSON shape, deny-list) — see `observability-contracts`, requires ADR
-* Audit logging for security events — covered by `keycloak-patterns` §10
+- **Auto-spans:** every HTTP request is a span (the root of most server-side traces).
+- **Attributes:** `http.method`, `http.route`, `http.status_code` (OTel semconv) auto-set.
+- **What you add:** for endpoints that fan out to multiple handlers / external calls, add `your_context.operation` as a span attribute to make Tempo searches easier.
+
+## 17. Anti-patterns
+
+- String-interpolated log messages (kills structured-property indexing).
+- Logging PII in any signal (see §6).
+- High-cardinality labels in Prometheus or Loki (see §5, §7).
+- Manually logging what's auto-spanned (e.g. "called Elasticsearch" inside an HttpClient call).
+- Logging at INFO inside a tight loop.
+- `Console.WriteLine` anywhere; `Debug.WriteLine` anywhere.
+- ERROR level for a recoverable condition (it's a WARN — see §4).
+- Probing DB from `/health/live` (cascade failure risk).
+- Manually calling `SentrySdk.CaptureException` (breaks auto-correlation — see §8).
+- Metric labels that aren't enumerated and bounded.
+- Custom spans inside tight loops.
+- Logging without the `TraceId` enricher (rule: every log MUST carry `TraceId` + `SpanId`).
+
+## 18. Comment markers emitted by this skill
+
+- `// LOG:` — non-obvious logged property choice.
+- `// SPAN:` — custom span start.
+- `// METRIC:` — metric emission line.
+- `// SENSITIVE:` — annotates a deliberately-excluded property (PII or otherwise).
+
+Canonical comment-markers index: `backend-architecture §7`.
+
+## 19. References
+
+- `backend-architecture §7` — canonical comment-markers index.
+- `backend-feature-patterns §3` — handler observability touchpoints.
+- `infrastructure-wiring` — the dispatch-seam bus + outbox spans; message + saga auto-emission.
+- `data-access-patterns` — DB observability auto-emission.
+- `caching-patterns` — cache observability + invalidation events.
+- `search-patterns` — ES client observability.
+- `authorization-patterns` — audit-log property conventions.
+- `file-pipeline-patterns` — scan / upload state-change events worth logging.
+- `orchestration-patterns` — Elsa + Hangfire OTel propagation.
+- `integration-adapter-patterns §12` — adapter OTel auto-instrumentation.
+- `api-endpoint-patterns` — endpoint observability auto-emission.
+- `.specify/memory/observability-stack.md` — one-time wiring: `AddOpenTelemetry` builder, Collector config, Tempo/Loki/Prometheus/GlitchTip endpoints, Serilog enricher registration, Sentry SDK trace-id alignment.

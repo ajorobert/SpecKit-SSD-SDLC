@@ -1,20 +1,24 @@
 ---
-name: persistence-patterns
+name: data-access-patterns
 description: |
-  PostgreSQL persistence for .NET 10 with EF Core (write path) and Dapper (read path). Covers DbContext conventions, per-aggregate write repositories, Dapper read services, migrations, JSONB mapping, PostGIS geo, Row-Level Security with TenantInterceptor, transaction binding with Wolverine outbox, and read/write separation per CQRS.
+  PostgreSQL persistence for .NET 10 with EF Core (write path) and Dapper (read path). Covers DbContext conventions, per-aggregate write repositories, Dapper read services, migrations, JSONB mapping, PostGIS geo, schema-per-context, optimistic concurrency, indexing, Row-Level Security with TenantInterceptor, and read/write separation per CQRS.
 when_to_load:
-  - Task mentions: persist, persistence, database, postgres, postgresql, ef core, dapper, migration, jsonb, postgis, geo, transaction, repository, read model, projection, rls, tenant isolation
+  - Task mentions: persist, persistence, database, postgres, postgresql, ef core, dapper, migration, jsonb, postgis, geo, repository, read model, projection, rls, tenant isolation
   - Files touched: any *DbContext.cs, *Repository.cs, *ReadService.cs, Migrations/*, *.sql, *EntityConfiguration.cs
 co_loads_with:
-  - backend-feature-patterns (write-repo + read-service boundary from §9)
-  - wolverine-patterns (outbox shares DbContext transaction)
-  - hybridcache-patterns (cache-aside wraps Dapper reads)
+  - backend-architecture (canonical seams, structure, markers, events model, outbox rule — read first)
+  - backend-feature-patterns (write-repo + read-service boundary from §10)
+  - caching-patterns (cache-aside wraps Dapper reads)
 references:
-  - keycloak-patterns (IUserContext provides TenantId for the interceptor)
-  - elasticsearch-patterns (geo-search denormalizes from PostGIS write side)
+  - authorization-patterns (IUserContext provides TenantId for the interceptor)
+  - search-patterns (geo-search denormalizes from PostGIS write side)
 ---
 
-# Persistence Patterns
+# Data Access Patterns
+
+Read `backend-architecture` first — it owns the seam catalog, the building-blocks/module structure,
+the comment-marker index, the domain/integration event model, and the outbox invariant. This skill
+applies them to the persistence edge: EF Core on the write path, Dapper on the read path.
 
 ## 1. Mental model
 
@@ -29,7 +33,7 @@ Write path:                                Read path:
      ▼                                          ▼
    DbContext (EF Core)                       Dapper SQL
      │ SaveChangesAsync                         │ SELECT ... mapped to DTO
-     │   shares tx with Wolverine outbox        │
+     │   participates in the ambient tx         │
      ▼                                          ▼
        ─────────── PostgreSQL ──────────────────
                        │
@@ -55,6 +59,7 @@ public sealed class YourContextDbContext(DbContextOptions<YourContextDbContext> 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasDefaultSchema(Schema.Name);   // schema-per-context (§3a) — name is project vocabulary
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(YourContextDbContext).Assembly);
     }
 }
@@ -69,29 +74,37 @@ internal sealed class ListingConfiguration : IEntityTypeConfiguration<Listing>
         b.Property(x => x.Status).HasConversion<string>().IsRequired();
         b.OwnsOne(x => x.Price, p => { p.Property(m => m.Amount).HasColumnType("numeric(14,4)"); p.Property(m => m.Currency); });
         b.Property(x => x.RowVersion).IsRowVersion();
-        b.Property(x => x.TenantId).HasColumnName("tenant_id");
+        b.Property(x => x.TenantId).HasColumnName("tenant_id");   // RLS column name is project vocabulary (.specify/memory/)
         b.HasIndex(x => new { x.TenantId, x.Status }).HasFilter("deleted_at IS NULL");
     }
 }
 ```
 
+### 3a. Schema-per-context
+
+Each module owns exactly one PostgreSQL schema; the `DbContext` sets it as the default schema via
+`HasDefaultSchema(...)`. The schema name is project vocabulary (`.specify/memory/system-context.md`),
+never hardcoded in this skill. **Cross-schema foreign keys are forbidden** — a module's tables never
+FK to another module's schema. Cross-module relationships are carried by `Contracts` (IDs) and
+integration events (`backend-architecture §6`), not by database joins.
+
 ## 3. Write repository shape
 
-This skill owns the contract that `backend-feature-patterns §9` references.
+This skill owns the contract that `backend-feature-patterns §10` references.
 
 - Interface in `YourContext.Application`; implementation in `YourContext.Infrastructure.Persistence`.
 - Naming: `I<Aggregate>sRepository` (plural). One typed repository per aggregate root.
 - Methods: `GetByIdAsync(id, ct)`, `AddAsync(aggregate, ct)`, `Remove(aggregate)`, `SaveChangesAsync(ct)`.
-- `GetByIdAsync` returns `ErrorOr<TAggregate>` with `Error.NotFound` when missing.
-- `SaveChangesAsync` does **not** open or commit a transaction by itself — Wolverine's `[Transactional]` middleware (`wolverine-patterns §4`) owns the unit of work so the outbox row commits atomically with the aggregate write.
+- `GetByIdAsync` returns `Result<TAggregate>` with `Error.NotFound` when missing.
+- `SaveChangesAsync` does **not** open or commit a transaction — it just flushes change-tracked work into the **ambient unit of work** owned by the command pipeline (§5).
 - Aggregates use private setters + factory methods (`backend-feature-patterns §2`).
 
 ```csharp
-namespace YourContext.Application.Features.Listings;
+namespace YourContext.Application.Handlers.Listings;
 
 public interface IListingsRepository
 {
-    Task<ErrorOr<Listing>> GetByIdAsync(ListingId id, CancellationToken ct);
+    Task<Result<Listing>> GetByIdAsync(ListingId id, CancellationToken ct);
     Task AddAsync(Listing listing, CancellationToken ct);
     void Remove(Listing listing);
     Task SaveChangesAsync(CancellationToken ct);
@@ -101,7 +114,7 @@ namespace YourContext.Infrastructure.Persistence.Repositories;
 
 public sealed class ListingsRepository(YourContextDbContext db) : IListingsRepository
 {
-    public async Task<ErrorOr<Listing>> GetByIdAsync(ListingId id, CancellationToken ct)
+    public async Task<Result<Listing>> GetByIdAsync(ListingId id, CancellationToken ct)
     {
         var listing = await db.Listings.FindAsync([id], ct);
         return listing is null ? Error.NotFound("Listing.NotFound", "Listing not found") : listing;
@@ -124,7 +137,7 @@ public sealed class ListingsRepository(YourContextDbContext db) : IListingsRepos
 - Pagination uses a `PagedResult<T>` record carrying `Items` + `TotalCount` + `Page` + `PageSize`.
 
 ```csharp
-namespace YourContext.Application.Features.Listings;
+namespace YourContext.Application.Handlers.Listings;
 
 public sealed record ListingSummaryDto(Guid Id, string Title, decimal Price, string Currency, string Status);
 public sealed record PagedResult<T>(IReadOnlyList<T> Items, int TotalCount, int Page, int PageSize);
@@ -139,9 +152,9 @@ namespace YourContext.Infrastructure.Persistence.Reads;
 
 public sealed class ListingsReadService(IDbConnectionFactory factory) : IListingsReadService
 {
+    // CONFIGUREAWAIT: adapter library code — see backend-architecture §7.
     public async Task<ListingDetailDto?> GetDetailAsync(Guid id, CancellationToken ct)
     {
-        // CONFIGUREAWAIT: adapter library code.
         await using var conn = await factory.OpenAsync(ct).ConfigureAwait(false);
         return await conn.QuerySingleOrDefaultAsync<ListingDetailDto>(new CommandDefinition(
             "SELECT public_id AS Id, title AS Title, price_amount AS Price, price_currency AS Currency, status AS Status " +
@@ -166,47 +179,15 @@ public sealed class ListingsReadService(IDbConnectionFactory factory) : IListing
 }
 ```
 
-Wrap the read-service call in `HybridCache.GetOrCreateAsync` at the query-handler call site — see `hybridcache-patterns §4` for the cache-aside pattern and §7 for handler shape.
+Wrap the read-service call in `HybridCache.GetOrCreateAsync` at the query-handler call site — see `caching-patterns` for the cache-aside pattern and `backend-feature-patterns §5` for handler shape.
 
-## 5. Transaction + outbox binding (the critical rule)
+## 5. Transaction + outbox — owned elsewhere
 
-> **Rule:** A handler that mutates state and publishes an event MUST be decorated with `[Transactional]` (Wolverine). The attribute opens a DbContext transaction; `SaveChangesAsync` and outbox-bound `EnqueueAsync` calls commit atomically. A raw `bus.PublishAsync` without `[Transactional]` is a **dual-write**: the broker may receive the message before — or instead of — the DB commit, leaving observers ahead of truth.
-
-This skill owns the **persist-side** of the rule; `wolverine-patterns §4` owns the **publish-side**. They are joined here.
-
-**Right pattern.**
-
-```csharp
-[Transactional]                                            // TX: opens DbContext transaction; outbox writes commit with this tx
-public async Task<ErrorOr<Success>> Handle(ActivateListingCommand cmd, IMessageContext bus, CancellationToken ct)
-{
-    var listing = await repo.GetByIdAsync(new ListingId(cmd.ListingId), ct);
-    if (listing.IsError) return listing.Errors;
-
-    var activated = listing.Value.Activate();
-    if (activated.IsError) return activated.Errors;
-
-    // OUTBOX: enqueued — commits with the EF transaction below.
-    await bus.EnqueueAsync(new ListingActivatedIntegrationEvent(listing.Value.Id.Value));
-    await repo.SaveChangesAsync(ct);
-    return Result.Success;
-}
-```
-
-**Wrong pattern.**
-
-```csharp
-public async Task<ErrorOr<Success>> Handle(ActivateListingCommand cmd, IMessageBus bus, CancellationToken ct)
-{
-    var listing = await repo.GetByIdAsync(new ListingId(cmd.ListingId), ct);
-    listing.Value.Activate();
-    await repo.SaveChangesAsync(ct);
-    // WRONG: dual-write risk. If the broker is down or the process dies here,
-    // the DB commit happened but no event is sent — observers stay stale forever.
-    await bus.PublishAsync(new ListingActivatedIntegrationEvent(listing.Value.Id.Value));
-    return Result.Success;
-}
-```
+The **command pipeline owns the transaction and the outbox** (`backend-architecture §6`): the pipeline
+behavior wraps the handler in a transaction, flushes raised domain events, and writes integration
+events to the EF outbox in that same transaction. Repositories **never** open, commit, or roll back a
+transaction; `SaveChangesAsync` only flushes change-tracked work into that ambient unit of work. There
+is no `// TX:` marker — the transaction boundary is the pipeline's, not the persistence layer's.
 
 ## 6. Migrations
 
@@ -278,45 +259,9 @@ var nearby = await db.Listings
 
 **SRID rule:** 4326 (WGS84) for lat/lng; switch to 3857 only when computing distances on a flat projection.
 
-**PostGIS for transactional geo (single-row read/write); Elasticsearch for search-side queries** (polygon, radius, sort-by-distance, faceted geo) — see `elasticsearch-patterns`. The write side owns the source of truth; ES denormalizes for search.
+**PostGIS for transactional geo (single-row read/write); Elasticsearch for search-side queries** (polygon, radius, sort-by-distance, faceted geo) — see `search-patterns`. The write side owns the source of truth; ES denormalizes for search.
 
-## 9. Row-Level Security + TenantInterceptor
-
-RLS policies enforce tenant isolation at the database level. The application sets a session variable (`app.current_tenant_id`) per connection via a `DbConnectionInterceptor` that pulls `TenantId` from `IUserContext` (see `keycloak-patterns §2` for the contract, §4 for how middleware populates it).
-
-**Policy (migration template):**
-
-```sql
--- RLS: enable + define policy on every tenant-scoped table
-ALTER TABLE listings ENABLE ROW LEVEL SECURITY;
-CREATE POLICY tenant_isolation ON listings
-    USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
-```
-
-**Interceptor (applied to both EF and the Dapper connection factory):**
-
-```csharp
-public sealed class TenantInterceptor(IUserContext user) : DbConnectionInterceptor
-{
-    public override async Task ConnectionOpenedAsync(
-        DbConnection connection, ConnectionEndEventData eventData, CancellationToken ct = default)
-    {
-        if (user.TenantId == Guid.Empty) return;        // unauthenticated → RLS denies all rows
-        await using var cmd = connection.CreateCommand();
-        // CONFIGUREAWAIT: interceptor adapter code.
-        cmd.CommandText = "SELECT set_config('app.current_tenant_id', @tid, false)";
-        var p = cmd.CreateParameter(); p.ParameterName = "tid"; p.Value = user.TenantId.ToString();
-        cmd.Parameters.Add(p);
-        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
-    }
-}
-```
-
-Register the same interceptor for both EF Core and the Dapper connection factory. M2M tokens (`IsViaM2M == true`): the interceptor either sets the M2M's authorized tenant or sets a project-specific service sentinel that RLS policies recognise — pick one per project and document.
-
-Replica connections enforce RLS independently — the interceptor must be applied there too.
-
-## 10. Concurrency control
+## 9. Concurrency control
 
 Optimistic concurrency via a `RowVersion` `byte[]` property mapped with `IsRowVersion()` — EF Core maps that onto PostgreSQL's `xmin` system column. On conflict, `DbUpdateConcurrencyException` propagates to the handler.
 
@@ -327,6 +272,48 @@ public sealed class Listing { public byte[] RowVersion { get; private set; } = [
 try { await repo.SaveChangesAsync(ct); }
 catch (DbUpdateConcurrencyException) { return Error.Conflict("Listing.ConcurrentUpdate", "Listing was modified by another request"); }
 ```
+
+## 10. Row-Level Security + TenantInterceptor
+
+RLS policies enforce tenant isolation at the database level — defence-in-depth devs author per table.
+The application sets a session variable (`app.current_tenant_id`) per connection via a
+`DbConnectionInterceptor` that pulls `TenantId` from `IUserContext` (see `authorization-patterns` for
+the contract and `backend-architecture §5` for how identity reaches the handler). The RLS column name
+and tenant session-variable name are project vocabulary (`.specify/memory/`).
+
+**Policy (migration template):**
+
+```sql
+-- RLS: enable + define policy on every tenant-scoped table
+ALTER TABLE listings ENABLE ROW LEVEL SECURITY;
+CREATE POLICY tenant_isolation ON listings
+    USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
+```
+
+**Interceptor (authored here; registered in infrastructure-wiring):**
+
+```csharp
+public sealed class TenantInterceptor(IUserContext user) : DbConnectionInterceptor
+{
+    // CONFIGUREAWAIT: interceptor adapter code — see backend-architecture §7.
+    public override async Task ConnectionOpenedAsync(
+        DbConnection connection, ConnectionEndEventData eventData, CancellationToken ct = default)
+    {
+        if (user.TenantId == Guid.Empty) return;        // unauthenticated → RLS denies all rows
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = "SELECT set_config('app.current_tenant_id', @tid, false)";
+        var p = cmd.CreateParameter(); p.ParameterName = "tid"; p.Value = user.TenantId.ToString();
+        cmd.Parameters.Add(p);
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+    }
+}
+```
+
+The **same interceptor must be registered for both EF Core and the Dapper connection factory** (and for
+replica connections, which enforce RLS independently). That DI registration lives in
+`infrastructure-wiring` — reference it; do not wire it here. M2M tokens (`IsViaM2M == true`): the
+interceptor either sets the M2M's authorized tenant or a project-specific service sentinel that RLS
+policies recognise — pick one per project and document.
 
 ## 11. Indexing rules of thumb
 
@@ -346,8 +333,8 @@ catch (DbUpdateConcurrencyException) { return Error.Conflict("Listing.Concurrent
 - EF on the read path for hot queries — LINQ-to-SQL overhead, N+1 risk. Use Dapper.
 - `DbContext` injected into the Domain layer — Domain doesn't know about persistence.
 - Raw `connection.ExecuteAsync` for state mutation in app code — EF only on the write path.
-- `SaveChangesAsync` called outside a `[Transactional]` handler — breaks outbox atomicity.
-- Aggregate references on saga state — hold IDs (`wolverine-patterns §7`).
+- A repository opening or committing a transaction — the command pipeline owns the unit of work (`backend-architecture §6`).
+- Cross-schema foreign keys — modules relate via Contracts/events, not joins (§3a).
 - Tenant-scoped table without an RLS policy — interceptor + audit alone is not enough; RLS is defence-in-depth.
 - Bypassing the interceptor via `IDbContextFactory<T>` without setting the tenant context manually.
 - Editing migrations after staging-apply — forward-only.
@@ -356,6 +343,9 @@ catch (DbUpdateConcurrencyException) { return Error.Conflict("Listing.Concurrent
 
 Integration tests use Testcontainers (`Testcontainers.PostgreSql`) — one container per test class or shared fixture. Migrations run against the container at fixture startup. Do NOT substitute in-memory SQLite for tests that exercise PostgreSQL-specific features (JSONB, PostGIS, RLS) — coverage there must hit a real PG instance. SQLite is acceptable only for read-service interface tests that touch nothing PG-specific.
 
+Dispatch through the command seam (`IAppCommandBus.Send`) so the pipeline's transaction + outbox run,
+then assert the outbox through the seam — never inject Wolverine types into the test.
+
 ```csharp
 public sealed class ListingsRepositoryTests : IClassFixture<PostgresFixture>
 {
@@ -363,36 +353,40 @@ public sealed class ListingsRepositoryTests : IClassFixture<PostgresFixture>
     public ListingsRepositoryTests(PostgresFixture pg) => _pg = pg;
 
     [Fact]
-    public async Task Saving_listing_writes_outbox_row()
+    public async Task Creating_listing_persists_aggregate_and_enqueues_integration_event()
     {
         await using var host = await TestHost.CreateAsync(_pg.ConnectionString);
-        var bus = host.Services.GetRequiredService<IMessageBus>();
+        var commands = host.Services.GetRequiredService<IAppCommandBus>();
 
-        var result = await bus.InvokeAsync<ErrorOr<Success>>(new CreateListingCommand(Guid.NewGuid(), "T", 100m, "USD"));
-        Assert.False(result.IsError);
+        var result = await commands.Send(new CreateListingCommand(Guid.NewGuid(), "T", 100m, "USD"));
+        result.IsError.ShouldBeFalse();
 
-        var outbox = await host.Services.GetRequiredService<IMessageStore>().Admin.AllOutgoingAsync();
-        Assert.Contains(outbox, e => e.MessageType.Contains("ListingCreated"));
+        // assert the persisted aggregate via the read service (repo-level assertion)
+        var reads = host.Services.GetRequiredService<IListingsReadService>();
+        var saved = await reads.GetDetailAsync(result.Value, default);
+        saved.ShouldNotBeNull();
+
+        // outbox is asserted through the test seam, not a Wolverine type
+        host.Outbox.ShouldContainIntegrationEvent("ListingCreated");
     }
 }
 ```
 
-See `wolverine-patterns §10` for the full Wolverine test-harness shape.
+Full pipeline/outbox harness shape is integration-tested per `infrastructure-wiring`.
 
 ## 14. Comment markers emitted by this skill
 
 - `// JSONB:` — annotates an entity property persisted as JSONB.
 - `// RLS:` — annotates a migration line that enables RLS or defines a policy.
-- `// TX:` — annotates a method that participates in the transactional unit of work (typically `[Transactional]` on a handler; co-emitted with `wolverine-patterns`).
-- `// CONFIGUREAWAIT:` — interceptor/adapter library code retaining `ConfigureAwait(false)`; handlers omit it.
 
-The canonical comment-markers index lives in `backend-feature-patterns §10`.
+The cross-skill marker registry and the `// CONFIGUREAWAIT:` rule live in `backend-architecture §7`.
 
 ## 15. References
 
-- `backend-feature-patterns §9` — write-repo and read-service boundary; this skill owns the contracts.
-- `wolverine-patterns §4` — outbox shares the EF transaction; `[Transactional]` middleware. §7 — saga state stores IDs only. §10 — Wolverine test-harness.
-- `hybridcache-patterns §4, §7` — cache-aside wraps the Dapper read service.
-- `keycloak-patterns §2, §4` — `IUserContext` provides `TenantId` for the TenantInterceptor.
-- `elasticsearch-patterns` — geo-search denormalizes from the PostGIS write side.
-- `.specify/memory/system-context.md` — project-specific connection / schema conventions.
+- `backend-architecture` — seams, structure, marker index, the domain/integration event model, the outbox invariant (§6), identity (§5) (read first).
+- `backend-feature-patterns §10` — write-repo and read-service boundary; this skill owns the contracts.
+- `caching-patterns` — cache-aside wraps the Dapper read service.
+- `authorization-patterns` — `IUserContext` provides `TenantId` for the TenantInterceptor.
+- `infrastructure-wiring` — DI registration of the DbContext, the TenantInterceptor (EF + Dapper factory), and the pipeline transaction/outbox machinery.
+- `search-patterns` — geo-search denormalizes from the PostGIS write side.
+- `.specify/memory/system-context.md` — project-specific schema, connection, RLS-column, and tenant-marker conventions.

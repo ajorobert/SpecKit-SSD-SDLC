@@ -73,15 +73,16 @@ Loaded by sk.implement/sk.review Step 0 based on story tags. You do not need to 
 
 | Pack | When loaded |
 |---|---|
+| `backend-architecture` | Always (all backend stories) — canonical SSOT for seams, structure, markers, invariants |
 | `backend-feature-patterns` | Always (all backend stories) |
 | `design-code-review` | sk.review — always |
-| `bff-patterns` | `bff` tag |
-| `wolverine-patterns` | `messaging`, `events`, `queue` tags |
-| `workflow-and-jobs-patterns` | `workflow`, `elsa`, `sla`, `hangfire`, `job`, `cron` tags |
-| `keycloak-patterns` | `auth`, `keycloak` tags |
-| `persistence-patterns` | `db`, `schema`, `migration` tags |
-| `hybridcache-patterns` | `cache`, `redis` tags |
-| `elasticsearch-patterns` | `search`, `elasticsearch` tags |
+| `api-endpoint-patterns` | `endpoint`, `api`, `http`, `bff` tags (BFF/aggregation absorbed here) |
+| `authorization-patterns` | `auth`, `authz`, `permission`, `role`, `policy`, `abac`, `rbac` tags |
+| `orchestration-patterns` | `workflow`, `elsa`, `sla`, `hangfire`, `job`, `cron`, `saga`, `messaging`, `events` tags |
+| `data-access-patterns` | `db`, `schema`, `migration`, `persistence` tags |
+| `caching-patterns` | `cache`, `redis` tags |
+| `search-patterns` | `search`, `elasticsearch`, `geo` tags |
 | `file-pipeline-patterns` | `file`, `upload` tags |
 | `integration-adapter-patterns` | `adapter`, `integration adapter`, `polly`, `DelegatingHandler`, `vendor api` tags |
 | `feature-management-patterns` | `feature flag`, `rollout`, `gating`, `variant`, `sunset` tags |
+| `infrastructure-wiring` | `infrastructure`, `wiring`, `composition root`, `host setup`, `DI`, `bootstrap` tags (rare — Infrastructure/hosts work only) |
