@@ -6,11 +6,12 @@ when_to_load:
   - Task mentions: adapter, integration, vendor api, external service, httpclient registration, DelegatingHandler, resilience, polly, retry, circuit breaker, timeout, idempotency-aware retry
   - Files touched: any project under `*.Adapters.*`, any `AddHttpClient<...>` call, any custom `DelegatingHandler` class
 co_loads_with:
-  - keycloak-patterns (M2M DelegatingHandler attach is a joint rule)
+  - backend-architecture (canonical seams, structure, markers, events model — read first)
+  - infrastructure-wiring (registers the M2M token provider + handler; M2M DelegatingHandler attach is a joint rule)
 references:
-  - wolverine-patterns (handler-level retry vs HTTP retry boundary)
+  - backend-architecture §6 (handler-level redelivery vs HTTP retry boundary)
   - backend-feature-patterns (handlers depend on ports; this skill produces the adapters)
-  - elasticsearch-patterns, file-pipeline-patterns (concrete adapter examples)
+  - search-patterns, file-pipeline-patterns (concrete adapter examples)
   - observability-backend (OTel auto-instrumentation — Phase 5 placeholder)
 ---
 
@@ -32,7 +33,7 @@ Application layer            Adapter layer              Wire
 
 Retry layer                  Retry layer
 ───────────                  ───────────
-Wolverine handler-level      HTTP-level (Polly)
+dispatch-seam handler-level  HTTP-level (Polly)
 (message redelivery)         (per-call transient)
 ```
 
@@ -50,14 +51,14 @@ The contract: app code knows the port. The adapter knows the wire. They never mi
 namespace YourContext.Application.Ports;
 public interface INotificationService
 {
-    Task<ErrorOr<Success>> SendAsync(NotificationRequest req, CancellationToken ct);
+    Task<Result> SendAsync(NotificationRequest req, CancellationToken ct);
 }
 
 namespace YourContext.Adapters.Sendgrid;
 public sealed class SendgridNotificationService(HttpClient http, IOptions<SendgridOptions> opts)
     : INotificationService                                                       // PORT-IMPL: Sendgrid → INotificationService
 {
-    public async Task<ErrorOr<Success>> SendAsync(NotificationRequest req, CancellationToken ct)
+    public async Task<Result> SendAsync(NotificationRequest req, CancellationToken ct)
     {
         var resp = await http.PostAsJsonAsync("v3/mail/send", req.ToWire(opts.Value), ct);
         return resp.IsSuccessStatusCode ? Result.Success : Error.Failure("Sendgrid.Failed", resp.ReasonPhrase ?? "");
@@ -87,11 +88,11 @@ public static class SendgridAdapterRegistration
 }
 ```
 
-## 4. DelegatingHandler chain order (joint rule with keycloak-patterns)
+## 4. DelegatingHandler chain order (joint rule with infrastructure-wiring)
 
 > **Rule:** When attaching an M2M bearer token via a custom `DelegatingHandler`, register it BEFORE the resilience handler in the pipeline. Retries replay the request; replays must carry a fresh (or cached) token. If the resilience handler runs first, retried requests can fire with stale or missing auth headers.
 
-Order: `M2MTokenAttachHandler` → `Http.Resilience` standard handler → outbound socket. The `M2MTokenHandler` itself lives in `keycloak-patterns §8`.
+Order: `M2MTokenAttachHandler` → `Http.Resilience` standard handler → outbound socket. The `M2MTokenHandler` and its M2M token provider are registered by `infrastructure-wiring`; this skill owns the chain-order rule.
 
 ```csharp
 services.AddTransient<M2MTokenHandler>();
@@ -159,7 +160,7 @@ services.AddHttpClient<IPaymentClient, PaymentClient>("payments")
             }));
 ```
 
-The idempotency-key contract on the producing side lives in `backend-feature-patterns §8` (handler) and `fastendpoints-patterns §6` (endpoint); this skill consumes it.
+The idempotency-key contract on the producing side lives in `backend-feature-patterns §9` (handler) and `api-endpoint-patterns` (endpoint); this skill consumes it.
 
 ## 8. Transient vs permanent error mapping
 
@@ -186,11 +187,11 @@ Custom predicates **extend** the default; don't replace it. Vendor-specific retr
 
 Use `AddConcurrencyLimiter` in custom pipelines for upstreams with strict server-side concurrency limits (e.g. a daemon with a small worker pool). The limit is per `HttpClient` name, not process-global. Skip unless you've measured upstream contention or have explicit vendor concurrency quotas.
 
-## 11. The HTTP-retry vs Wolverine-retry boundary
+## 11. The HTTP-retry vs message-redelivery boundary
 
-HTTP retry (this skill) handles in-the-moment transients within a single call. Wolverine handler retry (`wolverine-patterns §9`) handles across-time durability — if a handler's HTTP call exhausts HTTP retries and throws, Wolverine decides whether to redeliver the message later.
+HTTP retry (this skill) handles in-the-moment transients within a single call. Handler-level redelivery (the dispatch seam, `backend-architecture §6`) handles across-time durability — if a handler's HTTP call exhausts HTTP retries and throws, the dispatch seam decides whether to redeliver the message later.
 
-**They compose; they don't duplicate.** HTTP retry tries hard NOW; Wolverine retry tries again LATER.
+**They compose; they don't duplicate.** HTTP retry tries hard NOW; message redelivery tries again LATER.
 
 ## 12. OTel auto-instrumentation
 
@@ -200,7 +201,7 @@ HTTP retry (this skill) handles in-the-moment transients within a single call. W
 
 When adding a new external integration adapter, in order:
 
-1. Define port `IFooService` in `YourContext.Application.Ports` — methods, DTOs, `ErrorOr` return semantics.
+1. Define port `IFooService` in `YourContext.Application.Ports` — methods, DTOs, `Result` return semantics.
 2. Create adapter project `YourContext.Adapters.<Vendor>` with vendor SDK / HttpClient dependency.
 3. Define `<Vendor>Options` POCO; bind from `IConfiguration` with validation.
 4. Write the impl class implementing the port (annotate with `// PORT-IMPL:`).
@@ -256,15 +257,15 @@ For integration tests, prefer the vendor's sandbox endpoint or a Testcontainer i
 - `// RESILIENCE:` — annotates a resilience-handler registration or critical pipeline option.
 - `// HANDLER-ORDER:` — annotates the `DelegatingHandler`-vs-resilience order at a registration site.
 
-Canonical comment-markers index: `backend-feature-patterns §10`.
+Canonical comment-markers index: `backend-architecture §7`.
 
 ## 17. References
 
-- `keycloak-patterns §8` — `M2MTokenHandler` lives there; chain-order rule is joint in §4.
-- `wolverine-patterns §9` — handler-level retry; cross-cutting boundary in §11.
-- `backend-feature-patterns §8` — idempotency-key handler contract.
-- `fastendpoints-patterns §6` — idempotency-key endpoint contract.
-- `elasticsearch-patterns` — concrete adapter (HTTP, bulk indexing, transient handling).
+- `backend-architecture §6, §7` — events/redelivery model + the marker index; the cross-cutting redelivery boundary in §11.
+- `infrastructure-wiring` — registers the M2M token provider + `M2MTokenHandler`; chain-order rule is joint in §4.
+- `backend-feature-patterns §9` — idempotency-key handler contract.
+- `api-endpoint-patterns` — idempotency-key endpoint contract.
+- `search-patterns` — concrete adapter (HTTP, bulk indexing, transient handling).
 - `file-pipeline-patterns` — concrete adapters (SeaweedFS via S3-compat, nClam via TCP).
 - `observability-backend` — OTel auto-instrumentation (Phase 5 placeholder).
 - `.specify/memory/system-context.md` — project-specific upstream SLAs, timeout defaults, vendor inventory.
