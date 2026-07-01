@@ -80,13 +80,20 @@ tests/e2e/{story-id}/ (frontend)
 tests/components/{unit}/ (frontend)
 
 ## Quality Bar
-- Every endpoint has provider test (backend)
-- Every acceptance criterion has E2E test (frontend)
-- Tests runnable without manual setup
-- Test names describe scenarios not implementation
-- Coverage report generated and displayed
+- Mode is detected and logged at the start — never ambiguous.
+- The impacted-project list is sourced from `unit-brief.md`; every impacted project is either tested
+  or explicitly logged as skipped with a reason.
+- `--projects` resolution is logged; `--role`/type conflicts STOP rather than guess.
+- Each `sk.testproject` invocation is self-contained — no state leaks between projects.
+- Tests realize `02-design/contracts/` and the unit's acceptance criteria — the orchestrator does not
+  redesign contracts or invent endpoints.
+- Existing tests are never discarded on REFINE; only failing cases are repaired.
+- Active gates must receive explicit 'approved' before `test-status` changes; skipped gates are logged.
+- 'cancel' at the gate preserves all artifacts and tests written up to that point.
+- `test-status` rolls up honestly — `pass` only when every in-scope project's suite is green.
+- Completion report lists only what actually ran and what was skipped, with reasons.
 
 ## Completion Signal
 Last line of output must be exactly one of:
-`SK_RESULT: PASS` — all tests passed
-`SK_RESULT: FAIL` — one or more tests failed
+`SK_RESULT: PASS` — all in-scope projects' suites passed
+`SK_RESULT: FAIL` — one or more projects have failing or missing required tests

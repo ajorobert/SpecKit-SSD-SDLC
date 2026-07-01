@@ -1,15 +1,23 @@
 # sk.scaffolding
-Structural scaffolding step for story implementation.
-Role: backend | frontend | Level: story
+Structural scaffolding step for one project's implementation.
+Role: backend | frontend | mobile | Level: project
 
-Internal sub-skill — invoked by sk.implement. Do not invoke directly.
+Internal sub-skill — invoked by sk.implementproject (one project of a unit). Do not invoke directly.
+
+## Project Context (passed by sk.implementproject)
+The caller passes the target `{Project}`, `{CodeRoot}`, `{ProjectType}`, and the effective `--role`,
+plus the project slice: `03-plan/{Project}/plan.md`, `03-plan/{Project}/tasks.md`, and the relevant
+`02-design/` artifacts. ALL files are created inside `{CodeRoot}` (and `tests/`), exactly as enumerated
+in `03-plan/{Project}/plan.md` → Files Affected. Never write outside `{CodeRoot}`.
 
 ## Step 0: Capability Pack Selection
 Before any other steps, load the tech stack packs relevant to this task.
 
-1. Read session.yaml → get `role` (backend | frontend) and `active_story_id`
-2. Read the active story frontmatter → check `tags` array for domain keywords
-3. Determine the active service surface (from `active_unit` or story context)
+1. Use the `role` (backend | frontend | mobile) and `{Project}` passed by sk.implementproject
+   (fall back to session.yaml `role` if not passed).
+2. Read `03-plan/{Project}/plan.md` and the unit's story frontmatter → identify domain keywords
+   (auth, persistence, messaging, file, search, cache …).
+3. Use `{ProjectType}` + the project's Role (from unit-brief Impacted Projects) as the active surface.
 4. Read applicable packs. **Load ≤6 packs total** — prioritise specialist packs when the limit is reached.
 
 **Role = backend**
@@ -45,20 +53,21 @@ List the packs loaded before continuing.
 ## Context Loading — cacheable (load first, in order)
 1. specs/domains/{relevant-domain}/knowledge-base.md (if exists)
 2. specs/intents/{intent}/units/{unit}/knowledge-base.md (if exists)
-3. specs/intents/{intent}/units/{unit}/contracts/api-spec.json (if exists)
-4. specs/intents/{intent}/units/{unit}/contracts/README.md (if exists)
-5. specs/intents/{intent}/units/{unit}/architecture.md (if exists)
-6. specs/intents/{intent}/units/{unit}/data-model.md (if exists)
-7. .specify/memory/standards/coding-standards.md
+3. specs/intents/{intent}/units/{unit}/02-design/contracts/api-spec.json (if exists)
+4. specs/intents/{intent}/units/{unit}/02-design/architecture.md (if exists)
+5. specs/intents/{intent}/units/{unit}/02-design/projects/{Project}.md (if exists)
+6. specs/intents/{intent}/units/{unit}/02-design/database-design.md (if exists)
+7. specs/intents/{intent}/units/{unit}/02-design/ui-model.md (if exists — Frontend/Mobile)
+8. .specify/memory/standards/coding-standards.md
 
-## Story context (tail — load LAST)
+## Project context (tail — load LAST)
 Emit at end of user-input block, after all cacheable context:
 ```
-<story id="{story-id}">
-  <story-md>…STORY_DIR/story-{ID}.md…</story-md>
-  <plan-md>…STORY_DIR/plan.md…</plan-md>
-  <tasks-yaml>…STORY_DIR/tasks.yaml…</tasks-yaml>
-</story>
+<project name="{Project}" code-root="{CodeRoot}" type="{ProjectType}">
+  <plan-md>…03-plan/{Project}/plan.md…</plan-md>
+  <tasks-md>…03-plan/{Project}/tasks.md…</tasks-md>
+  <stories>…UNIT_DIR/01-story/ story.md, requirement.md, acceptance-criteria.md…</stories>
+</project>
 ```
 
 ## Pre-generation Protocol
@@ -69,10 +78,16 @@ Before writing any code in an existing module:
 ## Execution Rules: Structural Scaffolding
 This phase is a **pure mechanical translation** of the contracts, data models, and plan into code shape.
 - **DO NOT** write business logic, implement rules, conditions, or transformations.
-- **Task Tracking**: For every task where you successfully generate the structural scaffolding (stubs, classes, DTOs, etc.), update its status in `tasks.yaml` from `open` to `ready`. This signals to `sk.codegen` that the boilerplate is ready for logic implementation.
+- **Inspect before creating**: where the target file or module already exists, read it first and extend
+  additively — do not rewrite or alter existing functionality.
+- **Task Tracking**: For every task where you successfully generate the structural scaffolding (stubs,
+  classes, DTOs, etc.), set its status to `scaffolded` in `04-implementation/{Project}/progress.md`. This
+  signals to `sk.codegen` that the boilerplate is ready for logic implementation.
 
 ### Generate the structure:
-Read `tasks.yaml` to understand *what* needs to be built, and use `api-spec.json` and `data-model.md` to know *how* it should be shaped.
+Read `03-plan/{Project}/tasks.md` to understand *what* needs to be built (build order + Files Affected),
+and use `api-spec.json`, `database-design.md`, and `ui-model.md` to know *how* it should be shaped. All
+output goes inside `{CodeRoot}`.
 1. Create directories and empty files.
 2. Create classes, entities, enums, controllers, and services as stubbed boundaries.
 3. Wire up dependencies via Dependency Injection signatures.
