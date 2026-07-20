@@ -15,10 +15,11 @@ type RealmClaims = {
 type PortalSession = { /* fill 6f */ };
 
 type AdminSession = {
+  // tagin-console is Next.js / NextAuth v5 (Keycloak) — same family as PortalSession.
   isAuthenticated: boolean;
   userId:          string;                      // from sub claim
   roles:           string[];                    // from realm_access.roles; drives role-based UI
-  accessTokenExpiresAt: number;                 // epoch seconds; used by apiClient updateToken threshold
+  accessTokenExpiresAt: number;                 // epoch seconds; NextAuth refresh threshold
   // claim names below are project-specific — confirm against realm config before relying on them
   email?:    string;                            /* unknown — confirm with team */
   fullName?: string;                            /* unknown — confirm with team */
@@ -40,6 +41,6 @@ type MobileSession = {
 ## Token storage
 | Surface   | Access                                                          | Refresh                                                          |
 |---|---|---|
-| Portal    | fill 6f                                                         | fill 6f                                                          |
-| Admin SPA | in-memory only (keycloak-js instance); never localStorage/sessionStorage | in-memory only (keycloak-js instance); silent SSO via OIDC `prompt=none` on reload |
-| Mobile    | in-memory only; never persisted                                 | `expo-secure-store` (iOS Keychain / Android Keystore); never AsyncStorage; never MMKV |
+| Portal (customer-portal, Next.js) | NextAuth v5 session (server-side; httpOnly cookie) | NextAuth token rotation (Keycloak refresh) |
+| Admin (tagin-console, Next.js)    | NextAuth v5 session (server-side; httpOnly cookie) — same as portal | NextAuth token rotation (Keycloak refresh) |
+| Mobile (vendor-app, RN/Expo)      | in-memory only; never persisted                                 | `expo-secure-store` (iOS Keychain / Android Keystore); never AsyncStorage; never MMKV |

@@ -28,7 +28,12 @@ Role = backend: always `.claude/skills/backend-architecture/SKILL.md` (canonical
 - Cache opportunity signals (cache, caching, hybrid cache, L1/L2, tag invalidation, distributed lock, rate limit, redlock, redis stream) → `.claude/skills/caching-patterns/SKILL.md`
 - Search bottleneck signals → `.claude/skills/search-patterns/SKILL.md`
 
-Role = frontend: always `.claude/skills/react-component-patterns/SKILL.md`, `.claude/skills/frontend-design-system/SKILL.md`
+Role = frontend: resolve the surface and load its packs via the shared
+surface-resolution preamble — do NOT hardcode a list. Read
+`.claude/skills/shared/surface-resolution.md`, then load the resolved surface's
+**Always-load skill packs** from `.specify/memory/projects/{surface}/project.md`.
+This gives the mobile surface its own packs (and correctly omits the web-only
+`frontend-design-system` on mobile) instead of the old single web-biased list.
 
 List packs loaded.
 

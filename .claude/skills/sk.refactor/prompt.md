@@ -25,8 +25,14 @@ Role = backend: always `.claude/skills/backend-architecture/SKILL.md` (canonical
 - adapter scope (port-and-adapter split, typed HttpClient, resilience, DelegatingHandler chain, idempotency-aware retry) → `.claude/skills/integration-adapter-patterns/SKILL.md`
 - feature-flag scope (rollouts, variant features, gating, sunset cleanup) → `.claude/skills/feature-management-patterns/SKILL.md`
 
-Role = frontend (Customer Portal): always `.claude/skills/react-component-patterns/SKILL.md`, `.claude/skills/frontend-design-system/SKILL.md`
-Role = frontend (Admin SPA): always `.claude/skills/react-admin-patterns/SKILL.md`, `.claude/skills/react-component-patterns/SKILL.md`
+Role = frontend: resolve the surface and load its packs via the shared
+surface-resolution preamble — do NOT hardcode a per-surface list (this also adds
+the previously-missing mobile branch). Read
+`.claude/skills/shared/surface-resolution.md`, then load the resolved surface's
+**Always-load skill packs** from `.specify/memory/projects/{surface}/project.md`.
+`admin` = `nextjs-patterns` + `nextjs-admin-patterns` (both Next.js; no
+`react-admin-patterns`); `mobile` = `react-native-patterns` (+ component,
+a11y-core, observability), and does NOT load `frontend-design-system`.
 
 List packs loaded before proceeding.
 

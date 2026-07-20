@@ -1,12 +1,20 @@
 ---
 name: zustand-state-management
-description: "Load when: implementing or reviewing Zustand stores for global/shared UI state in any frontend. TypeScript patterns, hydration safety, persist middleware, slice composition."
+description: "Load when: implementing or reviewing Zustand stores for global/shared UI state in any frontend surface (web, admin, mobile). TypeScript patterns, hydration safety, persist middleware, slice composition."
+when_to_load:
+  - Authoring or reviewing a Zustand store (global/shared UI state) on any surface
+  - Store slice composition, selector hygiene, or persist-middleware work
+  - Hydration-safety review for client state in Next.js
+  - The boundary between client UI state (Zustand) and server state (TanStack Query)
 ---
+
+<!-- Pack co-loading is defined by the manifest (projects/{surface}/project.md "always-load skill packs" — added on the `state`/`zustand` keyword overlay), read via the shared surface-resolution preamble — not by frontmatter. -->
+
 
 # Zustand State Management
 
 ## Purpose
-Production patterns for Zustand v5 (React 18–19, TypeScript 5+) managing global and shared UI state across the customer portal and admin SPA. Covers correct TypeScript syntax, hydration safety, persist middleware, slice composition, and the boundary between Zustand state and server state (TanStack Query).
+Production patterns for Zustand v5 (React 18–19, TypeScript 5+) managing global and shared UI state across the customer portal, admin console, and mobile app. Covers correct TypeScript syntax, hydration safety, persist middleware, slice composition, and the boundary between Zustand state and server state (TanStack Query).
 
 ## Core Rules
 

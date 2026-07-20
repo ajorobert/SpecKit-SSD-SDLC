@@ -23,17 +23,17 @@ Load the frontend packs relevant to this unit's surface before designing. **Load
 
 1. Read session.yaml → get `active_unit`, `active_intent`, and `role`.
 2. Read unit-brief.md and all stories → check `tags` arrays and prose for surface + concern keywords.
-3. Identify the target surface(s): customer portal (Next.js) | admin SPA (React+Vite) | mobile (React Native).
-4. Read applicable packs:
-
-- Always: `.claude/skills/frontend-design-system/SKILL.md`
-- Always: `.claude/skills/react-component-patterns/SKILL.md`
-- `portal`, `web`, `next`, `nextjs`, `app router`, `ssr`, `seo`, `strapi`, `cms` → `.claude/skills/nextjs-patterns/SKILL.md`
-- `admin`, `spa`, `vite`, `tanstack`, `dashboard`, `back office`, `internal tool` → `.claude/skills/react-admin-patterns/SKILL.md`
-- `mobile`, `native`, `react native`, `expo`, `nativewind`, `ios`, `android` → `.claude/skills/react-native-patterns/SKILL.md`
-- `state`, `global`, `store`, `zustand`, `shared state`, `client cache` → `.claude/skills/zustand-state-management/SKILL.md`
-- `a11y`, `accessibility`, `wcag`, `keyboard`, `screen reader`, `aria` → `.claude/skills/accessibility-standards/SKILL.md`
-- `telemetry`, `analytics`, `observability`, `posthog`, `sentry`, `web vitals` → `.claude/skills/observability-frontend/SKILL.md`
+3. Identify the target surface(s): `web` (customer-portal, Next.js) | `admin` (tagin-console, Next.js) | `mobile` (vendor-app, React Native).
+4. Load packs via the shared surface-resolution preamble — do NOT hardcode a
+   per-surface list, so design loads the same packs codegen/review will:
+   - Read `.claude/skills/shared/surface-resolution.md`.
+   - For **each** in-scope surface, load its **Always-load skill packs** from
+     `.specify/memory/projects/{surface}/project.md` (+ keyword overlays:
+     `state`/`zustand` → `zustand-state-management`; `auth` →
+     `authorization-patterns`; `file`/`upload` → `file-pipeline-patterns`).
+   - This loads `observability-frontend` on every surface, and does NOT load the
+     web-only `frontend-design-system` on `mobile`. There is no
+     `react-admin-patterns`; `admin` uses `nextjs-patterns` + `nextjs-admin-patterns`.
 
 List the packs loaded before continuing.
 

@@ -1,16 +1,16 @@
 ---
 name: observability-frontend
-description: |
-  Frontend observability rules for Next.js (portal), React+Vite (admin SPA), React Native Expo (mobile): OTel JS / RN telemetry, Sentry SDK to GlitchTip, PostHog anonymous behavior, Microsoft Clarity heatmaps. Covers what to capture, error-boundary integration, source-map upload, PII redaction, opt-in/opt-out conventions. Wiring/deployment lives in `.specify/memory/observability-stack.md`.
+description: "Frontend observability rules for Next.js (customer portal + admin console) and React Native Expo (mobile): OTel JS / RN telemetry, Sentry SDK to GlitchTip, PostHog anonymous behavior, Microsoft Clarity heatmaps (web only). Covers what to capture, error-boundary integration, source-map upload, PII redaction, opt-in/opt-out conventions. Wiring/deployment lives in .specify/memory/observability-stack.md."
 when_to_load:
   - Task mentions: log, trace, telemetry, sentry, glitchtip, posthog, clarity, error boundary, user behavior, heatmap, web vitals
   - Files touched: any client-side code that captures user events, errors, or performance metrics
-co_loads_with:
-  - nextjs-patterns, react-admin-patterns, react-native-patterns (one per surface)
 references:
   - observability-backend (server-side correlation via traceparent)
   - .specify/memory/observability-stack.md (one-time wiring)
 ---
+
+<!-- Pack co-loading is defined by the manifest (projects/{surface}/project.md "always-load skill packs"), read via the shared surface-resolution preamble — not by frontmatter. Loaded on all three surfaces. -->
+
 
 # Observability — Frontend Rules
 
@@ -23,7 +23,7 @@ Four stacks on each frontend surface:
 | **OTel JS / OTel RN** | Traces + minimal metrics (web vitals, route-change timings) | All |
 | **Sentry SDK → GlitchTip** | Error capture; trace-id matches backend for cross-correlation | All (GlitchTip deferred from V1) |
 | **PostHog (anonymous)** | User behavior analytics; anonymized by default; consent-gated for identification | All |
-| **Microsoft Clarity** | Heatmaps + session recordings | **Web only — NOT on RN, NOT on admin SPA** |
+| **Microsoft Clarity** | Heatmaps + session recordings | **Web only — NOT on RN, NOT on admin console** |
 
 **Rule:** each stack has its own purpose. Don't use Sentry for behavior analytics, don't use PostHog for error capture, don't use Clarity for performance metrics.
 
@@ -66,7 +66,7 @@ export default function ListingsPage() {
 
 - **Anonymous by default:** PostHog tracks an anonymous `distinct_id` from first session; no PII attached.
 - **Identification:** ONLY after user explicit consent. Call `posthog.identify(userId)` only inside the consent-accepted code path.
-- **Event naming:** `<noun>_<verb>` (e.g. `listing_viewed`, `search_executed`, `vendor_signup_completed`).
+- **Event naming:** `<noun>_<verb>` (e.g. `listing_viewed`, `search_executed`, `signup_completed`). Audience-specific event names (which user segment signed up, etc.) are project vocabulary — keep them in code / `projects/{surface}/project.md`, not in this grammar skill.
 - **Capture business-meaningful actions only.** Don't track every click, keystroke, scroll, or hover.
 - **Property conventions:** snake_case property names; the same PII deny-list as §6 applies.
 
@@ -114,7 +114,7 @@ function ListingCard({ listing }: { listing: ListingSummary }) {
 
 - Bootstrap loads via `<script>` AFTER the consent gate.
 - Mask sensitive fields with `data-clarity-mask`.
-- **Don't run Clarity on the admin SPA** — admin users see PII; Clarity recording exposes it. **Clarity is for customer portal only.**
+- **Don't run Clarity on the admin console** — admin users see PII; Clarity recording exposes it. **Clarity is for customer portal only.**
 - Default rule: every page with form inputs uses `data-clarity-mask` on every input by default; opt INTO unmasked on a per-field basis only when justified.
 
 ## 8. Web Vitals + OTel JS metrics
@@ -190,7 +190,7 @@ Consent banner state lives in a Zustand store (cross-ref `zustand-state-manageme
 
 - Capturing every click via PostHog autocapture (noise; cost).
 - Sentry breadcrumbs with form input enabled (PII leak by default).
-- Clarity on the admin SPA (PII leak).
+- Clarity on the admin console (PII leak).
 - `posthog.identify(userId)` before consent.
 - Custom OTel spans inside tight render loops or scroll handlers.
 - `console.log(user)` — PII visible in prod logs.
@@ -209,8 +209,8 @@ Canonical comment-markers index: `backend-architecture §7`.
 
 ## 14. References
 
-- `nextjs-patterns` — Customer Portal surface integration (Phase 6 will fill section refs).
-- `react-admin-patterns` — Admin SPA surface (**NO Clarity** rule).
+- `nextjs-patterns` — Customer Portal surface integration (see its "Surface integration for observability-frontend" section).
+- `nextjs-admin-patterns` — Admin console surface (**NO Clarity** rule; see its observability section).
 - `react-native-patterns` — Mobile surface (NO Clarity, RN-specific patterns).
 - `zustand-state-management` — consent state lives here.
 - `observability-backend §6` — server-side PII deny-list (duplicated for skill independence).

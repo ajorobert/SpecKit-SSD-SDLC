@@ -14,9 +14,15 @@ Load all packs applicable to this story for comprehensive gate evaluation.
 3. Read ALL applicable packs for the story's role and domain. **Load ≤6 packs total.**
 
 Backend story: always `.claude/skills/backend-feature-patterns/SKILL.md`
-Frontend story: always `.claude/skills/frontend-design-system/SKILL.md`, `.claude/skills/accessibility-standards/SKILL.md`
-
-Then conditional packs per the CLAUDE.md Tech Stack Context Skills table matching the story tags.
+Frontend story: do NOT hardcode a frontend pack list. Resolve the surface and
+load its packs via the shared surface-resolution preamble so verify gates against
+the *same* packs codegen/review/test used:
+- Read `.claude/skills/shared/surface-resolution.md`, then load the resolved
+  surface's **Always-load skill packs** from
+  `.specify/memory/projects/{surface}/project.md` (+ keyword overlays). This
+  loads the surface skill, `react-component-patterns`, `observability-frontend`,
+  and `accessibility-standards` — no longer the old narrow "design + a11y only"
+  subset, and no web-only `frontend-design-system` on mobile.
 
 List the packs loaded before continuing.
 

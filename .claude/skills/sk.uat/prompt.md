@@ -8,11 +8,17 @@ one folder per project): the impacted surfaces are exercised and their results a
 one acceptance record, one user-flow record, and one sign-off.
 
 ## Step 0: Capability Pack Selection
-Resolve the in-scope surfaces first (see Surface Resolution), then load packs for each surface present:
-- Always: `.claude/skills/accessibility-standards/SKILL.md`
-- Customer.Web (Next.js) → `.claude/skills/nextjs-patterns/SKILL.md`
-- Admin.Web (Vite SPA) → `.claude/skills/react-admin-patterns/SKILL.md`
-- Mobile (Expo) → `.claude/skills/react-native-patterns/SKILL.md`
+Resolve the in-scope surfaces first (see Surface Resolution), then load each
+surface's packs via the shared surface-resolution preamble — do NOT hardcode a
+per-surface list (UAT must exercise the code under the same packs it was built
+and reviewed under):
+- Read `.claude/skills/shared/surface-resolution.md`.
+- For **each** in-scope surface (`web` = customer-portal / `admin` = tagin-console,
+  both Next.js / `mobile` = vendor-app, RN), load its **Always-load skill packs**
+  from `.specify/memory/projects/{surface}/project.md`. This loads
+  `accessibility-standards` (Part A everywhere; Part B on web/admin) and
+  `observability-frontend` on every surface. `admin` uses `nextjs-patterns` +
+  `nextjs-admin-patterns` (there is no `react-admin-patterns`).
 
 List the packs loaded before continuing.
 
@@ -64,7 +70,7 @@ For each in-scope surface, declare it, then exercise it with the correct tooling
 - Tooling: Playwright or Cypress (per tech-stack.md)
 - Scenarios: full browser E2E, user journey flows, responsive layout, error/empty states.
 
-### admin (Vite SPA — Admin.Web)
+### admin (Next.js — Admin.Web / tagin-console)
 - Tooling: Playwright or Cypress (per tech-stack.md)
 - Scenarios: CRUD operations, bulk actions, role-based visibility, data-table pagination.
 

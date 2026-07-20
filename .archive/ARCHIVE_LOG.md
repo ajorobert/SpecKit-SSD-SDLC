@@ -174,3 +174,21 @@ approved and let a human run the cleanup.
 **Original path:** .claude/skills/SKILL_AUDIT.md
 **Archived to:** .archive/2026-06-25/SKILL_AUDIT.md
 **Review:** [ ] approved for permanent delete
+
+## 2026-07-17 — .specify/memory/projects/backend/project.md
+**Reason:** Out of scope: frontend-only effort; backend memory not needed per user
+**Original path:** .specify/memory/projects/backend/project.md
+**Archived to:** .archive/2026-07-17/project.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-07-17 — .specify/memory/projects/backend/coding-standards.md
+**Reason:** Out of scope: frontend-only effort
+**Original path:** .specify/memory/projects/backend/coding-standards.md
+**Archived to:** .archive/2026-07-17/coding-standards.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-07-17 — .claude/skills/react-admin-patterns/SKILL.md
+**Reason:** Admin surface (tagin-console) is Next.js, not React+Vite+Tanstack; replaced by nextjs-admin-patterns overlay
+**Original path:** .claude/skills/react-admin-patterns/SKILL.md
+**Archived to:** .archive/2026-07-17/SKILL.md
+**Review:** [ ] approved for permanent delete

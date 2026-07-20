@@ -53,31 +53,45 @@ Observability wiring lives in `.specify/memory/observability-stack.md` (not a sk
 | `search-patterns` | Elastic.Clients.Elasticsearch 8.x, geo search, tenant-isolated queries, event-driven indexing, alias-based reindex, PIT+search_after pagination |
 | `file-pipeline-patterns` | SeaweedFS storage + ImageSharp processing + nClam scanning, saga-driven upload state machine, presigned uploads, ABAC for file access |
 
-### Frontend — Customer Portal
+> **Frontend pack selection is DATA, not prose.** The authoritative per-surface
+> "always-load skill packs" live in `.specify/memory/projects/{web,admin,mobile}/project.md`
+> and are resolved by the shared preamble `.claude/skills/shared/surface-resolution.md`.
+> Every frontend command reads that one source, so codegen = review = test =
+> verify. The tables below are a human-readable mirror; the manifest wins.
+>
+> **Surfaces:** `web` = customer-portal (Next.js) · `admin` = tagin-console
+> (**Next.js**, not Vite/SPA) · `mobile` = vendor-app (React Native + Expo).
+
+### Frontend — web (customer-portal, Next.js)
 | Skill folder | Load when |
 |---|---|
 | `nextjs-patterns` | Next.js App Router, NextAuth v5, Strapi CMS, R2 images |
-| `frontend-design-system` | Tailwind v4, shadcn/ui, dark mode, design tokens |
 | `react-component-patterns` | Component decomposition, TypeScript props, form handling |
-| `zustand-state-management` | Global/shared UI state |
-| `accessibility-standards` | Any frontend implementation or UAT |
-| `observability-frontend` | OTel JS/RN, Sentry, PostHog (anonymous), Clarity — what to capture, error boundary, source-map upload, PII redaction, consent gating. Wiring in `.specify/memory/observability-stack.md`. |
+| `frontend-design-system` | Tailwind v4, shadcn/ui, dark mode, design tokens |
+| `accessibility-standards` | WCAG — Part A (core) + Part B (web-DOM) |
+| `observability-frontend` | OTel JS, Sentry→GlitchTip, PostHog, Clarity (web). Wiring in `.specify/memory/observability-stack.md`. |
+| `zustand-state-management` | (overlay) global/shared UI state |
 
-### Frontend — Admin SPA
+### Frontend — admin (tagin-console, Next.js)
 | Skill folder | Load when |
 |---|---|
-| `react-admin-patterns` | React + Vite + Tanstack Router admin SPA |
-| `frontend-design-system` | Tailwind v4, shadcn/ui (same as portal) |
+| `nextjs-patterns` | Base App Router / session / fetch contract (same as portal) |
+| `nextjs-admin-patterns` | Admin console overlay — data tables, bulk ops, RBAC-gated UI, audit forms |
 | `react-component-patterns` | Component patterns (same as portal) |
-| `zustand-state-management` | Global state (same as portal) |
-| `accessibility-standards` | Any frontend implementation or UAT |
-| `observability-frontend` | Same as portal — OTel JS, Sentry, PostHog, Clarity |
+| `frontend-design-system` | Tailwind v4, shadcn/ui (same as portal) |
+| `accessibility-standards` | WCAG — Part A (core) + Part B (web-DOM) |
+| `observability-frontend` | Same sinks as portal, but **no Microsoft Clarity on admin** |
+| `zustand-state-management` | (overlay) global state |
 
-### Frontend — Mobile App
+### Frontend — mobile (vendor-app, React Native + Expo)
 | Skill folder | Load when |
 |---|---|
-| `react-native-patterns` | React Native + Expo managed workflow, NativeWind v5 |
-| `observability-frontend` | OTel RN, Sentry RN, cached runtime-config, source maps |
+| `react-native-patterns` | React Native + Expo managed workflow, Expo Router, NativeWind v5 |
+| `react-component-patterns` | Component decomposition, props, hooks, forms |
+| `accessibility-standards` | WCAG — **Part A (core) only**; native impl in `react-native-patterns §2.11` |
+| `observability-frontend` | OTel RN, Sentry RN, source maps; **no Clarity on RN** |
+| `zustand-state-management` | (overlay) global state |
+| — | **Never** load `frontend-design-system` (web-only Tailwind/shadcn) on mobile |
 
 ## Security Rules
 5. Never use `rm`, `rmdir`, `del`, or `unlink` — these commands are blocked by policy.
