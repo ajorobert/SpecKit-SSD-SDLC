@@ -40,19 +40,37 @@ specs/intents/{intent}/units/{unit}/{NN}-story/
 ## Phase 0 — Jira Ingestion (only in [JIRA MODE])
 Runs before Phase 1 when `--jira {Jira_Id}` is supplied. Skipped entirely in [MANUAL MODE].
 1. Load the Atlassian MCP tool schema first (deferred): `ToolSearch` with query `select:mcp__claude_ai_Atlassian_Rovo__getJiraIssue` (also fetch `searchJiraIssuesUsingJql` if the parent/epic must be resolved).
-2. Fetch the issue `{Jira_Id}` via `getJiraIssue`. If the fetch fails (auth missing, unknown ID, MCP not connected): STOP and report — do not silently fall back to manual.
+2. Fetch the issue `{Jira_Id}` via `getJiraIssue`. Request the fields Summary, Description,
+   Acceptance Criteria, **Components**, Labels, and Attachments. If the fetch fails
+   (auth missing, unknown ID, MCP not connected): STOP and report — do not silently fall back to manual.
 3. Map Jira fields → pipeline seed data:
    - **Summary** → story title + action.
    - **Description / acceptance-criteria field / checklist** → requirement, happy path, and seed acceptance criteria.
-   - **Issue type** (`Bug` → also engage [BUG MODE] framing) and **labels/components** → tags + project-impact hints.
+   - **Issue type** (`Bug` → also engage [BUG MODE] framing) and **labels** → tags.
+   - **Attachments** (optional) → design/reference links carried into requirement.md.
    - **Epic / parent** → candidate Intent; the issue itself → candidate Unit + Story.
-4. Carry the seed data forward so sub-skills PRE-FILL answers instead of re-asking. Record the source `jira_id: {Jira_Id}` in story frontmatter.
+4. **Component → Project detection** (drives the `## Project` section written in Phase 1):
+   a. Read the mapping `.specify/memory/jira-component-map.md`. Never hardcode component or
+      project names — the mapping is the only source of truth.
+   b. For each Component on the issue, resolve it against the mapping (exact, case-insensitive
+      on the Component name). Collect the mapped Project Names into a de-duplicated list.
+   c. A Component that is not in the mapping is **unmapped**: warn (`Unmapped Jira Component
+      '{name}' — add it to jira-component-map.md`) and skip it; it never becomes a project.
+   d. Carry the resolved project list forward as `detected_projects` seed data:
+      - 1 mapped project  → single-project list
+      - 2+ mapped projects → all mapped projects
+      - 0 components, or all components unmapped → empty list (no `## Project` section written)
+   e. `detected_projects` seeds the `## Project` section only; it does NOT replace
+      `sk.architect-probe`'s independent impacted-projects analysis in `unit-brief.md`.
+5. Carry the seed data forward so sub-skills PRE-FILL answers instead of re-asking. Record the source `jira_id: {Jira_Id}` in story frontmatter.
 
 ## Orchestration
 
 ### Phase 1 — Story Capture
 Invoke sub-skill: `sk.story/sk.specify` (or `--bug` if in bug mode)
 - In [JIRA MODE]: pass the Phase 0 seed data to `sk.specify`. It pre-fills intent/unit/story fields from Jira and only asks for fields Jira left genuinely empty — it does not re-run the full interview.
+  Also pass `detected_projects` (from Phase 0 step 4). `sk.specify` writes the `## Project`
+  section into `story.md` when the list is non-empty, and omits it entirely when empty.
 - In [MANUAL MODE]: `sk.specify` runs the interactive interview as normal.
 - Wait for specify phase to complete and write the story folder (`story.md`, `requirement.md`, `acceptance-criteria.md`)
 - Read back `active_story_id` from `session.yaml`
@@ -135,6 +153,10 @@ Once the story is `ready`, finalize the **single** story folder. Do NOT split pe
 
 **Confirm the folder is complete** at `specs/intents/{intent}/units/{unit}/{NN}-story/`:
 - `story.md` — frontmatter (`id`, `intent`, `unit`, `status`, `story_type`, `tags`, `checkpoint_mode`, and `jira_id` in [JIRA MODE]) + the As-a/I-want/So-that statement + in/out-of-scope.
+  In [JIRA MODE], when `detected_projects` (Phase 0) is non-empty, `story.md` also carries a
+  `## Project` section listing the mapped project name(s) — one per line. When the list is
+  empty (no components, or none mapped), no `## Project` section is written. This section is
+  the project-scope signal consumed by `sk.design` (priority 2 — see sk.design mode detection).
 - `requirement.md` — business + non-functional requirements, the clarifications log, and architecture constraints (NFRs, security, observability, integration).
 - `acceptance-criteria.md` — the testable acceptance criteria.
 - `jira.md` — **optional**, written only in [JIRA MODE]: records the source Jira ID `{Jira_Id}`, the issue summary, and a link back to it for traceability. In [MANUAL MODE] this file is not created.

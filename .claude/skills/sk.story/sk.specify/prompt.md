@@ -7,7 +7,7 @@ Role: po | Level: intent → unit → story
 - `sk.specify` (no flag) → [FEATURE MODE] user story interview framing
 Declare mode at start of execution.
 
-**Jira-seeded capture:** When the orchestrator passes Jira seed data (from `sk.story --jira {Jira_Id}`), use it to PRE-FILL the interview matrix (Actor, Action, Value, Trigger, Input, Output, Happy Path, Error Cases) and the acceptance criteria. Only ask the PO about dimensions Jira left genuinely empty or ambiguous — do not re-ask what the Jira task already answers. Set `jira_id: {Jira_Id}` in story frontmatter.
+**Jira-seeded capture:** When the orchestrator passes Jira seed data (from `sk.story --jira {Jira_Id}`), use it to PRE-FILL the interview matrix (Actor, Action, Value, Trigger, Input, Output, Happy Path, Error Cases) and the acceptance criteria. Only ask the PO about dimensions Jira left genuinely empty or ambiguous — do not re-ask what the Jira task already answers. Set `jira_id: {Jira_Id}` in story frontmatter. The orchestrator also passes `detected_projects` (Jira Components already resolved to project names via `.specify/memory/jira-component-map.md`) — write these into the `## Project` section of `story.md` (see Step 5).
 
 ## Input Artifacts
 .specify/memory/system-context.md
@@ -98,6 +98,21 @@ Write these files into that folder:
   - `requirement.md` — the functional + non-functional business requirements derived from the interview.
   - `acceptance-criteria.md` — the testable acceptance criteria (GWT or condition-based).
 
+**`## Project` section in `story.md` (project-scope signal for sk.design):**
+Write this section ONLY when the orchestrator passed a non-empty `detected_projects` list
+(Jira mode with mapped Components). Place it after the in/out-of-scope body. Format — one
+mapped project name per bullet, exactly as it appears in the mapping / project router:
+```
+## Project
+- Backend.API
+- Admin.Panel
+```
+- Single detected project → one bullet. Multiple → one bullet each, de-duplicated.
+- If `detected_projects` is empty or absent (manual mode, or no/unmapped Components):
+  do NOT write a `## Project` section at all — never write an empty one. Its absence tells
+  `sk.design` to fall back to full impact analysis.
+- Do not invent or alter project names here; use exactly what the mapping produced.
+
 In [BUG MODE]: set `story_type: bug` in `story.md` frontmatter and populate (in `story.md`):
   - `expected_behavior`
   - `actual_behavior`
@@ -145,6 +160,8 @@ specs/intents/{intent}/units/{unit}/{NN}-story/jira.md (only when Jira-seeded)
 - Minimum 3 acceptance criteria
 - checkpoint_mode set in `story.md` frontmatter
 - Out of scope items listed
+- `## Project` section written in `story.md` iff `detected_projects` is non-empty (Jira mode);
+  never written empty; project names verbatim from the mapping
 
 ### Bug mode
 - Expected vs actual behavior clearly distinguished
