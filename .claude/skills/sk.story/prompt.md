@@ -51,7 +51,10 @@ Runs before Phase 1 when `--jira {Jira_Id}` is supplied. Skipped entirely in [MA
    - **Epic / parent** → candidate Intent; the issue itself → candidate Unit + Story.
 4. **Component → Project detection** (drives the `## Project` section written in Phase 1):
    a. Read the mapping `.specify/memory/jira-component-map.md`. Never hardcode component or
-      project names — the mapping is the only source of truth.
+      project names — the mapping is the only source of truth. If the file is missing or its
+      `## Mapping` table has no rows, the map is **unconfigured**: warn (`jira-component-map.md
+      is unconfigured — run /sk.init or add rows to it`), treat every Component as unmapped,
+      and continue — do not block the run.
    b. For each Component on the issue, resolve it against the mapping (exact, case-insensitive
       on the Component name). Collect the mapped Project Names into a de-duplicated list.
    c. A Component that is not in the mapping is **unmapped**: warn (`Unmapped Jira Component
