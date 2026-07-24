@@ -20,6 +20,19 @@ specs/intents/{intent}/units/{unit}/02-design/database-design.md
 .specify/memory/standards/tech-stack.md (for test framework)
 .claude/skills/design-principles/SKILL.md
 
+## Project-Scoped Mode (`--project {ProjectName …}`)
+When sk.design invokes this skill with `--project`, it is regenerating ONLY the named Backend
+project pages (sk.design PROJECT mode). In this mode:
+- Write ONLY `02-design/projects/{ProjectName}.md` for the named projects — steps 1–8 do not run.
+- Treat `contracts/api-spec.json`, `api-contract.md`, `architecture.md`, and `database-design.md`
+  as read-only inputs: reuse them; never create, modify, or regenerate them here.
+- If a canonical source the page normally synthesises from is missing, derive that slice from the
+  unit stories (`01-story/`) and unit-brief.md instead, and record the gap under the page's
+  Open Questions section — do not write the missing shared artifact.
+- Do not write provider tests, test-plan.md, README.md, or service-registry.md updates.
+- Never write a page for a project that was not named, and never write an empty page — if the
+  stories show no backend impact for a named project, report it and skip the file.
+
 ## Steps
 1. [REFINE MODE] if contracts/ exists, [CREATE MODE] if not
 2. Check service-registry.md — no breaking changes without confirmation
