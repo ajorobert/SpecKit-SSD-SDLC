@@ -7,7 +7,7 @@ Role: po | Level: intent → unit → story
 - `sk.specify` (no flag) → [FEATURE MODE] user story interview framing
 Declare mode at start of execution.
 
-**Jira-seeded capture:** When the orchestrator passes Jira seed data (from `sk.story --jira {Jira_Id}`), use it to PRE-FILL the interview matrix (Actor, Action, Value, Trigger, Input, Output, Happy Path, Error Cases) and the acceptance criteria. Only ask the PO about dimensions Jira left genuinely empty or ambiguous — do not re-ask what the Jira task already answers. Set `jira_id: {Jira_Id}` in story frontmatter. The orchestrator also passes `detected_projects` (Jira Components already resolved to project names via `.specify/memory/jira-component-map.md`) — write these into the `## Project` section of `story.md` (see Step 5).
+**Jira-seeded capture:** When the orchestrator passes Jira seed data (from `sk.story --jira {Jira_Id}`), use it to PRE-FILL the interview matrix (Actor, Action, Value, Trigger, Input, Output, Happy Path, Error Cases) and the acceptance criteria. Only ask the PO about dimensions Jira left genuinely empty or ambiguous — do not re-ask what the Jira task already answers. Set `jira_id: {Jira_Id}` in story frontmatter. The orchestrator also passes `detected_projects` (Jira Components already resolved to project names via the router's `Jira Component` column) — write these into the `## Project` section of `story.md` (see Step 5).
 
 ## Input Artifacts
 .specify/memory/system-context.md
@@ -101,11 +101,11 @@ Write these files into that folder:
 **`## Project` section in `story.md` (project-scope signal for sk.design):**
 Write this section ONLY when the orchestrator passed a non-empty `detected_projects` list
 (Jira mode with mapped Components). Place it after the in/out-of-scope body. Format — one
-mapped project name per bullet, exactly as it appears in the mapping / project router:
+mapped project name per bullet, exactly as it appears in the project router:
 ```
 ## Project
-- Backend.API
-- Admin.Panel
+- {ProjectName}
+- {AnotherProjectName}
 ```
 - Single detected project → one bullet. Multiple → one bullet each, de-duplicated.
 - If `detected_projects` is empty or absent (manual mode, or no/unmapped Components):

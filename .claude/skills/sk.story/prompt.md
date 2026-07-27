@@ -50,21 +50,18 @@ Runs before Phase 1 when `--jira {Jira_Id}` is supplied. Skipped entirely in [MA
    - **Attachments** (optional) → design/reference links carried into requirement.md.
    - **Epic / parent** → candidate Intent; the issue itself → candidate Unit + Story.
 4. **Component → Project detection** (drives the `## Project` section written in Phase 1):
-   a. Read the mapping `.specify/memory/jira-component-map.md`. Never hardcode component or
-      project names — the mapping is the only source of truth. If the file is missing or its
-      `## Mapping` table has no rows, the map is **unconfigured**: warn (`jira-component-map.md
-      is unconfigured — run /sk.init or add rows to it`), treat every Component as unmapped,
-      and continue — do not block the run.
-   b. For each Component on the issue, resolve it against the mapping (exact, case-insensitive
-      on the Component name). Collect the mapped Project Names into a de-duplicated list.
-   c. A Component that is not in the mapping is **unmapped**: warn (`Unmapped Jira Component
-      '{name}' — add it to jira-component-map.md`) and skip it; it never becomes a project.
-   d. Carry the resolved project list forward as `detected_projects` seed data:
-      - 1 mapped project  → single-project list
-      - 2+ mapped projects → all mapped projects
-      - 0 components, or all components unmapped → empty list (no `## Project` section written)
-   e. `detected_projects` seeds the `## Project` section only; it does NOT replace
-      `sk.architect-probe`'s independent impacted-projects analysis in `unit-brief.md`.
+   a. Read the project router `.specify/memory/projects/index.md`. Its `Jira Component` column
+      is the only source of component → project mappings — never hardcode names. If the router
+      is absent (single-project layout) or the column has no values, warn once
+      (`No Jira Component routing configured — run /sk.init to fill the router's Jira Component column`),
+      set `detected_projects` to empty, and continue — never block the run.
+   b. Resolve each issue Component against that column (exact match, case-insensitive — Jira
+      data entry varies in casing). The matching rows' Project names form the de-duplicated
+      `detected_projects` list. A Component matching no row is **unmapped**: warn and skip it.
+   c. Empty `detected_projects` (no components, or none mapped) → no `## Project` section is written.
+   d. `detected_projects` seeds the `## Project` section AND is passed to `sk.architect-probe`
+      (Phase 5) as the story's declared scope, which the probe reconciles against its own
+      impact analysis instead of silently expanding.
 5. Carry the seed data forward so sub-skills PRE-FILL answers instead of re-asking. Record the source `jira_id: {Jira_Id}` in story frontmatter.
 
 ## Orchestration
@@ -134,7 +131,8 @@ If all items are ✅ Clear, skip Phase 5 and go to Phase 6.
 Loop `sk.story/sk.architect-probe` up to 2 times to resolve gaps from Phase 4.
 
 **Round 1:**
-- Present the ⚠️/❌ items to the architect-probe sub-skill.
+- Present the ⚠️/❌ items to the architect-probe sub-skill. In [JIRA MODE], also pass
+  `detected_projects` as the story's declared scope (drives the probe's scope reconciliation).
 - Probe phase asks up to 3 questions translating technical needs to business context.
 - Integrate user answers into `requirement.md` (and impacted projects into `unit-brief.md`).
 - Re-run Phase 4 Assessment. If all ✅, exit loop.
@@ -157,9 +155,9 @@ Once the story is `ready`, finalize the **single** story folder. Do NOT split pe
 **Confirm the folder is complete** at `specs/intents/{intent}/units/{unit}/{NN}-story/`:
 - `story.md` — frontmatter (`id`, `intent`, `unit`, `status`, `story_type`, `tags`, `checkpoint_mode`, and `jira_id` in [JIRA MODE]) + the As-a/I-want/So-that statement + in/out-of-scope.
   In [JIRA MODE], when `detected_projects` (Phase 0) is non-empty, `story.md` also carries a
-  `## Project` section listing the mapped project name(s) — one per line. When the list is
-  empty (no components, or none mapped), no `## Project` section is written. This section is
-  the project-scope signal consumed by `sk.design` (priority 2 — see sk.design mode detection).
+  `## Project` section listing the mapped project name(s) — one per line, plus any project the
+  PO confirmed during the probe's scope reconciliation (Phase 5). When the list is empty, no
+  `## Project` section is written. This section is the project-scope signal consumed by sk.design.
 - `requirement.md` — business + non-functional requirements, the clarifications log, and architecture constraints (NFRs, security, observability, integration).
 - `acceptance-criteria.md` — the testable acceptance criteria.
 - `jira.md` — **optional**, written only in [JIRA MODE]: records the source Jira ID `{Jira_Id}`, the issue summary, and a link back to it for traceability. In [MANUAL MODE] this file is not created.

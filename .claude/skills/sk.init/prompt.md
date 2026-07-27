@@ -114,15 +114,6 @@ Capture only project-wide **invariants** here — the high-level direction every
 - How does authentication work? (e.g. JWT, OAuth2, session cookies, API keys)
 - Any external APIs, payment providers, notification services?
 
-**4b. Jira Integration** (drives `.specify/memory/jira-component-map.md`)
-- Ask: "Do you track work in Jira?" (y/n)
-  - **No** → skip the rest of this block; the map file stays unconfigured (empty table).
-  - **Yes** → for each service/app identified in step 2, ask:
-    "Which Jira Component name routes issues to **{service name}**?" (Enter to skip a service
-    that has no Jira Component). Collect one `Component → Project Name → Type` row per answer.
-    The Project Name is the service/app name from step 2 — never invent a different one, and
-    never suggest example names from documentation; only use what the user provides.
-
 **5. Architecture and Design Principles**
 The following are ON by default. Only ask if the user gives a conflicting signal:
 - **Clean Architecture** — strict layering (domain → application → infrastructure). No infrastructure dependencies in domain layer.
@@ -218,14 +209,6 @@ Do not leave any placeholders — if something wasn't mentioned, make a reasonab
 - Required Fields: id, created_at, updated_at minimum
 - Keep the pre-existing Index Strategy, Partitioning, Transaction rules intact
 
-**`.specify/memory/jira-component-map.md`**
-- Generate from the template `templates/project/.specify/memory/jira-component-map.md`.
-- If step 4b collected rows: fill the `## Mapping` table with them — one row per
-  `Jira Component | Project Name | Type`. Component and project names come ONLY from the
-  interview answers; never hardcode or copy names from examples.
-- If the user does not use Jira (or skipped every service): write the template as-is with an
-  empty table — the file documents how to configure it later.
-
 **`.specify/memory/constitution.md`**
 Using answers from steps 5, 6, 7, 8 (Principles, Error Handling, Observability, Constraints), write:
 ```
@@ -297,7 +280,6 @@ Report what was created:
 ✓ .specify/project-config.md
 ✓ .specify/memory/system-context.md
 ✓ .specify/memory/service-registry.md
-✓ .specify/memory/jira-component-map.md
 ✓ .specify/memory/constitution.md
 ✓ .specify/memory/standards/tech-stack.md
 ✓ .specify/memory/standards/coding-standards.md
@@ -337,8 +319,7 @@ What would you like to update?
   [6] data-standards     — naming, required fields, migration rules
   [7] service-registry   — service list and boundaries
   [8] constitution       — architecture principles, error handling contract, observability contract, constraints
-  [9] jira-component-map — Jira Component → project name mapping (Jira mode routing)
-  [10] all memory files  — re-run full interview for everything
+  [9] all memory files   — re-run full interview for everything
 
 Enter numbers (comma-separated) or press Enter to cancel:
 ```
@@ -398,6 +379,8 @@ collect:
 - **Jira Component** — only when `usesJira`: the Jira Component name(s) that
   route issues to this project (Enter to skip — not every project has one).
   Component names come ONLY from the user's answer; never suggest or invent them.
+  Recorded in the router's `Jira Component` column (Step W2) — sk.story Jira mode
+  resolves issue Components against that column.
 
 ### Step W2 — Generate Workspace Memory
 
@@ -414,11 +397,14 @@ Workspace memory index. Each project owns an isolated memory folder under
 
 Total projects: {totalProjects}  (Backend: {backendCount} · Frontend: {frontendCount} · Mobile: {mobileCount})
 
-| Project | Type | Code Root |
-|---|---|---|
-| [{name}](./{name}/project.md) | {type} | `{code root path}` |
-| ... | ... | ... |
+| Project | Type | Code Root | Jira Component |
+|---|---|---|---|
+| [{name}](./{name}/project.md) | {type} | `{code root path}` | {component(s), comma-separated — empty if none} |
+| ... | ... | ... | ... |
 ```
+The `Jira Component` column holds only user-provided names (empty cell when the
+project has none, or when the workspace doesn't use Jira). It is the single source
+sk.story Jira mode uses to map issue Components → project names.
 
 ### Step W3 — Generate Per-Project Memory
 
@@ -559,25 +545,11 @@ Non-negotiable behaviour across every project, regardless of tooling.
 - Metrics sink: {answer or "not decided yet — flagged for resolution"}
 ```
 
-### Step W3.6 — Generate Jira Component Map
-
-Write `.specify/memory/jira-component-map.md` from the template
-`templates/project/.specify/memory/jira-component-map.md`:
-- `usesJira` and at least one project gave a Component → fill the `## Mapping` table
-  with one `Jira Component | Project Name | Type` row per collected answer. The
-  Project Name is the exact router name from `projects/index.md` (same slug/casing);
-  Type is the project's type. Multiple Components on one project → one row each,
-  all pointing at the same Project Name.
-- `usesJira` = no, or no Components collected → write the template as-is with an
-  empty table (the file documents how to configure it later).
-Never carry over example rows — the table contains only user-provided mappings.
-
 ### Step W4 — Confirm
 
 Report what was created, e.g.:
 ```
-✓ .specify/memory/projects/index.md   (router — {totalProjects} projects)
-✓ .specify/memory/jira-component-map.md   ({N} component mappings, or "unconfigured")
+✓ .specify/memory/projects/index.md   (router — {totalProjects} projects, {N} Jira Component mappings)
 
 For each project:
 ✓ .specify/memory/projects/{name}/project.md
@@ -613,9 +585,8 @@ Projects: [list each name — type]
 What would you like to do?
   [1] Add a new project        — interview + new projects/{name}/ folder + router row
   [2] Update an existing project — pick one, regenerate its memory files
-  [3] Update the router only     — fix names / types / code roots in index.md
+  [3] Update the router only     — fix names / types / code roots / Jira Components in index.md
   [4] Update shared standards    — api / data / observability standards
-  [5] Update Jira component map  — Jira Component → project name routing
 
 Enter a number or press Enter to cancel:
 ```
@@ -629,20 +600,16 @@ Enter a number or press Enter to cancel:
 - **[2] Update project** — show that project's current memory values, ask
   what changes, regenerate only the affected file(s) in its folder. Update
   the router row if name/type/code-root changed.
-- **[3] Update router** — edit only `index.md`.
+- **[3] Update router** — edit only `index.md` (including a project's
+  `Jira Component` cell; add the column first if the router predates it).
 - **[4] Update shared standards** — show current values from
   `standards/{api,data,observability}-standards.md`, ask what changes,
   regenerate only the affected file(s). If the `standards/` folder is
   absent (workspace predates this step), generate it via Step W3.5.
-- **[5] Update Jira component map** — show the current `## Mapping` table from
-  `.specify/memory/jira-component-map.md` (or "unconfigured" if empty/absent),
-  then ask which rows to add, change, or remove. Every Project Name must match
-  a router row in `index.md` — reject a mapping to an unknown project. If the
-  file is absent (workspace predates this step), generate it via Step W3.6.
 
-When **[1] Add project** runs and the workspace `usesJira` (the map file has
-rows or the user confirms Jira use), also ask the new project's Jira
-Component question and append its row(s) to `jira-component-map.md`.
+**[1] Add project** also asks the Jira Component question when the workspace
+uses Jira (any router row has a component, or the user confirms) and fills the
+new row's `Jira Component` cell.
 
 Never touch other projects' folders during an update — each project's
 memory is isolated.
@@ -657,7 +624,6 @@ memory is isolated.
 - `.specify/project-config.md`
 - `.specify/memory/system-context.md`
 - `.specify/memory/service-registry.md`
-- `.specify/memory/jira-component-map.md`
 - `.specify/memory/constitution.md`
 - `.specify/memory/standards/tech-stack.md`
 - `.specify/memory/standards/coding-standards.md`
@@ -674,7 +640,6 @@ memory is isolated.
 - `.specify/memory/standards/api-standards.md` (shared)
 - `.specify/memory/standards/data-standards.md` (shared)
 - `.specify/memory/standards/observability-standards.md` (shared)
-- `.specify/memory/jira-component-map.md` (shared — Jira Component → project routing)
 
 ## Quality Bar
 - No `<!-- TODO -->` or placeholder lines remain in generated files
@@ -692,7 +657,6 @@ memory is isolated.
 - Each `tech-stack.md`: concrete Framework Version, never "TBD"
 - Each `coding-standards.md`: Architecture Pattern recorded with at least one enforceable boundary rule
 - Project folder slug matches the name used in the router row
-- `jira-component-map.md`: every Project Name in the mapping table matches a router
-  row exactly; the table contains only user-provided rows (no example/placeholder
-  names) — an empty table is valid and means "unconfigured"
+- Router `Jira Component` cells contain only user-provided names (never invented or
+  copied from examples); empty cells are valid — they mean "no Jira routing"
 - Shared `standards/` folder present with all three files: `api-standards.md`, `data-standards.md`, `observability-standards.md` — concrete values; "not decided yet" allowed only for observability sinks and flagged

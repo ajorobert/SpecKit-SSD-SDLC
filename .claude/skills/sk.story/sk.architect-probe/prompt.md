@@ -30,6 +30,14 @@ For each category, mark status: Clear / Partial / Missing. If an orchestrator pa
 
 ## Impact Analysis — Identify Impacted Projects
 Using the project router and per-project memory loaded in pre-flight, determine which projects the story changes.
+
+**Declared scope reconciliation** — when the orchestrator passed `detected_projects` (the story's
+Jira-derived `## Project` scope): seed the impacted set from it. If your analysis finds impact in a
+project OUTSIDE that scope, do not silently add it — ask the PO one question naming the project and
+the concrete reason. Include → add it to `unit-brief.md` AND append it to story.md `## Project` (the
+scope signal stays consistent for downstream skills). Exclude → record it in `unit-brief.md` under
+`Out-of-scope impact (noted)` so the decision stays visible.
+
 Classify each impacted project under its type and record concrete reasons (not just names):
 
 - **Backend:** `[]`
@@ -75,4 +83,5 @@ unit-brief.md (updated with the **Impacted projects** list)
 - All technical boundaries (Scale, Security, Observability, Integration, UX) are locked down.
 - No vague engineering terms remain (e.g., "fast", "secure" are quantified).
 - Impacted projects are recorded in `unit-brief.md`, each classified as Backend / Frontend / Mobile with a concrete reason.
+- When a declared scope was passed: no project enters Impacted Projects without being declared or PO-confirmed.
 - Total questions asked ≤ 5.

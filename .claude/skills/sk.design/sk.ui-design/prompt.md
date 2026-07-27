@@ -19,17 +19,14 @@ and renders those responses. If a needed endpoint is missing from the contract, 
 under Open Questions and flag it for the architect (sk.design --contracts).
 
 ## Project-Scoped Mode (`--project {ProjectName …}`)
-When sk.design invokes this skill with `--project`, it is regenerating ONLY the named
-Frontend/Mobile project pages (sk.design PROJECT mode). In this mode:
-- Run Step 0 (capability packs) and read the input artifacts, then execute ONLY step 12,
-  restricted to the named projects. Do NOT write or modify `02-design/ui-model.md`.
-- Treat `ui-model.md`, `api-contract.md`, and `contracts/` as read-only inputs: reuse them. If
-  `ui-model.md` is missing, derive the project's slice from the unit stories (`01-story/`),
-  unit-brief.md, and architecture.md, and record the gap under the page's Open Questions
-  section — do not write the missing shared artifact.
-- The frontend engineering review still runs, scoped to the pages written in this mode.
-- Never write a page for a project that was not named, and never write an empty page — if the
-  stories show no frontend impact for a named project, report it and skip the file.
+sk.design PROJECT mode — write ONLY `02-design/projects/{ProjectName}.md` for the named
+Frontend/Mobile projects: run Step 0 (capability packs), read the inputs, then execute ONLY
+step 12 restricted to those projects. `ui-model.md`, `api-contract.md`, and `contracts/` are
+read-only inputs (never write or modify ui-model.md here); if ui-model.md is missing, derive
+the slice from the unit stories, unit-brief.md, and architecture.md and record the gap under
+the page's Open Questions. The frontend engineering review still runs, scoped to the pages
+written. A named project with no frontend impact: report it and skip the file — never an empty
+page, never a page for an unnamed project.
 
 ## Step 0: Capability Pack Selection
 Load the frontend packs relevant to this unit's surface before designing. **Load ≤6 packs total.**
