@@ -1,0 +1,262 @@
+<title>Skills Repository Split</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#FAF9F7; --surface:#FFFFFF; --ink:#22252A; --ink-soft:#5A5F68; --line:#E4E1DB;
+  --accent:#0E7C6B; --accent-soft:#E2F0ED;
+  --tier-fw:#4A5B8C; --tier-fw-soft:#E8EBF4;
+  --tier-sk:#0E7C6B; --tier-sk-soft:#E2F0ED;
+  --tier-pj:#8C6A2F; --tier-pj-soft:#F3ECDE;
+  --code-bg:#F1EFEA;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1B1D21; --surface:#24272C; --ink:#E8E6E1; --ink-soft:#A5A9B0; --line:#3A3E45;
+    --accent:#4DBBA8; --accent-soft:#1E3833;
+    --tier-fw:#8FA0D4; --tier-fw-soft:#2A3040;
+    --tier-sk:#4DBBA8; --tier-sk-soft:#1E3833;
+    --tier-pj:#D4AE6A; --tier-pj-soft:#3A3222;
+    --code-bg:#2B2E34;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1B1D21; --surface:#24272C; --ink:#E8E6E1; --ink-soft:#A5A9B0; --line:#3A3E45;
+  --accent:#4DBBA8; --accent-soft:#1E3833;
+  --tier-fw:#8FA0D4; --tier-fw-soft:#2A3040;
+  --tier-sk:#4DBBA8; --tier-sk-soft:#1E3833;
+  --tier-pj:#D4AE6A; --tier-pj-soft:#3A3222;
+  --code-bg:#2B2E34;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.65 "Source Sans 3",system-ui,sans-serif;}
+.wrap{max-width:860px;margin:0 auto;padding:0 28px 96px;}
+header.hero{padding:64px 0 36px;border-bottom:1px solid var(--line);}
+.eyebrow{font:600 12px/1 "Archivo",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 14px;}
+h1{font:700 clamp(30px,5vw,44px)/1.12 "Archivo",sans-serif;letter-spacing:-.015em;margin:0 0 14px;text-wrap:balance;}
+.lede{font-size:19px;color:var(--ink-soft);max-width:62ch;margin:0;}
+.meta{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:22px;font:400 14px/1.4 "JetBrains Mono",monospace;color:var(--ink-soft);}
+.meta b{color:var(--ink);font-weight:600;}
+h2{font:700 24px/1.2 "Archivo",sans-serif;letter-spacing:-.01em;margin:60px 0 6px;text-wrap:balance;}
+h2 .num{color:var(--accent);margin-right:10px;font-variant-numeric:tabular-nums;}
+h3{font:600 18px/1.3 "Archivo",sans-serif;margin:34px 0 8px;}
+p{max-width:70ch;margin:12px 0;}
+li{margin:5px 0;max-width:66ch;}
+ul,ol{padding-left:24px;}
+a{color:var(--accent);}
+code{font:400 .88em/1.5 "JetBrains Mono",monospace;background:var(--code-bg);padding:1px 5px;border-radius:4px;}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:16px 18px;overflow-x:auto;font:400 13.5px/1.6 "JetBrains Mono",monospace;margin:18px 0;}
+pre code{background:none;padding:0;}
+table{border-collapse:collapse;width:100%;font-size:15px;}
+.tblwrap{overflow-x:auto;margin:18px 0;}
+.tblwrap table{min-width:560px;}
+th{font:600 12px/1.3 "Archivo",sans-serif;letter-spacing:.08em;text-transform:uppercase;text-align:left;color:var(--ink-soft);padding:10px 14px;border-bottom:2px solid var(--line);}
+td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+td:first-child{font-weight:600;}
+.pill{display:inline-block;font:600 11.5px/1 "Archivo",sans-serif;letter-spacing:.05em;padding:5px 10px;border-radius:999px;white-space:nowrap;}
+.pill.fw{background:var(--tier-fw-soft);color:var(--tier-fw);}
+.pill.sk{background:var(--tier-sk-soft);color:var(--tier-sk);}
+.pill.pj{background:var(--tier-pj-soft);color:var(--tier-pj);}
+.tiers{display:flex;flex-direction:column;gap:10px;margin:24px 0;}
+.tier{border:1px solid var(--line);border-left:4px solid;border-radius:8px;padding:16px 20px;background:var(--surface);}
+.tier h4{margin:0 0 4px;font:700 15px/1.3 "Archivo",sans-serif;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+.tier h4 small{font:400 12.5px/1 "JetBrains Mono",monospace;color:var(--ink-soft);}
+.tier p{margin:4px 0 0;font-size:14.5px;color:var(--ink-soft);max-width:none;}
+.tier.fw{border-left-color:var(--tier-fw);} .tier.fw h4{color:var(--tier-fw);}
+.tier.sk{border-left-color:var(--tier-sk);} .tier.sk h4{color:var(--tier-sk);}
+.tier.pj{border-left-color:var(--tier-pj);} .tier.pj h4{color:var(--tier-pj);}
+.tier-arrow{align-self:center;color:var(--ink-soft);font-size:13px;font-family:"JetBrains Mono",monospace;}
+.callout{background:var(--accent-soft);border-radius:8px;padding:16px 20px;margin:20px 0;}
+.callout p{margin:0;max-width:none;}
+.loop{display:flex;flex-direction:column;margin:22px 0;counter-reset:step;}
+.loop .step{display:flex;gap:16px;align-items:flex-start;padding:10px 0;}
+.loop .step::before{counter-increment:step;content:counter(step);flex:0 0 28px;height:28px;border-radius:50%;background:var(--accent);color:var(--bg);font:700 14px/28px "Archivo",sans-serif;text-align:center;}
+.loop .step div{padding-top:2px;font-size:15.5px;max-width:64ch;}
+.loop .step b{font-family:"Archivo",sans-serif;}
+.phase{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:18px 22px;margin:16px 0;}
+.phase h3{margin:0 0 2px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline;}
+.phase h3 .dur{font:400 13px/1 "JetBrains Mono",monospace;color:var(--ink-soft);}
+.phase ol,.phase ul{margin:8px 0 0;font-size:15.5px;}
+footer{margin-top:72px;padding-top:20px;border-top:1px solid var(--line);font-size:13.5px;color:var(--ink-soft);}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth;}}
+</style>
+
+<div class="wrap">
+<header class="hero">
+  <p class="eyebrow">SpecKit-SSD-SDLC &middot; Migration Report</p>
+  <h1>Separating framework skills from project skills</h1>
+  <p class="lede">Move the tech-stack pattern skills out of the framework and into a project-owned git repository laid out as a Claude Code plugin marketplace &mdash; auto-synced, scope-attachable, and updatable by Claude itself through pull requests.</p>
+  <div class="meta">
+    <span><b>Date</b> 2026-08-23</span>
+    <span><b>Status</b> Proposal / roadmap</span>
+    <span><b>Effort</b> ~4 dev-days</span>
+  </div>
+</header>
+
+<h2><span class="num">1</span>Executive summary</h2>
+<p>Today <code>.claude/skills/</code> ships two fundamentally different kinds of skills together, distributed by git subtree + <code>setup.sh</code> rsync:</p>
+<ul>
+  <li><span class="pill fw">FRAMEWORK</span>&nbsp; The 23 <code>sk.*</code> pipeline skills plus <code>governance/</code> &mdash; stack-agnostic SDLC machinery that should be overwritten on every framework update.</li>
+  <li><span class="pill sk">STACK</span>&nbsp; ~24 pattern skills (<code>backend-architecture</code>, <code>nextjs-patterns</code>, <code>data-access-patterns</code>, &hellip;) that encode one project's chosen stack &mdash; .NET 10 seam architecture, FastEndpoints, Next.js, React Native. These are <strong>project assets wearing framework clothing</strong>.</li>
+</ul>
+<p>The proposal: move the stack skills into a separate, private GitHub repository structured as a plugin marketplace (<code>.claude-plugin/marketplace.json</code> + one folder per plugin). That unlocks the capabilities in Anthropic's <em>&ldquo;Set up a skills repository Claude can update&rdquo;</em>: merge-to-sync propagation, Claude-authored skill PRs with a human merge gate, and one skills repo serving Claude Code, claude.ai, and Claude&nbsp;Tag at once.</p>
+<div class="callout"><p>The framework already states the rule this completes &mdash; <code>backend-architecture &sect;1</code>: <em>&ldquo;Skills carry grammar, project memory carries vocabulary.&rdquo;</em> The split adds the missing tier: <strong>framework carries process, skills repo carries stack grammar, project memory carries vocabulary.</strong></p></div>
+
+<h2><span class="num">2</span>Current state</h2>
+<h3>2.1 Skill inventory &mdash; 51 skills, three families</h3>
+<div class="tblwrap"><table>
+<tr><th>Family</th><th>Count</th><th>Examples</th><th>True owner</th></tr>
+<tr><td>Pipeline <code>sk.*</code></td><td>23</td><td>sk.story, sk.design, sk.plan, sk.implement, sk.test, sk.review, sk.verify, sk.ship, sk.session, sk.init, sk.hotfix&hellip;</td><td><span class="pill fw">FRAMEWORK</span></td></tr>
+<tr><td>Governance</td><td>1</td><td>checkpoint-rules.md, quality-gates.md</td><td><span class="pill fw">FRAMEWORK</span></td></tr>
+<tr><td>Memory loaders</td><td>6</td><td>system-context, service-registry, domain-model, architecture-decisions, standards, design-principles</td><td><span class="pill fw">FRAMEWORK</span> (thin loaders over <code>.specify/memory/</code>)</td></tr>
+<tr><td>Backend patterns</td><td>10</td><td>backend-architecture (SSOT), backend-feature-patterns, api-endpoint-patterns, authorization-patterns, orchestration-patterns, integration-adapter-patterns, feature-management-patterns, infrastructure-wiring, design-code-review, observability-backend</td><td><span class="pill sk">STACK</span></td></tr>
+<tr><td>Data patterns</td><td>4</td><td>data-access-patterns, caching-patterns, search-patterns, file-pipeline-patterns</td><td><span class="pill sk">STACK</span></td></tr>
+<tr><td>Frontend patterns</td><td>8</td><td>nextjs-patterns, react-admin-patterns, react-native-patterns, frontend-design-system, react-component-patterns, zustand-state-management, accessibility-standards, observability-frontend</td><td><span class="pill sk">STACK</span></td></tr>
+</table></div>
+<p><code>design-principles</code> is the judgment call &mdash; it is stack-neutral DDD/DDIA guidance that informs <code>sk.design</code> on any stack. Recommendation: it stays in the framework.</p>
+
+<h3>2.2 Why the current model hurts</h3>
+<ul>
+  <li><code>setup.sh</code> runs <code>rsync -a --delete</code> over <code>.claude/</code> &mdash; <strong>any project-local skill edit is destroyed on every framework update</strong>. Projects cannot safely evolve their own pattern skills.</li>
+  <li>A second project on a different stack would inherit 24 irrelevant .NET/React skills and have to fork the framework &mdash; defeating the subtree-update story.</li>
+  <li>Skill improvements learned during real work die with the session. There is no channel for &ldquo;that worked &mdash; remember it&rdquo; to persist into the skills.</li>
+</ul>
+
+<h3>2.3 Coupling audit &mdash; what actually binds the families</h3>
+<div class="tblwrap"><table>
+<tr><th>Coupling point</th><th>Where</th><th>Severity</th></tr>
+<tr><td>Hardcoded path routing tables</td><td>9 framework prompt files route keywords to literal paths, e.g. <code>sk.implement/sk.codegen/prompt.md:21</code> &rarr; <code>.claude/skills/backend-architecture/SKILL.md</code>; also sk.review, sk.design (&times;2), sk.perf, sk.refactor, sk.test, sk.uat, sk.scaffolding</td><td>The real surgery</td></tr>
+<tr><td>CLAUDE.md tech-stack tables</td><td>Root instruction file enumerates stack skills by folder name and load condition</td><td>Template split</td></tr>
+<tr><td><code>inject_files</code> frontmatter</td><td>22 skills; targets are almost all <code>.specify/memory/*</code> (project memory &mdash; unaffected) or <code>governance/*</code> (framework-internal &mdash; unaffected). One stack-to-stack inject moves with its family</td><td>No change</td></tr>
+<tr><td>Placeholder convention</td><td><code>YourContext.*</code>, tenancy markers, permission catalog already isolated to <code>.specify/memory/</code></td><td>Tailwind &mdash; makes stack skills shareable as-is</td></tr>
+</table></div>
+
+<h2><span class="num">3</span>Target state</h2>
+<h3>3.1 Three-tier ownership model</h3>
+<div class="tiers">
+  <div class="tier fw"><h4>Tier 1 &mdash; Framework <small>SpecKit-SSD-SDLC</small></h4>
+    <p>Process: sk.* pipeline, governance, memory-loader skills, agents, hooks, templates, setup.sh. Stack-agnostic. Updated via <code>git subtree pull</code>. Changes rarely.</p></div>
+  <div class="tier-arrow">&#9650; pins process&nbsp;&nbsp;&middot;&nbsp;&nbsp;&#9660; supplies stack grammar</div>
+  <div class="tier sk"><h4>Tier 2 &mdash; Skills repo <small>NEW &middot; e.g. &lt;org&gt;/dotnet-react-skills</small></h4>
+    <p>Stack grammar: the 24 pattern skills bundled as plugins in a marketplace layout. Private GitHub repo. Auto-syncs to claude.ai; pinned as a marketplace in each project's <code>.claude/settings.json</code>. Claude opens PRs against it; humans merge. Changes when the team learns something.</p></div>
+  <div class="tier-arrow">&#9660; references vocabulary via placeholders + pointers</div>
+  <div class="tier pj"><h4>Tier 3 &mdash; Project repo</h4>
+    <p>Vocabulary: <code>.specify/memory/</code> (system-context, standards, auth contract, observability stack), specs/, knowledge bases, session.yaml, and the settings pin for Tier 2. Changes continuously.</p></div>
+</div>
+
+<h3>3.2 Skills repository layout</h3>
+<pre><code>dotnet-react-skills/                      # private GitHub repo
+&#9500;&#9472;&#9472; .claude-plugin/
+&#9474;   &#9492;&#9472;&#9472; marketplace.json                  # lists each plugin
+&#9500;&#9472;&#9472; backend-dotnet/                       # plugin 1
+&#9474;   &#9500;&#9472;&#9472; .claude-plugin/plugin.json
+&#9474;   &#9492;&#9472;&#9472; skills/
+&#9474;       &#9500;&#9472;&#9472; backend-architecture/SKILL.md # canonical SSOT, moves intact
+&#9474;       &#9492;&#9472;&#9472; backend-feature-patterns/&hellip;   # + 8 more backend skills
+&#9500;&#9472;&#9472; data-dotnet/                          # plugin 2: data-access, caching,
+&#9474;   &#9492;&#9472;&#9472; skills/&hellip;                          #   search, file-pipeline
+&#9500;&#9472;&#9472; frontend-web/                         # plugin 3: nextjs, react-admin,
+&#9474;   &#9492;&#9472;&#9472; skills/&hellip;                          #   design-system, a11y, zustand&hellip;
+&#9492;&#9472;&#9472; frontend-mobile/                      # plugin 4: react-native-patterns
+    &#9492;&#9472;&#9472; skills/&hellip;</code></pre>
+<p><strong>Why four plugins, not one or twenty-four:</strong> plugins are the enable/disable unit per scope. A backend-only service enables <code>backend-dotnet</code> + <code>data-dotnet</code>; the mobile channel enables <code>frontend-mobile</code>. The four bundles mirror the existing CLAUDE.md table sections.</p>
+<p><strong>What does not move:</strong> <code>.specify/memory/*</code> stays in each project. The <code>inject_files</code> pointers from pattern skills to project memory resolve against the consuming project's root and keep working unchanged.</p>
+<p><strong>Resolution after the split:</strong> plugin skills surface as <code>plugin-name:skill-name</code> but each skill's own <code>name:</code> frontmatter is untouched, so descriptions and triggers survive. Framework routing switches from paths to names &mdash; the one change that makes the framework genuinely stack-agnostic.</p>
+
+<h2><span class="num">4</span>New Claude capabilities this unlocks</h2>
+<div class="tblwrap"><table>
+<tr><th>Capability</th><th>What it gives you</th><th>Requirement</th></tr>
+<tr><td>Marketplace auto-sync</td><td>Merge to default branch &rarr; plugins re-sync org-wide &rarr; next thread/session uses the update. Replaces setup.sh re-runs for skills</td><td>Private repo; GitHub connector; Admin &rarr; Plugins &rarr; &ldquo;Sync from GitHub&rdquo;, auto-sync on</td></tr>
+<tr><td>Claude-authored skill PRs</td><td>&ldquo;@Claude that worked &mdash; open a PR so caching-patterns covers that edge case.&rdquo; PR opens under the Claude GitHub App, linked to the thread; you merge like any contributor's</td><td>Access bundle &rarr; Repositories &rarr; add repo (write); Claude GitHub App linked</td></tr>
+<tr><td>Scoped attachment</td><td>Different bundles/channels/projects enable different plugin subsets of the same repo</td><td>Bundle &rarr; Plugins tab toggles</td></tr>
+<tr><td>Routine-driven loop</td><td>&ldquo;Every Friday, review what you got wrong this week and open one PR with the fixes&rdquo; &mdash; corrections stop evaporating</td><td>A routine, or a scheduled Claude Code session</td></tr>
+<tr><td>Team-wide auto-install</td><td>Marketplace pin + enabled plugins checked into <code>.claude/settings.json</code>; every teammate and web session gets the skills with zero setup</td><td>Claude Code plugin marketplace support</td></tr>
+<tr><td>Skill tooling</td><td><code>skill-creator</code> to author/refine; plugin eval / skill-doctor as CI for skill triggering</td><td>Claude Code CLI</td></tr>
+</table></div>
+
+<h3>The improvement loop, end to end</h3>
+<div class="loop">
+  <div class="step"><div><b>Claude works</b> in a session or channel using skills v1.</div></div>
+  <div class="step"><div><b>Learns a correction</b> &mdash; e.g. &ldquo;this Dapper read model needed PIT pagination&rdquo;.</div></div>
+  <div class="step"><div><b>Opens a PR</b> against the skills repo, prompted or routine-swept, under the Claude GitHub App identity.</div></div>
+  <div class="step"><div><b>A human reviews and merges</b> &mdash; the only gate, matching the framework's checkpoint and archive posture.</div></div>
+  <div class="step"><div><b>Marketplace auto-syncs</b> on push to the default branch.</div></div>
+  <div class="step"><div><b>Next session in every covered scope</b> uses skills v1.1.</div></div>
+</div>
+
+<h3>What belongs where</h3>
+<div class="tblwrap"><table>
+<tr><th><span class="pill sk">Skills repo</span> &mdash; grammar</th><th><span class="pill pj">.specify/memory/</span> &mdash; vocabulary</th></tr>
+<tr><td>How to shape a FastEndpoints endpoint correctly</td><td>This project's schema names, cache-key prefix, RLS column</td></tr>
+<tr><td>The HybridCache tag-invalidation pattern</td><td>The permission catalog and tenancy markers</td></tr>
+<tr><td>Stack gotchas (Wolverine outbox ordering, EF xmin concurrency)</td><td>Which bounded contexts exist and their names</td></tr>
+<tr><td>A review checklist any team on this stack reuses</td><td>One-off ADRs, this system's invariants</td></tr>
+</table></div>
+
+<h2><span class="num">5</span>Migration roadmap &mdash; ~4 dev-days</h2>
+
+<div class="phase"><h3>Phase 0 &mdash; Decisions &amp; prerequisites <span class="dur">&frac12; day</span></h3>
+<ul><li>Confirm the &sect;2.1 classification (design-principles stays framework; accessibility-standards ships in frontend-web).</li>
+<li>Name the skills repo after the <strong>stack</strong>, not the project (<code>dotnet-react-skills</code>) &mdash; the placeholder convention already makes it reusable across same-stack projects.</li>
+<li>Checklist: private repo &middot; GitHub connector enabled &middot; Claude GitHub App linked &middot; admin access to claude.ai Plugins + Access bundles.</li></ul></div>
+
+<div class="phase"><h3>Phase 1 &mdash; Create the skills repository <span class="dur">1 day</span></h3>
+<ol><li>Scaffold marketplace.json + four plugin folders, each with plugin.json + <code>skills/</code>.</li>
+<li>Copy the 24 pattern skill folders <strong>unchanged</strong> &mdash; same names, same frontmatter, same memory pointers.</li>
+<li>Fix the one intra-family inject (data-access-patterns &rarr; sibling skill) as a plugin-relative reference.</li>
+<li>README states the contribution contract: the grammar test from backend-architecture &sect;1 &mdash; no project facts.</li>
+<li>Optional: CI running skill lint / plugin eval on PRs, so Claude-authored PRs get automatic feedback.</li></ol></div>
+
+<div class="phase"><h3>Phase 2 &mdash; Decouple the framework <span class="dur">1&ndash;2 days &middot; the real surgery</span></h3>
+<ol><li><strong>Routing tables &rarr; name-based manifest.</strong> Replace literal paths in the nine prompt files with skill names, and move the keyword&rarr;skill tables into project memory: <code>.specify/memory/skill-routing.md</code>. Framework prompts say only &ldquo;load the skills the routing manifest selects for this role + story tags&rdquo;.</li>
+<li><strong>CLAUDE.md template split</strong> &mdash; remove the tech-stack tables; the skills repo ships a fragment that sk.init merges in.</li>
+<li><strong>setup.sh guard</strong> &mdash; warn on leftover pattern-skill folders in <code>.claude/skills/</code> that would shadow plugin versions.</li>
+<li><strong>Archive moved skills</strong> via the mandated <code>archive-file.sh</code> flow (no rm; human reviews the log).</li>
+<li>Teach sk.init to record the marketplace repo in project-config.md and scaffold the settings pin.</li></ol></div>
+
+<div class="phase"><h3>Phase 3 &mdash; Wire up consumption <span class="dur">&frac12; day</span></h3>
+<p style="margin-top:8px"><strong>Claude Code</strong> &mdash; check into each project's <code>.claude/settings.json</code> (validate exact key shape against the current CLI at rollout):</p>
+<pre><code>{
+  "extraKnownMarketplaces": {
+    "dotnet-react-skills": { "source": { "source": "github",
+                             "repo": "&lt;org&gt;/dotnet-react-skills" } } },
+  "enabledPlugins": {
+    "backend-dotnet@dotnet-react-skills": true,
+    "data-dotnet@dotnet-react-skills": true,
+    "frontend-web@dotnet-react-skills": true,
+    "frontend-mobile@dotnet-react-skills": true }
+}</code></pre>
+<p><strong>claude.ai / Claude Tag</strong> &mdash; Admin &rarr; Plugins &rarr; Add plugins &rarr; Sync from GitHub (auto-sync on) &middot; Access bundle &rarr; Repositories (write for PRs) &middot; bundle &rarr; Plugins tab &rarr; toggle the four plugins.</p></div>
+
+<div class="phase"><h3>Phase 4 &mdash; Turn on the improvement loop <span class="dur">&frac12; day</span></h3>
+<ul><li>Prompt convention: &ldquo;open a PR to the skills repo updating &lt;skill&gt; with &lt;learning&gt;&rdquo;.</li>
+<li>Weekly routine sweeping corrections into one consolidated PR.</li>
+<li>Review discipline: grammar test, placeholder convention, plugin eval &mdash; then merge and verify a fresh session picks up the change.</li></ul></div>
+
+<div class="phase"><h3>Phase 5 &mdash; Cleanup &amp; docs <span class="dur">&frac12; day</span></h3>
+<ul><li>Update framework README (Quick Start gains a &ldquo;pin your stack's marketplace&rdquo; step) and docs/memory-guide.md with the three-tier model.</li>
+<li>Prune migrated-skill <code>Edit(...)</code> entries from the settings allow-list; tag a framework release; projects subtree-pull + add the pin.</li></ul></div>
+
+<h2><span class="num">6</span>Risks &amp; mitigations</h2>
+<div class="tblwrap"><table>
+<tr><th>Risk</th><th>Mitigation</th></tr>
+<tr><td>Name drift between routing manifest and skill names</td><td>CI check: every routed skill exists; every skill is reachable. Freeze <code>name:</code> frontmatter at migration</td></tr>
+<tr><td>Shadowing &mdash; leftover local copies override plugin versions</td><td>setup.sh guard + one-time archive sweep per project</td></tr>
+<tr><td>Claude Code plugin config keys still evolving</td><td>Treat the Phase 3 JSON as indicative; the marketplace repo layout is the stable contract</td></tr>
+<tr><td>Public-repo limitation for claude.ai sync</td><td>Keep the repo private/internal</td></tr>
+<tr><td>Propagation lag &mdash; running sessions keep old skills</td><td>Document &ldquo;new threads pick it up&rdquo;; restart long-lived sessions after merges</td></tr>
+<tr><td>Vocabulary leakage &mdash; Claude PRs a project fact into a shared skill</td><td>PR checklist + CI grep for known project tokens (context names, schema names)</td></tr>
+<tr><td>Two-repo PRs for one change (pattern + routing keyword)</td><td>Ship the routing manifest <em>from the skills repo</em> so both halves land in one PR</td></tr>
+</table></div>
+
+<h2><span class="num">7</span>Recommended decisions</h2>
+<ol>
+  <li><strong>Split now</strong> &mdash; only ~9 prompt files + the CLAUDE.md tables need surgery; injects and placeholders already support it.</li>
+  <li><strong>Four plugins</strong> mirroring the existing table sections: backend / data / frontend-web / frontend-mobile.</li>
+  <li><strong>Name the repo by stack</strong>, not project, to collect the reuse the placeholder convention already paid for.</li>
+  <li><strong>Routing manifest in project memory</strong>, shipped from the skills repo &mdash; the piece that makes SpecKit adoptable by any stack.</li>
+  <li><strong>Governed loop</strong>: Claude proposes, CI evaluates, a human merges &mdash; consistent with existing checkpoint and archive policy.</li>
+</ol>
+
+<footer>Full source report committed at <code>ai_reports/project-skills-repository-separation.md</code> on branch <code>claude/framework-project-skills-separation-j5rc2e</code>. Reference: Anthropic docs, &ldquo;Set up a skills repository Claude can update&rdquo;.</footer>
+</div>
