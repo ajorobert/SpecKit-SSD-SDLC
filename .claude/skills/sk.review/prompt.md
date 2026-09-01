@@ -24,12 +24,17 @@ Load the tech stack packs relevant to this review before reading any code.
 - `adapter`, `integration adapter`, `external service adapter`, `vendor api`, `external integration`, `DelegatingHandler`, `chain order`, `M2M handler`, `typed httpclient`, `polly`, `resilience pipeline`, `resilience handler`, `port adapter split` → `.claude/skills/integration-adapter-patterns/SKILL.md`
 - `feature flag`, `feature toggle`, `feature gate`, `rollout`, `gradual release`, `percentage rollout`, `a/b test`, `variant`, `gating`, `IFeatureManager`, `IFeatureManagerSnapshot`, `IVariantFeatureManager`, `sunset`, `flag cleanup` → `.claude/skills/feature-management-patterns/SKILL.md`
 
-**Role = frontend**
-- Always: `.claude/skills/frontend-design-system/SKILL.md`, `.claude/skills/react-component-patterns/SKILL.md`, `.claude/skills/accessibility-standards/SKILL.md`
-- Portal (Next.js): `.claude/skills/nextjs-patterns/SKILL.md`
-- Admin SPA: `.claude/skills/react-admin-patterns/SKILL.md`
-- Mobile: `.claude/skills/react-native-patterns/SKILL.md`
-- `state`, `zustand` → `.claude/skills/zustand-state-management/SKILL.md`
+**Role = frontend (surface = web | admin | mobile)**
+Do NOT hardcode a per-surface pack list here. Review must load the *same* packs
+the code was generated under — resolve via the shared surface-resolution
+preamble:
+1. Read `.claude/skills/shared/surface-resolution.md`.
+2. It resolves the surface from the story frontmatter / unit-brief Impacted
+   Projects, then loads that surface's **Always-load skill packs** from
+   `.specify/memory/projects/{surface}/project.md` (+ keyword overlays:
+   `state`/`zustand`, `auth` → `authorization-patterns`, `file`/`upload`).
+   Note this correctly loads `observability-frontend` on every surface and does
+   NOT load the web-only `frontend-design-system` on mobile.
 
 List the packs loaded before continuing.
 

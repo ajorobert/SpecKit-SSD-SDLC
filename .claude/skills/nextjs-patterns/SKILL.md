@@ -7,17 +7,16 @@ when_to_load:
   - Authenticated page or action — session-aware rendering
   - Outbound fetch to backend services from the portal
   - R2 image rendering or upload presign flow
-co_loads_with:
-  - frontend-design-system
-  - react-component-patterns
-  - accessibility-standards
-  - observability-frontend
 references:
   - authorization-patterns
   - file-pipeline-patterns
   - api-endpoint-patterns
   - observability-backend
+  - .specify/memory/auth_contract.md
 ---
+
+<!-- Pack co-loading is defined by the manifest (projects/web/project.md "always-load skill packs"), read via the shared surface-resolution preamble — not by frontmatter. -->
+
 
 # Next.js Patterns (App Router 15+, Customer Portal)
 
@@ -145,17 +144,7 @@ app/
 ### 2.6 Authentication — NextAuth v5 + Keycloak
 NextAuth v5 is the only sanctioned auth library for the portal. The Keycloak provider is configured ONCE in `auth.ts` (wiring — out of scope here). Feature code consumes the exported `auth()`, `signIn()`, `signOut()`, and `handlers` only.
 
-**Session shape (what's in the JWT after Keycloak callback):** the public claim contract — what the backend issues and what the portal can read — is owned by `authorization-patterns`. This skill assumes the session matches that contract:
-
-```ts
-// @/lib/auth-types.ts
-export type PortalSession = {
-  user:  { id: string; email: string; name: string };
-  roles: string[];           // realm_access.roles
-  tenantId: string;          // custom claim
-  expiresAt: number;         // epoch seconds
-};
-```
+**Session shape (what's in the JWT after Keycloak callback):** the public claim contract — what the backend issues and what the portal can read — is owned by `authorization-patterns`. The **project-specific `PortalSession` shape** (its exact fields, and any custom claims such as a tenancy claim) lives in `.specify/memory/auth_contract.md`, exactly like `AdminSession`/`MobileSession`. This skill defines the pattern; the memory doc holds the contract — do not hardcode the session fields or custom-claim names here.
 
 * **Page-level guard (Server Component):**
   ```ts
@@ -250,7 +239,7 @@ export async function serverFetch(path: string, opts: Options = {}): Promise<Res
 | `// MASK:` | `observability-frontend` | PII redaction at telemetry boundary (§4) |
 | `// CONSENT:` | `observability-frontend` | Telemetry consent gate (§4) |
 
-## 4. Surface integration for observability-frontend §11
+## 4. Surface integration for observability-frontend
 The portal is the landing zone for the frontend observability markers (`// EVENT:`, `// MASK:`, `// CONSENT:` — all owned by `observability-frontend`). This section defines where they attach in Next.js code; emission internals, SDK init, and the PII deny-list live in the owner skill.
 
 * **`// CONSENT:`** — top of the root `layout.tsx` Client subtree (consent provider) and at the entry of any telemetry-emitting hook. The portal must NOT initialise PostHog/Clarity before the consent state resolves; render a no-op telemetry shim until then.
@@ -266,7 +255,7 @@ The portal is the landing zone for the frontend observability markers (`// EVENT
 * Any outbound fetch from the portal to a backend service — `serverFetch` contract.
 
 ## 6. When NOT to use
-* **Admin SPA** (React + Vite + Tanstack Router) — see `react-admin-patterns`.
+* **Admin console** (also Next.js) — base App Router patterns here apply; console-specific rules (data tables, bulk ops, RBAC-gated UI) are in `nextjs-admin-patterns`.
 * **Mobile app** (React Native + Expo) — see `react-native-patterns`.
 * **Component decomposition, prop typing, form handling, custom hooks** — see `react-component-patterns`.
 * **Tailwind v4 setup, shadcn/ui rules, design tokens, CVA, dark mode** — see `frontend-design-system`.

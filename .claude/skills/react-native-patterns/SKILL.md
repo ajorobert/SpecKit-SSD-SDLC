@@ -11,19 +11,18 @@ when_to_load:
   - File upload from the mobile app (presigned PUT to R2)
   - Mobile accessibility implementation or review
   - Observability marker placement on RN code
-co_loads_with:
-  - frontend-design-system
-  - react-component-patterns
-  - accessibility-standards
-  - observability-frontend
 references:
   - .specify/memory/auth_contract.md
+  - .specify/memory/projects/mobile/project.md
 ---
+
+<!-- Pack co-loading is defined by the manifest (projects/mobile/project.md "always-load skill packs"), read via the shared surface-resolution preamble — not by frontmatter. -->
+
 
 # React Native Patterns (Expo Managed + Expo Router + NativeWind v5)
 
 ## 1. Purpose
-Production patterns for the vendor mobile app built with React Native, Expo managed workflow, Expo Router, NativeWind v5 (Tailwind v4 CSS-first), FlashList, Reanimated 3, and Keycloak PKCE auth via expo-auth-session. Covers managed-workflow boundaries, file-based routing with deep linking, native styling, list and animation performance, native API permission UX, in-memory access + secure-store refresh token handling, the universal backend fetch contract (traceparent + Idempotency-Key), presigned uploads with progress on `fetch`-incompatible APIs, mobile-specific accessibility, and the observability marker landing zone. Excludes wiring (`app.json` config, Expo plugins, AuthRequest project singleton instantiation, Sentry/OTel/PostHog init) — those live in `.specify/memory/` or deploy docs. Component decomposition and web-only design-system rules live in their own skills (see §6).
+Production patterns for the mobile app built with React Native, Expo managed workflow, Expo Router, NativeWind v5 (Tailwind v4 CSS-first), FlashList, Reanimated 3, and Keycloak PKCE auth via expo-auth-session. (Audience/app identity — e.g. which user segment this app serves — is project vocabulary in `.specify/memory/projects/mobile/project.md`, not here.) Covers managed-workflow boundaries, file-based routing with deep linking, native styling, list and animation performance, native API permission UX, in-memory access + secure-store refresh token handling, the universal backend fetch contract (traceparent + Idempotency-Key), presigned uploads with progress on `fetch`-incompatible APIs, mobile-specific accessibility, and the observability marker landing zone. Excludes wiring (`app.json` config, Expo plugins, AuthRequest project singleton instantiation, Sentry/OTel/PostHog init) — those live in `.specify/memory/` or deploy docs. Component decomposition and web-only design-system rules live in their own skills (see §6).
 
 ## 2. Core Rules
 
@@ -243,7 +242,12 @@ export async function uploadFile(
 * **Resume**: R2 does NOT support resuming a single PUT. On failure, restart the upload with the **same `Idempotency-Key` on the original `/presign` request** so the backend recognises the retry as the same user action (not a duplicate upload).
 
 ### 2.11 Accessibility (mobile-specific)
-RN uses a different a11y API surface than the DOM. VoiceOver (iOS) and TalkBack (Android) consume these props directly.
+This section is the **native implementation** of the cross-cutting a11y core in
+`accessibility-standards` **Part A** (POUR, target size, contrast,
+colour-independence, reduced-motion, the blocking-issue-= -not-shippable gate) —
+mobile loads Part A only, never the web-DOM **Part B**. RN uses a different a11y
+API surface than the DOM: VoiceOver (iOS) and TalkBack (Android) consume these
+props directly.
 
 * **`accessibilityLabel`** is mandatory on any interactive element without visible text (icon buttons, image-only links). Concise — the screen reader reads it verbatim.
 * **`accessibilityHint`** describes the action's result, not what the element is. ("Submits the form" — not "this is a button").
@@ -293,7 +297,7 @@ RN uses a different a11y API surface than the DOM. VoiceOver (iOS) and TalkBack 
 |---|---|
 | `// MASK:` | Microsoft Clarity is not supported on React Native; the PII-redaction obligation that `// MASK:` represents does not apply on this surface. Feature code does not insert this marker. |
 
-## 4. Surface integration for observability-frontend §13
+## 4. Surface integration for observability-frontend
 The mobile app is the landing zone for the frontend observability markers on the native surface. Place them at these sites — emission internals, SDK init, source-map upload, and the PII deny-list live in `observability-frontend`.
 
 * **`// CONSENT:`** — emitted at the root `_layout.tsx` before any analytics SDK is allowed to start. Mobile consent is OS-platform-aware: iOS App Tracking Transparency (`expo-tracking-transparency`) gates IDFA-bearing telemetry; Android privacy disclosure happens at first launch. PostHog is anonymous (no IDFA), but the gate exists for consistency.
@@ -313,6 +317,6 @@ The mobile app is the landing zone for the frontend observability markers on the
 
 ## 6. When NOT to use
 * **Customer Portal** (Next.js App Router) — see `nextjs-patterns`.
-* **Admin SPA** (React + Vite + Tanstack Router) — see `react-admin-patterns`.
+* **Admin console** (Next.js App Router) — see `nextjs-patterns` + `nextjs-admin-patterns`.
 * **Component decomposition, prop typing, form handling, custom hooks** — see `react-component-patterns`.
 * **Web design-system rules** (Tailwind v4 web setup, shadcn/ui, CVA, web dark mode) — see `frontend-design-system`. NativeWind shares tokens conceptually but the web rules don't all transfer.

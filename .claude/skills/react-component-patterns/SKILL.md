@@ -7,13 +7,10 @@ when_to_load:
   - Custom hook extraction or review
   - Reviewing component structure, decomposition, or TypeScript props
   - Icon usage on web (lucide-react)
-co_loads_with:
-  - frontend-design-system
-  - accessibility-standards
-  - nextjs-patterns
-  - react-admin-patterns
-  - react-native-patterns
 ---
+
+<!-- Pack co-loading is defined by the manifest (projects/{surface}/project.md "always-load skill packs"), read via the shared surface-resolution preamble — not by frontmatter. Loaded on all three surfaces. -->
+
 
 # React Component Patterns
 
@@ -153,7 +150,7 @@ export function CreateListingForm({ onSuccess }: { onSuccess: () => void }) {
 ### 2.7 State Boundary
 * **Component-local UI state** (`useState`, `useReducer`) — state that no other component reads and that resets when the component unmounts. Form-internal toggles, hover/focus tracking, expand/collapse, inline edits.
 * **Cross-component shared state** (Zustand) — state needed by two or more components that are not in a parent/child relationship. Auth session, theme preference, sidebar open/closed, offline action queue. **Selector hygiene, persist, hydration safety, and the "what belongs" decision rule** live in `zustand-state-management` — this section names the boundary; that skill owns the store-design contract.
-* **Server state** (TanStack Query on Admin SPA / Mobile, Next.js fetch on Portal) — never in `useState` or Zustand. The surface skill owns this rule.
+* **Server state** (Next.js fetch / Server Actions on Portal + Admin console, client TanStack Query islands, RN fetch on Mobile) — never in `useState` or Zustand. The surface skill owns this rule.
 * **Form state** (react-hook-form) — never duplicate into `useState`. Read via `form.watch` / `form.getValues` / `form.formState` instead.
 
 ### 2.8 Composition over Configuration
@@ -163,7 +160,7 @@ export function CreateListingForm({ onSuccess }: { onSuccess: () => void }) {
 * **Render props sparingly** — they're powerful but obscure. Reach for them when the parent must control rendering inside the child (virtualised lists, popover positioning); otherwise prefer composition.
 
 ### 2.9 Icons — lucide-react (web canonical)
-* **`lucide-react` is the canonical icon library on web** (Portal + Admin SPA). On mobile, the Lucide RN port (`lucide-react-native`) is the equivalent — same iconography, native primitive.
+* **`lucide-react` is the canonical icon library on web** (Portal + Admin console, both Next.js). On mobile, the Lucide RN port (`lucide-react-native`) is the equivalent — same iconography, native primitive.
 * **Tree-shakeable import**: `import { CheckIcon } from 'lucide-react'`. Never the default-export object or barrel re-exports.
 * **Size and colour via Tailwind classes**, not props: `<CheckIcon className="size-4 text-primary" />`. The Lucide `size` and `color` props exist but bypass the design system tokens.
 * **Icon-only interactive elements** need an accessible name. Wrap with the right ARIA: `<Button aria-label="Save"><HeartIcon aria-hidden="true" className="size-4" /></Button>`. The icon is decorative; the button carries the name.
@@ -189,7 +186,7 @@ export function CreateListingForm({ onSuccess }: { onSuccess: () => void }) {
 * Icon usage on web (lucide-react sizing, accessibility wrapping).
 
 ## 5. When NOT to use
-* **Surface-specific data fetching** (Server Components / Server Actions on Portal, TanStack Query loaders on Admin / Mobile) — see `nextjs-patterns`, `react-admin-patterns`, `react-native-patterns`.
+* **Surface-specific data fetching** (Server Components / Server Actions on Portal + Admin console, client TanStack Query islands, RN fetch) — see `nextjs-patterns`, `nextjs-admin-patterns`, `react-native-patterns`.
 * **Styling tokens, Tailwind v4 config, shadcn primitives, CVA, dark mode** — see `frontend-design-system`.
 * **WCAG compliance details** (keyboard navigation, focus management, screen-reader testing, contrast verification) — see `accessibility-standards`.
 * **Cross-component state design** (store shape, persist middleware, selectors) — see `zustand-state-management`.

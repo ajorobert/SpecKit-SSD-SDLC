@@ -26,10 +26,13 @@ Load packs before generating tests. Read session.yaml and the unit's stories for
 - `feature flag`, `feature toggle`, `feature gate`, `rollout`, `gradual release`, `percentage rollout`, `a/b test`, `variant`, `gating`, `IFeatureManager`, `IFeatureManagerSnapshot`, `IVariantFeatureManager`, `sunset`, `flag cleanup` → `.claude/skills/feature-management-patterns/SKILL.md`
 
 **ProjectType = Frontend / Mobile** (role frontend | mobile)
-- Always: `.claude/skills/accessibility-standards/SKILL.md`, `.claude/skills/react-component-patterns/SKILL.md`
-- Customer portal (Next.js): `.claude/skills/nextjs-patterns/SKILL.md`
-- Admin SPA (Vite): `.claude/skills/react-admin-patterns/SKILL.md`
-- Mobile (Expo): `.claude/skills/react-native-patterns/SKILL.md`
+Do NOT hardcode a per-surface pack list — resolve via the shared preamble so
+tests load the same packs the code was generated and reviewed under:
+1. Read `.claude/skills/shared/surface-resolution.md`.
+2. It maps `{ProjectType}` + `{Project}` → surface, then loads that surface's
+   **Always-load skill packs** from `.specify/memory/projects/{surface}/project.md`.
+   `admin` = `nextjs-patterns` + `nextjs-admin-patterns` (both Next.js; no
+   `react-admin-patterns`). Mobile does not load `frontend-design-system`.
 
 List the packs loaded before continuing.
 

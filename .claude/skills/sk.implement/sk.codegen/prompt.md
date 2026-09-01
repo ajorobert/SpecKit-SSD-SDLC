@@ -31,20 +31,17 @@ in REFINE mode `04-implementation/{Project}/review-{story-id}.md`. You operate O
 - `adapter`, `integration adapter`, `external service adapter`, `vendor api`, `external integration`, `DelegatingHandler`, `chain order`, `M2M handler`, `typed httpclient`, `polly`, `resilience pipeline`, `resilience handler`, `port adapter split` → `.claude/skills/integration-adapter-patterns/SKILL.md`
 - `feature flag`, `feature toggle`, `feature gate`, `rollout`, `gradual release`, `percentage rollout`, `a/b test`, `variant`, `gating`, `IFeatureManager`, `IFeatureManagerSnapshot`, `IVariantFeatureManager`, `sunset`, `flag cleanup` → `.claude/skills/feature-management-patterns/SKILL.md`
 
-**Role = frontend — Customer Portal (Next.js)**
-- Always: `.claude/skills/nextjs-patterns/SKILL.md`, `.claude/skills/frontend-design-system/SKILL.md`, `.claude/skills/react-component-patterns/SKILL.md`, `.claude/skills/accessibility-standards/SKILL.md`
-- `auth` → `.claude/skills/auth-patterns/SKILL.md`
-- `state`, `zustand` → `.claude/skills/zustand-state-management/SKILL.md`
-- `file`, `upload` → `.claude/skills/file-pipeline-patterns/SKILL.md`
-
-**Role = frontend — Admin SPA**
-- Always: `.claude/skills/react-admin-patterns/SKILL.md`, `.claude/skills/frontend-design-system/SKILL.md`, `.claude/skills/react-component-patterns/SKILL.md`, `.claude/skills/accessibility-standards/SKILL.md`
-- `state`, `zustand` → `.claude/skills/zustand-state-management/SKILL.md`
-
-**Role = frontend — Mobile**
-- Always: `.claude/skills/react-native-patterns/SKILL.md`
-- `auth` → `.claude/skills/auth-patterns/SKILL.md`
-- `file`, `upload` → `.claude/skills/file-pipeline-patterns/SKILL.md`
+**Role = frontend (surface = web | admin | mobile)**
+Do NOT hardcode a per-surface pack list here. Resolve the surface and load its
+packs via the shared surface-resolution preamble — this is the single source of
+truth, so codegen, review, test, and verify all load the *same* set:
+1. Read `.claude/skills/shared/surface-resolution.md`.
+2. It maps `{ProjectType}` + `{Project}` (unit-brief Impacted Projects) → surface,
+   then loads that surface's **Always-load skill packs** from
+   `.specify/memory/projects/{surface}/project.md`, plus keyword overlays
+   (`state`/`zustand` → `zustand-state-management`; `auth` →
+   `authorization-patterns` + `.specify/memory/auth_contract.md`; `file`/`upload`
+   → `file-pipeline-patterns`). There is no `auth-patterns` skill.
 List the packs loaded before continuing.
 
 ## Context Loading — cacheable (load first, in order)

@@ -1,23 +1,21 @@
 ---
 name: frontend-design-system
-description: "Load when: implementing or reviewing web UI styling — Tailwind v4 CSS-first config, HSL design tokens, @theme inline, shadcn/ui primitives, CVA variants, dark mode via .dark class, layout, typography, and animation primitives. Web-only (Portal + Admin SPA); NativeWind shares conceptual tokens but the design-system skill is web-specific."
+description: "Load when: implementing or reviewing web UI styling — Tailwind v4 CSS-first config, HSL design tokens, @theme inline, shadcn/ui primitives, CVA variants, dark mode via .dark class, layout, typography, and animation primitives. Web-only (customer portal + admin console, both Next.js); NativeWind shares conceptual tokens but the design-system skill is web-specific — do NOT load it on the React Native mobile surface."
 when_to_load:
-  - Any web styling decision (Portal or Admin SPA)
+  - Any web styling decision (customer portal or admin console)
   - Tailwind v4 configuration, @theme blocks, design-token authoring
   - Adding or customising shadcn/ui components, CVA variants
   - Dark mode work or contrast token verification
   - Layout, typography, or animation primitive selection
-co_loads_with:
-  - react-component-patterns
-  - accessibility-standards
-  - nextjs-patterns
-  - react-admin-patterns
 ---
+
+<!-- Pack co-loading is defined by the manifest (projects/{web,admin}/project.md "always-load skill packs"), read via the shared surface-resolution preamble — not by frontmatter. Web/admin only; never mobile. -->
+
 
 # Frontend Design System (Tailwind v4 + shadcn/ui)
 
 ## 1. Purpose
-Production styling system for web frontends (customer portal + admin SPA). Covers Tailwind v4 CSS-first configuration, the canonical HSL four-step token pattern, dark mode, shadcn/ui component rules, CVA variant composition, layout primitives, typography, and animation rules. Excludes React Native styling (NativeWind has different constraints), component decomposition and form composition, and accessibility compliance details beyond contrast tokens — those live in their own skills (see §6). Wiring (shadcn CLI installation, `next-themes` provider mounting, font loading registration) lives in deploy docs and root-layout setup files, not here.
+Production styling system for web frontends (customer portal + admin console, both Next.js). Covers Tailwind v4 CSS-first configuration, the canonical HSL four-step token pattern, dark mode, shadcn/ui component rules, CVA variant composition, layout primitives, typography, and animation rules. Excludes React Native styling (NativeWind has different constraints), component decomposition and form composition, and accessibility compliance details beyond contrast tokens — those live in their own skills (see §6). Wiring (shadcn CLI installation, `next-themes` provider mounting, font loading registration) lives in deploy docs and root-layout setup files, not here.
 
 > **Design aesthetic — decide once, then stay consistent.** Before styling a new surface, read the `Design Direction` seed, brand colour, and dark-mode preference from `project-config.md` (captured by `/sk.init`), then pick a concrete design style + component library from the catalogue in [design-styles.md](design-styles.md). Encode the decision in the design tokens (`globals.css` / theme) — those tokens are the single source of truth for the chosen aesthetic. When adding further UI, match the established tokens and style. Do not introduce a different visual style unless the user explicitly asks to change it.
 
@@ -103,7 +101,7 @@ The canonical token pattern for the codebase. Four steps, in order, every time.
 ### 2.3 Dark Mode
 * **Toggle via `.dark` class on `<html>`** — never the `prefers-color-scheme` media strategy alone. The class lets users override the OS preference, which is required for accessibility (some users need light at night, dark by day).
 * **Token swap, utilities unchanged.** Components use `bg-background text-foreground` regardless of mode. Adding dark support to a component is usually a no-op once the tokens are right.
-* **`next-themes` is the canonical mode-controller** for the Next.js portal (`attribute="class"`); the Admin SPA toggles the class directly on `document.documentElement`. Mounting the provider is wiring — out of scope here. The patterns this skill cares about are how components consume the tokens, not how the toggle is wired.
+* **`next-themes` is the canonical mode-controller** for both Next.js surfaces — the customer portal and the admin console (`attribute="class"`). Mounting the provider is wiring — out of scope here. The patterns this skill cares about are how components consume the tokens, not how the toggle is wired.
 * **Test both modes for every component.** A "dark mode bug" almost always means a hardcoded colour leaked past the four-step pattern.
 
 ### 2.4 shadcn/ui Rules
@@ -276,7 +274,7 @@ export function ThemeToggle() {
 ```
 
 ## 5. When to use
-* Any web styling decision on Portal or Admin SPA.
+* Any web styling decision on the customer portal or admin console (both Next.js).
 * Adding or customising shadcn/ui components.
 * Defining new design tokens (colour, spacing, typography, radius).
 * Dark-mode implementation and verification.
@@ -287,4 +285,4 @@ export function ThemeToggle() {
 * **React Native / NativeWind styling** — see `react-native-patterns`. NativeWind v5 shares tokens conceptually but the rules diverge (no `space-*` issues, no CSS-only `@starting-style`, platform colours via `platformColor()`).
 * **Component composition, prop interfaces, form composition** — see `react-component-patterns`.
 * **WCAG compliance** (keyboard, ARIA, focus management, screen-reader testing) — see `accessibility-standards`.
-* **Surface-specific styling concerns** (RSC streaming considerations on Portal, view transitions on Admin SPA) — see `nextjs-patterns`, `react-admin-patterns`.
+* **Surface-specific styling concerns** (RSC streaming considerations on Portal, view transitions / data-grid layout on the Admin console) — see `nextjs-patterns`, `nextjs-admin-patterns`.
