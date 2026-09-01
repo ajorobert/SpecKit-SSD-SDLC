@@ -362,6 +362,8 @@ mismatch (e.g. "You said 5 total but the breakdown sums to 4") and re-ask
 the four counts until the equation holds.
 
 **3. Per-project details**
+Before the loop, ask once: "Do you track work in Jira?" (y/n) → `usesJira`.
+
 Loop over every project (group the loop by type so the user fills all
 backend projects, then all frontend, then all mobile). For each project
 collect:
@@ -374,6 +376,11 @@ collect:
 - **Architecture pattern** — e.g. Clean Architecture, MVC, Feature-Sliced,
   Modular Monolith, MVVM
 - **Coding standards** — formatter/linter + key conventions to enforce
+- **Jira Component** — only when `usesJira`: the Jira Component name(s) that
+  route issues to this project (Enter to skip — not every project has one).
+  Component names come ONLY from the user's answer; never suggest or invent them.
+  Recorded in the router's `Jira Component` column (Step W2) — sk.story Jira mode
+  resolves issue Components against that column.
 
 ### Step W2 — Generate Workspace Memory
 
@@ -390,11 +397,14 @@ Workspace memory index. Each project owns an isolated memory folder under
 
 Total projects: {totalProjects}  (Backend: {backendCount} · Frontend: {frontendCount} · Mobile: {mobileCount})
 
-| Project | Type | Code Root |
-|---|---|---|
-| [{name}](./{name}/project.md) | {type} | `{code root path}` |
-| ... | ... | ... |
+| Project | Type | Code Root | Jira Component |
+|---|---|---|---|
+| [{name}](./{name}/project.md) | {type} | `{code root path}` | {component(s), comma-separated — empty if none} |
+| ... | ... | ... | ... |
 ```
+The `Jira Component` column holds only user-provided names (empty cell when the
+project has none, or when the workspace doesn't use Jira). It is the single source
+sk.story Jira mode uses to map issue Components → project names.
 
 ### Step W3 — Generate Per-Project Memory
 
@@ -539,7 +549,7 @@ Non-negotiable behaviour across every project, regardless of tooling.
 
 Report what was created, e.g.:
 ```
-✓ .specify/memory/projects/index.md   (router — {totalProjects} projects)
+✓ .specify/memory/projects/index.md   (router — {totalProjects} projects, {N} Jira Component mappings)
 
 For each project:
 ✓ .specify/memory/projects/{name}/project.md
@@ -575,7 +585,7 @@ Projects: [list each name — type]
 What would you like to do?
   [1] Add a new project        — interview + new projects/{name}/ folder + router row
   [2] Update an existing project — pick one, regenerate its memory files
-  [3] Update the router only     — fix names / types / code roots in index.md
+  [3] Update the router only     — fix names / types / code roots / Jira Components in index.md
   [4] Update shared standards    — api / data / observability standards
 
 Enter a number or press Enter to cancel:
@@ -590,11 +600,16 @@ Enter a number or press Enter to cancel:
 - **[2] Update project** — show that project's current memory values, ask
   what changes, regenerate only the affected file(s) in its folder. Update
   the router row if name/type/code-root changed.
-- **[3] Update router** — edit only `index.md`.
+- **[3] Update router** — edit only `index.md` (including a project's
+  `Jira Component` cell; add the column first if the router predates it).
 - **[4] Update shared standards** — show current values from
   `standards/{api,data,observability}-standards.md`, ask what changes,
   regenerate only the affected file(s). If the `standards/` folder is
   absent (workspace predates this step), generate it via Step W3.5.
+
+**[1] Add project** also asks the Jira Component question when the workspace
+uses Jira (any router row has a component, or the user confirms) and fills the
+new row's `Jira Component` cell.
 
 Never touch other projects' folders during an update — each project's
 memory is isolated.
@@ -642,4 +657,6 @@ memory is isolated.
 - Each `tech-stack.md`: concrete Framework Version, never "TBD"
 - Each `coding-standards.md`: Architecture Pattern recorded with at least one enforceable boundary rule
 - Project folder slug matches the name used in the router row
+- Router `Jira Component` cells contain only user-provided names (never invented or
+  copied from examples); empty cells are valid — they mean "no Jira routing"
 - Shared `standards/` folder present with all three files: `api-standards.md`, `data-standards.md`, `observability-standards.md` — concrete values; "not decided yet" allowed only for observability sinks and flagged

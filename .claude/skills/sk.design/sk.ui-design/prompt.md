@@ -18,6 +18,16 @@ does NOT redefine endpoints, URLs, or response field ownership. It defines HOW t
 and renders those responses. If a needed endpoint is missing from the contract, do not invent it — record it
 under Open Questions and flag it for the architect (sk.design --contracts).
 
+## Project-Scoped Mode (`--project {ProjectName …}`)
+sk.design PROJECT mode — write ONLY `02-design/projects/{ProjectName}.md` for the named
+Frontend/Mobile projects: run Step 0 (capability packs), read the inputs, then execute ONLY
+step 12 restricted to those projects. `ui-model.md`, `api-contract.md`, and `contracts/` are
+read-only inputs (never write or modify ui-model.md here); if ui-model.md is missing, derive
+the slice from the unit stories, unit-brief.md, and architecture.md and record the gap under
+the page's Open Questions. The frontend engineering review still runs, scoped to the pages
+written. A named project with no frontend impact: report it and skip the file — never an empty
+page, never a page for an unnamed project.
+
 ## Step 0: Capability Pack Selection
 Load the frontend packs relevant to this unit's surface before designing. **Load ≤6 packs total.**
 

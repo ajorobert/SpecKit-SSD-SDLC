@@ -26,10 +26,14 @@ Per-project file names are dynamic — read from `unit-brief.md` → Impacted Pr
 Unit-tier `knowledge-base.md` and `guide.yaml` stay at the unit root (not under 02-design/).
 
 ## Invocation Forms
-- `sk.design`                        — auto-detect mode, run all needed phases
+- `sk.design`                        — auto-detect: full solution design; a story-declared
+                                       `## Project` section constrains it to those projects
+                                       (STORY-PROJECT)
 - `sk.design --architecture`         — run Phase 1 only (TARGETED)
 - `sk.design --datamodel`            — run Phase 2 only (TARGETED)
 - `sk.design --contracts`            — run Phase 3 only (TARGETED)
+- `sk.design {Project} [{Project} …]`           — PROJECT mode: regenerate ONLY the named project design pages
+- `sk.design --project {Project} [{Project} …]` — PROJECT mode (explicit flag form, same behaviour)
 - `sk.design "<change description>"` — REFRESH mode: update affected artifacts, record decision
 
 ## Pre-flight
@@ -41,22 +45,42 @@ Unit-tier `knowledge-base.md` and `guide.yaml` stay at the unit root (not under 
    If missing: default to validate
 
 ## Mode Detection
-Evaluate in this order — first match wins:
+Evaluate in this order — first match wins.
+
+**Project-selection priority** (stated once here, nowhere else): explicit command-line project
+names beat the story's `## Project` section, which beats full impact analysis. Explicit args
+mean scoped *regeneration* of named pages (PROJECT); the story section means the *normal
+pipeline filtered* to the declared projects (STORY-PROJECT).
 
 **TARGETED** — a phase flag was passed (`--architecture`, `--datamodel`, `--contracts`)
   → run exactly that one phase, skip all others, no need detection
 
-**REFRESH** — a quoted change description was passed as argument
+**PROJECT** — arguments name one or more projects (bare tokens or via `--project`)
+  A token is a project name when it EXACTLY matches (case-sensitive — CLI args refer to exact
+  artifact/router names) a row in unit-brief.md → Impacted Projects or an existing file name
+  (without `.md`) under 02-design/projects/.
+  → regenerate ONLY the named projects' design pages; see PROJECT workflow below.
+  If SOME tokens match project names and others do not: STOP — report each unmatched token and
+  list the valid project names. Never fall through to REFRESH on a partial match.
+
+**REFRESH** — a quoted change description was passed as argument (and no token matches a project name)
   → all three artifacts exist; user is applying a custom change
   → see REFRESH workflow below
 
-**RESUME** — no flag, no description, some artifacts exist but pipeline is incomplete
+**STORY-PROJECT** — no flag, no description, no explicit project args, AND the unit's story.md
+  carries a `## Project` section (written by sk.story from Jira Components)
+  → run the NORMAL pipeline (RESUME or FRESH below, shared artifacts included), constrained to
+    the story-declared projects wherever a phase iterates impacted projects.
+    See STORY-PROJECT resolution below.
+
+**RESUME** — no flag, no description, no explicit project args, some artifacts exist but pipeline
+  is incomplete
   Incomplete means: 02-design/architecture.md exists but 02-design/database-design.md or
   02-design/contracts/ are missing
   → start from first missing artifact, skip completed phases
 
-**FRESH** — no flag, no description, 02-design/architecture.md does not exist
-  → run phase need detection, then run all needed phases
+**FRESH** — no flag, no description, no explicit project args, 02-design/architecture.md does not exist
+  → run phase need detection, then run all needed phases (full solution design)
 
 ## Phase Need Detection (FRESH and RESUME modes only)
 Read all stories in the unit. Determine which phases are needed:
@@ -92,6 +116,59 @@ Triggered when: `sk.design "<change description>"` is called.
 5. Run only the affected phases in sequence (Phase 1 → 2 → 3 order enforced even if subset)
 6. Gates apply per normal gate schedule for the active checkpoint_mode
 
+## PROJECT Workflow (explicit project-page regeneration)
+Triggered when: `sk.design {Project} …` or `sk.design --project {Project} …` is called.
+This mode is for deliberately regenerating design pages of a unit whose shared design already
+exists — it touches ONLY the named projects' pages under 02-design/projects/. (For a unit that
+still needs its shared design, run `sk.design` with no args — STORY-PROJECT filtering applies
+automatically when the story declares projects.)
+
+1. Resolve every requested name against unit-brief.md → Impacted Projects and the existing
+   files under 02-design/projects/. Any name that resolves nowhere: STOP — report it and list
+   the valid project names. Proceed only when every requested name resolves.
+2. Read unit-brief.md and all story documents under 01-story/.
+3. Read whatever shared artifacts exist — architecture.md, impact-analysis.md,
+   database-design.md, api-contract.md, contracts/, ui-model.md. In this mode they are
+   READ-ONLY inputs: reuse them; never create, regenerate, or overwrite any of them.
+4. Split the requested projects by Type from unit-brief.md → Impacted Projects:
+   - Backend rows        → invoke sk.contracts with `--project {names}` (project-scoped mode)
+   - Frontend/Mobile rows → invoke sk.ui-design with `--project {names}` (project-scoped mode)
+   Invoke each sub-skill at most once, passing it all of its requested projects. Each sub-skill
+   writes only `02-design/projects/{ProjectName}.md` for the projects it was given.
+5. If the stories show no design-relevant impact for a requested project: do NOT write an empty
+   page — report "no impact found for {Project}; page not written" and continue with the rest.
+6. Write scope: the requested projects' `02-design/projects/{ProjectName}.md` pages only, plus
+   knowledge-base.md / guide.yaml via Phases 4–5.
+
+In PROJECT mode the pipeline phases are replaced by step 4's direct sub-skill invocations;
+Phases 4 (KB assessment) and 5 (guide update) still run after the pages are written. Gates:
+see Gate Schedule.
+
+## STORY-PROJECT Resolution (story-driven project scoping)
+Triggered when: `sk.design` is called with NO arguments and the unit's story declares a
+`## Project` section. This mode FILTERS the normal pipeline — it never skips shared design:
+a fresh unit still gets architecture.md, impact-analysis.md, database-design.md, api-contract.md,
+contracts/ (api-spec.json, test-plan.md), and ui-model.md per phase need detection, so
+downstream skills (sk.plan, sk.test, sk.uat, sk.security-audit) find every input they read.
+
+1. Read each `{NN}-story/story.md` in the unit (single-story units are the common case) and
+   collect the de-duplicated union of `## Project` names. None found → mode does not apply;
+   run RESUME/FRESH unscoped.
+2. Resolve each name against unit-brief.md → Impacted Projects, and — when it exists — the
+   project router `.specify/memory/projects/index.md` (single-project layouts have no router;
+   its absence is not an error). A name that resolves nowhere came from the trusted mapping:
+   warn and skip it, never hard-stop. If NO name resolves: warn and run FRESH unscoped so the
+   unit still gets a design.
+3. The resolved names form the **scoped project set**. Run the normal pipeline (RESUME or
+   FRESH, phase need detection, the full gate schedule, Phases 4–6) with one constraint,
+   applied wherever a phase iterates impacted projects: impact-analysis.md rows, per-project
+   contract scope, and `02-design/projects/` pages cover ONLY the scoped set. Pass the scoped
+   set explicitly to every sub-skill invocation — it replaces unit-brief's full list there.
+4. unit-brief.md projects outside the scoped set were reconciled at story time
+   (sk.architect-probe asks the PO before expanding scope). If any remain, record them in
+   impact-analysis.md as `excluded by story scope` — visible, not designed.
+Log at start: "STORY-PROJECT — scoping design to {projects} from story.md ## Project."
+
 ## Gate Schedule
 Gates are driven by checkpoint_mode (see governance/checkpoint-rules.md):
 
@@ -106,6 +183,9 @@ treat as validate regardless of checkpoint_mode.
 Log: "Gate override: new bounded context detected — validate required."
 
 In TARGETED and REFRESH modes: gates apply only to phases that actually run.
+In STORY-PROJECT mode: the normal schedule applies — it is RESUME/FRESH with a project filter.
+In PROJECT mode: gates 1–3 do not apply (no shared artifacts are produced); the sub-skills'
+internal engineering reviews still cover the project pages written.
 
 ## Orchestration
 
@@ -305,7 +385,7 @@ After all phases complete, display:
 sk.design complete.
 Unit: {unit-id} — {unit name}
 Intent: {intent-id}
-Mode: {FRESH | RESUME | REFRESH | TARGETED}
+Mode: {FRESH | RESUME | REFRESH | TARGETED | PROJECT | STORY-PROJECT}
 
 Phases run:
   {list only phases that actually ran, with the sub-skill invoked}
@@ -332,5 +412,8 @@ Next step: /sk.plan
 - Skipped gates are logged inline so the user can see what was bypassed
 - 'cancel' at any active gate preserves all artifacts written up to that point
 - Each sub-skill invocation is self-contained — no state leaks between phases
+- Scoped modes stay scoped: PROJECT touches nothing outside the named projects' pages (shared
+  artifacts read-only); STORY-PROJECT produces shared artifacts normally but constrains every
+  per-project output to the story-declared set
 - Completion report lists only what actually ran and what was skipped, with reasons
 - KB update is conditional — only invoked when non-derivable content was produced; reason always logged

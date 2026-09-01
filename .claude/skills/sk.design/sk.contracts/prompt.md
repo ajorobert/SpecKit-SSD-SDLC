@@ -20,6 +20,15 @@ specs/intents/{intent}/units/{unit}/02-design/database-design.md
 .specify/memory/standards/tech-stack.md (for test framework)
 .claude/skills/design-principles/SKILL.md
 
+## Project-Scoped Mode (`--project {ProjectName …}`)
+sk.design PROJECT mode — write ONLY `02-design/projects/{ProjectName}.md` for the named Backend
+projects; steps 1–8 do not run and none of this skill's other outputs (provider tests,
+test-plan.md, README.md, service-registry.md) are written. Shared artifacts (api-spec.json,
+api-contract.md, architecture.md, database-design.md) are read-only inputs; if one is missing,
+derive that slice from the unit stories + unit-brief.md and record the gap under the page's
+Open Questions. A named project with no backend impact: report it and skip the file — never an
+empty page, never a page for an unnamed project.
+
 ## Steps
 1. [REFINE MODE] if contracts/ exists, [CREATE MODE] if not
 2. Check service-registry.md — no breaking changes without confirmation

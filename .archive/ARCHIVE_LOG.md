@@ -174,3 +174,15 @@ approved and let a human run the cleanup.
 **Original path:** .claude/skills/SKILL_AUDIT.md
 **Archived to:** .archive/2026-06-25/SKILL_AUDIT.md
 **Review:** [ ] approved for permanent delete
+
+## 2026-07-27 — .specify/memory/jira-component-map.md
+**Reason:** Review Major 1: Jira component mapping moved into the project router's Jira Component column (collected by sk.init); standalone map file dropped
+**Original path:** .specify/memory/jira-component-map.md
+**Archived to:** .archive/2026-07-27/jira-component-map.md
+**Review:** [ ] approved for permanent delete
+
+## 2026-07-27 — templates/project/.specify/memory/jira-component-map.md
+**Reason:** Review Major 1: mapping lives in the router now; template copy no longer needed
+**Original path:** templates/project/.specify/memory/jira-component-map.md
+**Archived to:** .archive/2026-07-27/jira-component-map.md-095748
+**Review:** [ ] approved for permanent delete
